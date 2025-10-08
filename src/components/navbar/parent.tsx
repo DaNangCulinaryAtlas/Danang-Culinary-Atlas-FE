@@ -7,7 +7,7 @@ import MobileMenu from './mobile';
 
 export default function Header() {
   return (
-    <header className="bg-white sticky top-0 z-50 w-full border-b backdrop-blur mb-4 px-4 md:px-8 lg:px-12 xl:px-16 2xl:px-24">
+    <header className="bg-white fixed top-0 z-50 w-full border-b backdrop-blur mb-4 px-4 md:px-8 lg:px-12 xl:px-16 2xl:px-24">
       <div className="flex justify-between items-center h-14 gap-4">
         {/* Left: Logo */}
         <Link
