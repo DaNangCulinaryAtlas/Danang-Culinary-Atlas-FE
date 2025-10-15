@@ -9,7 +9,8 @@ export default function DashboardLayout({
   return (
     <>
        <Header />
-       <div >
+       <div className="min-h-screen">
+          <div className="h-14"/> {/* Spacer */}
           {children}
        </div>
        <Footer />
