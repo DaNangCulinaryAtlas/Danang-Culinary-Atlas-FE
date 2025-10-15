@@ -9,14 +9,10 @@ import { MAP_STYLES } from '@/styles/map-styles';
 
 interface RestaurantMapProps {
   restaurants: Restaurant[];
-  selectedRestaurant: Restaurant | null;
-  onSelectRestaurant: (restaurant: Restaurant | null) => void;
 }
 
 const RestaurantMap: React.FC<RestaurantMapProps> = ({
   restaurants,
-  selectedRestaurant,
-  onSelectRestaurant,
 }) => {
       
   return (
@@ -43,7 +39,6 @@ const RestaurantMap: React.FC<RestaurantMapProps> = ({
           >
             <div
               className="cursor-pointer transform hover:scale-110 transition-transform"
-              onClick={() => onSelectRestaurant(restaurant)}
             >
               <div className="w-12 h-12 rounded-full border-4 border-white shadow-lg overflow-hidden hover:border-cyan-500 hover:shadow-xl">
                 <img
@@ -57,7 +52,7 @@ const RestaurantMap: React.FC<RestaurantMapProps> = ({
         ))}
 
         {/* Selected Restaurant Popup */}
-        {selectedRestaurant && (
+        {/* {selectedRestaurant && (
           <Popup
             longitude={selectedRestaurant.lng}
             latitude={selectedRestaurant.lat}
@@ -119,7 +114,7 @@ const RestaurantMap: React.FC<RestaurantMapProps> = ({
               </div>
             </div>
           </Popup>
-        )}
+        )} */}
       </Map>
     </div>
   );

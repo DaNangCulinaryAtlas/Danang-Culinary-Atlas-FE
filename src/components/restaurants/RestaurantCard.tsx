@@ -1,32 +1,27 @@
 import Image from "next/image";
-import { Heart } from "lucide-react";
+import { Heart, Star } from "lucide-react";
+import type { Restaurant } from "@/types/restaurant";
+import StarRating from "./StarRating";
 
 interface RestaurantCardProps {
-  image: string;
-  name: string;
-  cuisine: string;
-  location: string;
-  priceRange: string;
-  rating: number;
-  reviewCount: number;
+  restaurant: Restaurant;
+  onClick?: () => void;
 }
 
 export default function RestaurantCard({
-  image,
-  name,
-  cuisine,
-  location,
-  priceRange,
-  rating,
-  reviewCount,
+  restaurant,
+  onClick,
 }: RestaurantCardProps) {
+  
   return (
-    <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer">
+    <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+      onClick={onClick}
+    >
       {/* Image Section */}
       <div className="relative w-full h-59 md:h-60">
         <Image
-          src={image}
-          alt={name}
+          src={restaurant.image}
+          alt={restaurant.name}
           fill
           className="object-cover hover:scale-105 transition-transform duration-500"
         />
@@ -41,38 +36,26 @@ export default function RestaurantCard({
       <div className="p-5 flex flex-col gap-1">
         {/* Name */}
         <h3 className="text-[#1C2B38] font-volkhov font-bold text-lg leading-tight">
-          {name}
+          {restaurant.name}
         </h3>
 
         {/* Cuisine & Location */}
         <p className="text-[#778088] text-sm font-mulish">
-          {cuisine} | {location}
+          {restaurant.category} | {restaurant.address}
         </p>
 
         {/* Price */}
         <p className="text-[#44BACA] font-semibold text-[16px] mt-1">
-          {priceRange}
+          {restaurant.price}$
         </p>
 
         {/* Rating */}
         <div className="flex items-center gap-2 mt-2">
-          <div className="flex items-center">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <svg
-                key={star}
-                className={`w-4 h-4 ${
-                  star <= Math.round(rating)
-                    ? "text-yellow-400"
-                    : "text-gray-300"
-                } fill-current`}
-                viewBox="0 0 20 20"
-              >
-                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-              </svg>
-            ))}
+          <div className="flex items-center gap-0.5">
+            <StarRating rating={restaurant.rating} />
           </div>
           <p className="text-[#778088] text-sm">
-            ({reviewCount.toLocaleString()} reviews)
+            {restaurant.rating} ({restaurant.reviews} reviews)
           </p>
         </div>
       </div>

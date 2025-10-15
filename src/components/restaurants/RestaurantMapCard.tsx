@@ -4,14 +4,12 @@ import type { Restaurant } from "@/types/restaurant";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
-  onClick: () => void;
-  onToggleFavorite: (id: number) => void;
+  onClick?: () => void;
 }
 
-const RestaurantCard: React.FC<RestaurantCardProps> = ({
+const RestaurantMapCard: React.FC<RestaurantCardProps> = ({
   restaurant,
   onClick,
-  onToggleFavorite,
 }) => {
   return (
     <div
@@ -28,7 +26,6 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onToggleFavorite(restaurant.id);
           }}
           className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform"
         >
@@ -64,4 +61,4 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
   );
 };
 
-export default RestaurantCard;
+export default RestaurantMapCard;

@@ -9,5 +9,6 @@ interface Restaurant {
     isFavorite: boolean;
     lat: number;
     lng: number;
+    reviews: number;
   }
 export type { Restaurant };
