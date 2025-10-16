@@ -1,15 +1,16 @@
 "use client";
-
 import { useState } from "react";
 import Image from "next/image";
-import Card from "@/components/cuisinefeatures";
 import CuisineFeatures from "@/components/cuisinefeatures";
 import DishCard from "@/components/recommendedfood";
 import { Button } from "@/components/ui/button";
 import { Heart, Share2, MapPin, Star } from 'lucide-react';
-import RestaurantCard from "@/components/restaurants";
+import RestaurantCard from "@/components/restaurants/RestaurantCard";
 import GallerySection from "@/components/gallery";
+import { useRouter } from "next/navigation";
+import restaurants from "@/stores/mockRestaurants";
 export default function HomePage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const dishes = [
     {
@@ -50,45 +51,7 @@ export default function HomePage() {
     }
 
   ];
-  const restaurants = [
-    {
-      image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=800&h=600&fit=crop",
-      name: "Anchor & James",
-      cuisine: "American",
-      location: "Downtown Union Street",
-      priceRange: "$30 and under",
-      rating: 4,
-      reviewCount: 1897,
-    },
-    {
-      image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=800&h=600&fit=crop",
-      name: "Sakura Garden",
-      cuisine: "Japanese",
-      location: "Hải Châu District",
-      priceRange: "$50 and under",
-      rating: 5,
-      reviewCount: 2310,
-    },
-    {
-      image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=800&h=600&fit=crop",
-      name: "Bella Roma",
-      cuisine: "Italian",
-      location: "Ngũ Hành Sơn",
-      priceRange: "$40 and under",
-      rating: 4.5,
-      reviewCount: 1578,
-    },
-    {
-      image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=800&h=600&fit=crop",
-      name: "The Green Bowl",
-      cuisine: "Vegan & Organic",
-      location: "Sơn Trà",
-      priceRange: "$25 and under",
-      rating: 4.2,
-      reviewCount: 982,
-    },
-  ];
-  
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle search logic here
@@ -166,13 +129,7 @@ export default function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {dishes.map((dish) => (
             <DishCard
-              key={dish.id}
-              image={dish.image}
-              title={dish.title}
-              description={dish.description}
-              rating={dish.rating}
-              reviewCount={dish.reviewCount}
-              price={dish.price}
+              dish={dish}
             />
           ))}
         </div>
@@ -260,7 +217,11 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {restaurants.map((restaurant, index) => (
-                <RestaurantCard key={index} {...restaurant} />
+                <RestaurantCard 
+                  key={index} 
+                  restaurant={restaurant}
+                  onClick={() => router.push(`/restaurants/${restaurant.id}`) }
+                />
               ))}
           </div>
         </div>
