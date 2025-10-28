@@ -1,6 +1,6 @@
 "use client";
-import { Search, SlidersHorizontal } from 'lucide-react';
-import React, { useState } from 'react';
+import { SlidersHorizontal } from 'lucide-react';
+import React from 'react';
 import RestaurantMapCard from '@/components/restaurants/RestaurantMapCard';
 import { useRouter } from 'next/navigation';
 import type { Restaurant } from '@/types/restaurant';

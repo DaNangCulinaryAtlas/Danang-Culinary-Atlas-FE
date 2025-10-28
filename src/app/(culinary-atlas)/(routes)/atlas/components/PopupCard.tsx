@@ -1,5 +1,7 @@
+import StarRating from '@/components/restaurants/StarRating';
 import { Button } from '@/components/ui/button';
 import type { Restaurant } from '@/types/restaurant';
+import Image from 'next/image';
 
 interface PopupCardProps {
   restaurant: Restaurant;
@@ -7,50 +9,60 @@ interface PopupCardProps {
 }
 
 export default function PopupCard({ restaurant, onClose }: PopupCardProps) {
+
   return (
-    <div className="p-4 min-w-[280px] bg-white rounded-xl shadow-xl">
+    <div>
       {/* Image */}
-      <div className="relative">
-        <img
+      <div className="relative h-40 w-full">
+        <Image
+          width={320}
+          height={160}
           src={restaurant.image}
           alt={restaurant.name}
-          className="w-full h-48 object-cover rounded-lg"
+          className="w-full h-full object-cover"
         />
-        <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded-full text-xs font-semibold">
-          ★ {restaurant.rating || '4.5'}
-        </div>
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors flex items-center justify-center"
+        >
+          <span className="text-gray-600 font-bold text-xl leading-none">×</span>
+        </Button>
       </div>
 
-      {/* Restaurant Info */}
-      <div className="mt-3">
-        <h3 className="font-bold text-lg text-gray-800 line-clamp-1">
+      {/* Content */}
+      <div className="p-4">
+        <h3 className="font-bold text-lg mb-2 text-gray-900">
           {restaurant.name}
         </h3>
         
-        <p className="text-gray-600 text-sm mt-1">
-          {restaurant.category || 'Vietnamese'}
+        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+          {restaurant.address}
         </p>
 
-        <div className="flex items-center justify-between mt-2">
-          <span className="text-green-600 font-semibold text-sm">
-            ★ {restaurant.rating || '4.5'} ({restaurant.reviews || '123'} reviews)
-          </span>
-          <span className="text-gray-500 text-sm font-medium">
-            {restaurant.price || '$$'}
-          </span>
+        {/* Rating and additional info */}
+        <div className="flex items-center gap-4 mb-3">
+          {restaurant.rating && (
+            <div className="flex items-center gap-1">
+              <StarRating rating={restaurant.rating} />
+              <span className="font-semibold text-gray-900">{restaurant.rating}</span>
+              {restaurant.reviews && (
+                <span className="text-xs text-gray-500">({restaurant.reviews})</span>
+              )}
+            </div>
+          )}
+          
+          {restaurant.price && (
+            <span className="text-sm text-gray-600">
+              {restaurant.price}
+            </span>
+          )}
         </div>
-
-        {/* Address */}
-        <p className="text-gray-500 text-sm mt-2 truncate">
-          📍 {restaurant.address || '123 Beach Road, Da Nang'}
-        </p>
-
-        {/* Action Button */}
-        <Button 
-          onClick={onClose}
-          className="w-full mt-3 bg-[#44BACA] text-white py-2 rounded-lg font-semibold transition-colors"
-        >
-          View Details →
+        {/* View Details Button */}
+        <Button variant="ghost" className="w-full bg-[#44BACA] text-white font-medium py-2 rounded-lg">
+          Xem chi tiết
         </Button>
       </div>
     </div>

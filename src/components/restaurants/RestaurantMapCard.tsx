@@ -1,6 +1,7 @@
 import React from 'react';
 import { MapPin, Star, Heart } from 'lucide-react';
 import type { Restaurant } from "@/types/restaurant";
+import Image from 'next/image';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -18,7 +19,9 @@ const RestaurantMapCard: React.FC<RestaurantCardProps> = ({
     >
       {/* Image */}
       <div className="relative h-40 sm:h-48 overflow-hidden">
-        <img
+        <Image
+          width={400}
+          height={192}
           src={restaurant.image}
           alt={restaurant.name}
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
