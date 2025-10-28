@@ -129,6 +129,7 @@ export default function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {dishes.map((dish) => (
             <DishCard
+              key={dish.id}
               dish={dish}
             />
           ))}

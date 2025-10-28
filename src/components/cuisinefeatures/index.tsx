@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function CuisineFeatures() {
     const features = [
       {
@@ -30,7 +32,7 @@ export default function CuisineFeatures() {
       <div className= "py-16 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
+            {features.map((feature) => (
               <div 
                 key={feature.id} 
                 className="relative group"
@@ -39,7 +41,9 @@ export default function CuisineFeatures() {
                 <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
                   {/* Image */}
                   <div className="relative h-48 overflow-hidden">
-                    <img 
+                    <Image 
+                      width={400}
+                      height={300} 
                       src={feature.image} 
                       alt={feature.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"

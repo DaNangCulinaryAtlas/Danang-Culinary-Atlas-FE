@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Heart, Star } from "lucide-react";
+import { Heart } from "lucide-react";
 import type { Restaurant } from "@/types/restaurant";
 import StarRating from "./StarRating";
 

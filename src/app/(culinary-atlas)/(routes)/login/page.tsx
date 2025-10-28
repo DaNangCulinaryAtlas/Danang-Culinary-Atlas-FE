@@ -152,8 +152,8 @@ export default function Login() {
                             {/* Register Link */}
                             <div className="mt-6 text-center">
                                     <p className="text-[10px] font-mulish">
-                                        Don't have account?{' '}
-                                        <Link href="/register" className="text-[#69C3CF] hover:text-[#5AB3BF] font-semibold transition-colors">
+                                    Don&apos;t have account?{' '}
+                                    <Link href="/register" className="text-[#69C3CF] hover:text-[#5AB3BF] font-semibold transition-colors">
                                             Register Now
                                         </Link>
                                     </p>

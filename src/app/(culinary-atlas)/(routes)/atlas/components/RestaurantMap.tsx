@@ -31,7 +31,10 @@ const RestaurantMap: React.FC<RestaurantMapProps> = ({
 
         {/* Restaurant Markers */}
         {restaurants?.map((restaurant) => (
-          <RestaurantMarker restaurant= {restaurant}/>
+          <RestaurantMarker 
+            key={restaurant.id}
+            restaurant= {restaurant}
+            />
         ))}
       </Map>
     </div>
