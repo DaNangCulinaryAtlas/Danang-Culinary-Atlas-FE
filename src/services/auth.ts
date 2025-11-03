@@ -1,0 +1,126 @@
+import { AxiosError, AxiosResponse } from 'axios';
+import instanceAxios from '@/helpers/axios';
+import { API_ENDPOINTS } from '@/configs/api';
+import { 
+  TLoginAuth, 
+  TRegisterAuth, 
+  TForgotPasswordAuth, 
+  TResetPasswordAuth, 
+  TChangePassword 
+} from '@/types/auth';
+
+interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  error?: string;
+}
+
+export const loginAuth = async (data: TLoginAuth): Promise<ApiResponse> => {
+  try {
+    console.log("Calling:", API_ENDPOINTS.AUTH.LOGIN);
+    console.log("Full URL:", instanceAxios.defaults.baseURL + API_ENDPOINTS.AUTH.LOGIN);
+    const response: AxiosResponse = await instanceAxios.post(
+      API_ENDPOINTS.AUTH.LOGIN, 
+      data
+    );
+
+    return {
+      success: true,
+      data: response.data,
+      message: 'Login successful'
+    };
+  } catch (error) {
+    const axiosError = error as AxiosError<ApiResponse>;
+    console.log(API_ENDPOINTS.AUTH.LOGIN, data);
+    return {
+      success: false,
+      message: axiosError.response?.data?.message || 'Login failed',
+      error: axiosError.message
+    };
+  }
+};
+
+export const registerAuth = async (data: TRegisterAuth): Promise<ApiResponse> => {
+  try {
+    const response: AxiosResponse = await instanceAxios.post(
+      API_ENDPOINTS.AUTH.REGISTER,
+      data
+    );
+    return {
+      success: true,
+      data: response.data,
+      message: 'Registration successful'
+    };
+  } catch (error) {
+    const axiosError = error as AxiosError<ApiResponse>;
+    return {
+      success: false,
+      message: axiosError.response?.data?.message || 'Registration failed',
+      error: axiosError.message
+    };
+  }
+};
+
+export const forgotPasswordAuth = async (data: TForgotPasswordAuth): Promise<ApiResponse> => {
+  try {
+    const response: AxiosResponse = await instanceAxios.post(
+      API_ENDPOINTS.AUTH.FORGOT_PASSWORD,
+      data
+    );
+    return {
+      success: true,
+      data: response.data,
+      message: 'Password reset email sent'
+    };
+  } catch (error) {
+    const axiosError = error as AxiosError<ApiResponse>;
+    return {
+      success: false,
+      message: axiosError.response?.data?.message || 'Failed to send reset email',
+      error: axiosError.message
+    };
+  }
+};
+
+export const resetPasswordAuth = async (data: TResetPasswordAuth): Promise<ApiResponse> => {
+  try {
+    const response: AxiosResponse = await instanceAxios.post(
+      API_ENDPOINTS.AUTH.RESET_PASSWORD,
+      data
+    );
+    return {
+      success: true,
+      data: response.data,
+      message: 'Password reset successful'
+    };
+  } catch (error) {
+    const axiosError = error as AxiosError<ApiResponse>;
+    return {
+      success: false,
+      message: axiosError.response?.data?.message || 'Password reset failed',
+      error: axiosError.message
+    };
+  }
+};
+
+export const changePasswordAuth = async (data: TChangePassword): Promise<ApiResponse> => {
+  try {
+    const response: AxiosResponse = await instanceAxios.post(
+      API_ENDPOINTS.AUTH.CHANGE_PASSWORD,
+      data
+    );
+    return {
+      success: true,
+      data: response.data,
+      message: 'Password changed successfully'
+    };
+  } catch (error) {
+    const axiosError = error as AxiosError<ApiResponse>;
+    return {
+      success: false,
+      message: axiosError.response?.data?.message || 'Failed to change password',
+      error: axiosError.message
+    };
+  }
+};
