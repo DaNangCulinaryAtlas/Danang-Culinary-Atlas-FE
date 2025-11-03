@@ -1,5 +1,5 @@
 "use client";
-import { ReactNode, createContext, useContext, useState, useEffect } from 'react';
+import { ReactNode, createContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { loginAuth } from '@/services/auth';
 import {
@@ -51,13 +51,14 @@ const AuthProvider = ({ children }: Props) => {
       const response = await loginAuth({ email: params.email, password: params.password });
 
       if (response.success && response.data) {
-        const { token, role } = response.data;
-        console.log(token, role);
-        console.log("Storing token and user data");
+        const { token, roles } = response.data.data;
         window.localStorage.setItem('token', token);
-        window.localStorage.setItem('role', role);
-        if(role == 'ADMIN') {
+        window.localStorage.setItem('roles', roles);
+        // Route based on role priority
+        if (roles.includes('ADMIN')) {
           router.push('/restaurants');
+        } else if (roles.includes('VENDOR')) {
+          router.push('/vendor-dashboard');
         } else {
           router.push('/');
         }
