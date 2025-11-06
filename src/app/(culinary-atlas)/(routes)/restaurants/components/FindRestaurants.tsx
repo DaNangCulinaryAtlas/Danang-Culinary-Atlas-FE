@@ -21,8 +21,6 @@ export default function FindRestaurants() {
 
             {/* Content */}
             <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4">
-                {/* Tagline */}
-                <TagLine/>
 
                 {/* Search Box */}
                 <SearchBox/>

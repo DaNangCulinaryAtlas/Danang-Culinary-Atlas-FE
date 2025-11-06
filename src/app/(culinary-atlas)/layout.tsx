@@ -1,6 +1,9 @@
+"use client";
 import Footer from "@/components/footer";
 import Header from "@/components/navbar/parent";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { store } from "@/stores";
+import { Provider } from "react-redux";
 
 export default function DashboardLayout({
   children,
@@ -12,7 +15,9 @@ export default function DashboardLayout({
        <Header />
        <div className="min-h-screen">
           <div className="h-14"/> {/* Spacer */}
-           <AuthProvider>{children}</AuthProvider>
+          <Provider store={store}>
+            <AuthProvider>{children}</AuthProvider>
+           </Provider>
        </div>
        <Footer />
     </>

@@ -15,6 +15,7 @@ export const API_ENDPOINTS = {
   },
   RESTAURANT: {
     LIST: '/restaurants',
-    DETAIL: '/restaurants/:id',
+    DETAIL: (id: string) => `/restaurants/${id}`,
+    search: '/restaurants/search',
   },
 } as const;

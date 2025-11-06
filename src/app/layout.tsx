@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Mulish, Open_Sans, Volkhov, Poppins } from "next/font/google";
 import "./globals.css";
 import localFont from "next/font/local";
-
 const mulish = Mulish({
   subsets: ["latin"],
   variable: "--font-mulish",
