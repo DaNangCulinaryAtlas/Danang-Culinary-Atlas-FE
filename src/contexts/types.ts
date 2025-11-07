@@ -21,24 +21,22 @@ export type LoginGoogleParams = {
 }
 
 export type UserDataType = {
-  id: string
-  role: string[]
   email: string
-  fullName: string
-  avatarUrl?: string
-
+  fullName: string | null
+  avatarUrl: string | null
+  roles: string[]
 }
 
 export type AuthValuesType = {
-    loading: boolean
-    logout: () => void
-    user: UserDataType | null
-    setLoading: (value: boolean) => void
-    setUser: (value: UserDataType | null) => void
-    login: (params: LoginParams, errorCallback?: ErrCallbackType) => void
-    loginGoogle: (params: LoginGoogleParams, errorCallback?: ErrCallbackType) => void
-    loginFacebook: (params: LoginFacebookParams, errorCallback?: ErrCallbackType) => void
-  }
+  loading: boolean
+  logout: () => void
+  user: UserDataType | null
+  setLoading: (value: boolean) => void
+  setUser: (value: UserDataType | null) => void
+  login: (params: LoginParams, errorCallback?: ErrCallbackType) => void
+  loginGoogle: (params: LoginGoogleParams, errorCallback?: ErrCallbackType) => void
+  loginFacebook: (params: LoginFacebookParams, errorCallback?: ErrCallbackType) => void
+}
 
 export type LoginFacebookParams = {
   idToken: string

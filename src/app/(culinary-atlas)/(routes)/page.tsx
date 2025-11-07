@@ -60,8 +60,8 @@ export default function HomePage() {
   };
   return (
     <div className="mt-auto">
-      <div className="relative w-full h-auto">
-        <Image 
+      <div className="relative w-full h-auto mb-32">
+        <Image
           src="/images/HomePage.png"
           className="w-full h-auto"
           alt="Danang Culinary Atlas"
@@ -75,7 +75,7 @@ export default function HomePage() {
             <h1 className="hidden md:block text-[#1C2B38] font-bold font-volkhov text-3xl md:text-4xl lg:text-[40px] leading-tight">
               Khám phá ẩm thực tinh túy Đà Nẵng
             </h1>
-            
+
             <p className="hidden md:block text-[#1C2B38] font-mulish font-semibold text-[11px] max-w-[569px] mx-auto">
               Ẩm thực Đà Nẵng - sự hòa quyện tinh tế của hương vị miền Trung. Từ tô mì Quảng đậm đà, bánh xèo giòn tan đến những món hải sản tươi ngon bậc nhất. Một hành trình vị giác đầy phóng khoáng và đáng nhớ.
             </p>
@@ -83,41 +83,43 @@ export default function HomePage() {
             {/* Watch Video Button */}
             <button className="hidden sm:flex items-center gap-2 mx-auto px-6 py-3 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-lg">
               <svg className="w-5 h-5 text-teal-600" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z"/>
+                <path d="M8 5v14l11-7z" />
               </svg>
               <span className="font-mulish font-semibold text-[#1C2B38]">Watch Video</span>
             </button>
           </div>
-          
+
+        </div>
+
+        {/* Search Box - positioned absolutely at bottom of banner */}
+        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-full max-w-4xl px-4 z-10">
+          <form onSubmit={handleSearch}>
+            <div className="bg-white rounded-2xl shadow-2xl p-4 flex items-center gap-2">
+              <div className="flex flex-1">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Tìm kiếm món ăn, quán ăn..."
+                  className="w-full text-gray-600 font-mulish text-sm outline-none placeholder-gray-400"
+                />
+              </div>
+              <button
+                type="submit"
+                className="bg-[#FFDA32] hover:bg-yellow-400 text-[#1C2B38] font-mulish font-bold px-8 py-3 rounded-xl transition-all shadow-md"
+              >
+                Search
+              </button>
+            </div>
+          </form>
         </div>
       </div>
-       {/* Search Box */}
-      <div className="-mt-20 z-50 relative mb-10">
-       <form onSubmit={handleSearch} className="mt-8 max-w-4xl mx-auto">
-              <div className="bg-white rounded-2xl shadow-2xl p-4 flex items-center gap-2">
-                <div className="flex flex-1">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Tìm kiếm món ăn, quán ăn..."
-                    className="w-full text-gray-600 font-mulish text-sm outline-none placeholder-gray-400"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="bg-[#FFDA32] hover:bg-yellow-400 text-[#1C2B38] font-mulish font-bold px-8 py-3 rounded-xl transition-all shadow-md"
-                >
-                  Search
-                </button>
-              </div>
-            </form>
-      </div>
+
       <div className="flex flex-col">
         <div className="flex flex-col justify-center items-center mt-8 text-center">
           <h2 className="font-volkhov font-bold sm:text-2xl md:text-3xl lg:text-[36px] text-[#1C2B38]">Ẩm thực Đà Nẵng</h2>
           <p className="w-[60%] mt-2 font-mulish font-semibold sm:text-sm md:text-[15px] text-[#778088] whitespace-wrap">Khám phá ẩm thực Đà Nẵng với hương vị đặc trưng miền Trung, nơi hội tụ món ngon từ núi đến biển, mang đến trải nghiệm ẩm thực độc đáo và phong phú.</p>
-        </div> 
+        </div>
         <div className="w-full flex justify-center items-center mt-8">
           <CuisineFeatures />
         </div>
@@ -127,7 +129,7 @@ export default function HomePage() {
           Món Ăn Đề Xuất
         </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        {dishes.map((dish) => (
+          {dishes.map((dish) => (
             <DishCard
               key={dish.id}
               dish={dish}
@@ -135,7 +137,7 @@ export default function HomePage() {
           ))}
         </div>
       </div>
-      
+
       {/* Banner Section */}
       <div className="relative w-full mt-10">
         {/* Banner Image */}
@@ -152,7 +154,7 @@ export default function HomePage() {
         <div className="absolute inset-0 flex items-center justify-start">
           <div className="container mx-auto px-4 sm:px-6 lg:px-12">
             <div className="max-w-xl lg:max-w-2xl flex flex-col gap-3 sm:gap-4 text-left">
-              
+
               {/* Trending Badge */}
               <Button className="bg-[#AFFFF0] text-[#1C2B38] font-bold rounded-full px-4 py-2 w-fit">
                 Trending now
@@ -212,22 +214,22 @@ export default function HomePage() {
       </div>
       {/* Restaurants Section */}
       <h1 className="text-4xl font-bold text-[#44BACA] text-center mt-16">
-          Nhà Hàng Đề Xuất
-        </h1>
-      <div className= "px-4">
+        Nhà Hàng Đề Xuất
+      </h1>
+      <div className="px-4">
         <div className="max-w-7xl mx-auto">
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {restaurants.map((restaurant, index) => (
-                <RestaurantCard 
-                  key={index} 
-                  restaurant={restaurant}
-                  onClick={() => router.push(`/restaurants/${restaurant.id}`) }
-                />
-              ))}
+            {restaurants.map((restaurant, index) => (
+              <RestaurantCard
+                key={index}
+                restaurant={restaurant}
+                onClick={() => router.push(`/restaurants/${restaurant.id}`)}
+              />
+            ))}
           </div>
         </div>
       </div>
-         
+
       {/* Gallery Section */}
       <div className="mt-16">
         <div className="max-w-7xl mx-auto">
@@ -235,11 +237,11 @@ export default function HomePage() {
             <div className="flex flex-col justify-center items-center text-center">
               <h2 className="font-volkhov font-bold sm:text-2xl md:text-3xl lg:text-[36px] text-[#44BACA]">Từ Thư Viện Ảnh</h2>
               <p className="w-[60%] mt-2 font-mulish font-semibold sm:text-sm md:text-[15px] text-[#778088] whitespace-wrap">Khám phá bộ sưu tập hình ảnh sống động về ẩm thực và văn hóa Đà Nẵng, từ những món ăn đường phố hấp dẫn đến cảnh quan tuyệt đẹp của thành phố biển.</p>
-            </div> 
+            </div>
           </div>
         </div>
         <GallerySection />
-      </div>       
+      </div>
 
 
     </div>

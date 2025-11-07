@@ -1,5 +1,5 @@
 import Footer from "@/components/footer";
-import Header from "@/components/navbar/parent";
+import Header from "@/components/navbar";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 export default function DashboardLayout({
@@ -9,12 +9,14 @@ export default function DashboardLayout({
 }>) {
   return (
     <>
-       <Header />
-       <div className="min-h-screen">
-          <div className="h-14"/> {/* Spacer */}
-           <AuthProvider>{children}</AuthProvider>
-       </div>
-       <Footer />
+      <AuthProvider>
+        <Header />
+        <div className="min-h-screen">
+            <div className="h-14"/> 
+              {children}
+        </div>
+        <Footer />
+      </AuthProvider>
     </>
  )
 }

@@ -15,17 +15,17 @@ type Props = {
 
 // ** Defaults
 const defaultProvider: AuthValuesType = {
-    user: null,
-    loading: true,
-    setUser: () => null,
-    setLoading: () => Boolean,
-    login: () => Promise.resolve(),
-    logout: () => Promise.resolve(),
-    loginGoogle: () => Promise.resolve(),
-    loginFacebook: () => Promise.resolve()
-  }
-  
-  const AuthContext = createContext(defaultProvider)
+  user: null,
+  loading: true,
+  setUser: () => null,
+  setLoading: () => Boolean,
+  login: () => Promise.resolve(),
+  logout: () => Promise.resolve(),
+  loginGoogle: () => Promise.resolve(),
+  loginFacebook: () => Promise.resolve()
+}
+
+const AuthContext = createContext(defaultProvider)
 
 const AuthProvider = ({ children }: Props) => {
   const [user, setUser] = useState<UserDataType | null>(defaultProvider.user);
@@ -36,39 +36,43 @@ const AuthProvider = ({ children }: Props) => {
     const initAuth = async (): Promise<void> => {
       const storedToken = window.localStorage.getItem('token');
       const storedUser = window.localStorage.getItem('userData');
-      
+
       if (storedToken && storedUser) {
         setUser(JSON.parse(storedUser));
       }
       setLoading(false);
     };
-    
+
     initAuth();
   }, []);
 
-  const handleLogin = async ( params: LoginParams, errorCallback?: ErrCallbackType) => {
+  const handleLogin = async (params: LoginParams, errorCallback?: ErrCallbackType) => {
     try {
       const response = await loginAuth({ email: params.email, password: params.password });
 
       if (response.success && response.data) {
-        const { token, roles } = response.data.data;
+        const { token, email, fullName, avatarUrl, roles } = response.data.data;
+        // Create user data object
+        const userData: UserDataType = {
+          email,
+          fullName,
+          avatarUrl,
+          roles
+        };
+
         window.localStorage.setItem('token', token);
-        window.localStorage.setItem('roles', roles);
-        // Route based on role priority
-        if (roles.includes('ADMIN')) {
-          router.push('/restaurants');
-        } else if (roles.includes('VENDOR')) {
-          router.push('/vendor-dashboard');
-        } else {
-          router.push('/');
-        }
+        window.localStorage.setItem('userData', JSON.stringify(userData));
+        setUser(userData);
+        
+        // Redirect to Home
+        router.push('/');
+    
       } else {
         if (errorCallback) {
           errorCallback(new Error(response.message || 'Login failed'));
         }
       }
     } catch (err: any) {
-      console.error('Login error:', err);
       if (errorCallback) errorCallback(err);
     }
   };
@@ -77,8 +81,6 @@ const AuthProvider = ({ children }: Props) => {
     setUser(null);
     window.localStorage.removeItem('accessToken');
     window.localStorage.removeItem('userData');
-    window.sessionStorage.removeItem('accessToken');
-    window.sessionStorage.removeItem('userData');
     router.push('/login');
   };
 
