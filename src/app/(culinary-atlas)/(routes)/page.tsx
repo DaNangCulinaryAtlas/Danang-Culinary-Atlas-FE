@@ -18,13 +18,12 @@ export default function HomePage() {
 
   const { restaurants, loading, error } = useAppSelector((state) => state.restaurant);
 
-  // Fetch restaurants on component mount - simple fetch without filters
+  // Fetch restaurants on component mount 
   useEffect(() => {
-    dispatch(getRestaurantsAsync({
-      page: 0,
-      size: 10
-    }));
-  }, [dispatch]);
+    if (!restaurants || restaurants.length === 0) {
+      dispatch(getRestaurantsAsync({ page: 0, size: 10 }));
+    }
+  }, [dispatch, restaurants]);
 
   const dishes = [
     {

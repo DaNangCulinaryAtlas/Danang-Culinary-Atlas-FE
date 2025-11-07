@@ -1,7 +1,7 @@
 import React from 'react';
 import { MapPin, Star, Heart } from 'lucide-react';
-import type { Restaurant } from "@/types/restaurant";
 import Image from 'next/image';
+import type { Restaurant } from '@/types/restaurant';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -14,49 +14,57 @@ const RestaurantMapCard: React.FC<RestaurantCardProps> = ({
 }) => {
   return (
     <div
-      className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer"
+      className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer flex flex-col h-full"
       onClick={onClick}
     >
-      {/* Image */}
-      <div className="relative h-40 sm:h-48 overflow-hidden">
+      {/* Image - Fixed Height */}
+      <div className="relative h-40 sm:h-48 overflow-hidden flex-shrink-0">
         <Image
           width={400}
           height={192}
-          src={restaurant.image}
+          src={restaurant.images.photo || "/images/danang-find-restaurant.jpg"}
           alt={restaurant.name}
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
         />
         <button
           onClick={(e) => {
             e.stopPropagation();
+            // Handle favorite toggle
           }}
           className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform"
         >
-          <Heart
-            size={18}
-            className={restaurant.isFavorite ? 'fill-cyan-500 text-cyan-500' : 'text-gray-400'}
-          />
+          <Heart size={18} className="text-gray-400 hover:text-red-500 transition-colors" />
         </button>
       </div>
 
-      {/* Content */}
-      <div className="p-4">
-        <div className="flex items-start justify-between mb-2">
-          <div>
-            <p className="text-sm text-gray-500 mb-1">{restaurant.category}</p>
-            <h3 className="font-semibold text-gray-800">{restaurant.name}</h3>
-          </div>
-          <span className="text-lg font-bold text-gray-800">${restaurant.price}</span>
+      {/* Content - Fixed Layout */}
+      <div className="p-4 flex flex-col gap-3 flex-grow">
+        {/* Name - Fixed 2 lines height */}
+        <div className="h-12">
+          <h3 className="font-semibold text-gray-800 text-base line-clamp-2 leading-tight">
+            {restaurant.name}
+          </h3>
         </div>
 
-        <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center text-gray-600">
-            <MapPin size={14} className="mr-1 text-cyan-500" />
-            <span className="text-xs">{restaurant.address}</span>
+        {/* Bottom Section - Fixed at bottom */}
+        <div className="flex flex-col gap-2 mt-auto">
+          {/* Address - Fixed 1 line */}
+          <div className="flex items-center text-gray-600 min-h-[20px]">
+            <MapPin size={14} className="mr-1 text-cyan-500 flex-shrink-0" />
+            <span className="text-xs line-clamp-1">{restaurant.address}</span>
           </div>
-          <div className="flex items-center bg-yellow-50 px-2 py-1 rounded">
-            <Star size={14} className="fill-yellow-400 text-yellow-400 mr-1" />
-            <span className="font-semibold text-gray-700">{restaurant.rating}</span>
+
+          {/* Rating */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center bg-yellow-50 px-2 py-1 rounded">
+              <Star size={14} className="fill-yellow-400 text-yellow-400 mr-1" />
+              <span className="font-semibold text-gray-700 text-sm">
+                {restaurant.averageRating?.toFixed(1) || "0.0"}
+              </span>
+            </div>
+            <span className="text-xs text-gray-500">
+              ({restaurant.totalReviews || 0} reviews)
+            </span>
           </div>
         </div>
       </div>

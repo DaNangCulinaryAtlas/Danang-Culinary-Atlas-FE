@@ -1,17 +1,31 @@
 "use client";
 import { SlidersHorizontal } from 'lucide-react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import RestaurantMapCard from '@/components/restaurants/RestaurantMapCard';
 import { useRouter } from 'next/navigation';
 import type { Restaurant } from '@/types/restaurant';
 import { Button } from '@/components/ui/button';
 import SearchBox from './SearchBox';
+import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
+import { getRestaurantsAsync } from '@/stores/restaurant/action';
 
-interface RestaurantListProps {
-  restaurants: Restaurant[];
-}
+export default function RestaurantList (){
+  const dispatch = useAppDispatch();
 
-export default function RestaurantList ({ restaurants }: RestaurantListProps){
+  // Fetch restaurants from store
+  const {
+    restaurants,
+    loading,
+    error,
+    totalPages,
+    totalElements
+  } = useAppSelector((state) => state.restaurant);
+  useEffect(() => {
+    if (!restaurants || restaurants.length === 0) {
+      dispatch(getRestaurantsAsync({ page: 0, size: 20 }));
+    }
+  }, [dispatch, restaurants]);
+
   const router = useRouter();  
   return (
     <div className="flex flex-col bg-white rounded-2xl shadow-lg h-full">
@@ -33,9 +47,9 @@ export default function RestaurantList ({ restaurants }: RestaurantListProps){
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {restaurants.map((restaurant) => (
             <RestaurantMapCard 
-              key={restaurant.id} 
-              restaurant={restaurant} 
-              onClick={() => router.push(`/restaurants/${restaurant.id}`)}
+              key={restaurant.restaurantId} 
+              restaurant={restaurant}
+              onClick={() => router.push(`/restaurants/${restaurant.restaurantId}`)}
             />
           ))}
         </div>
