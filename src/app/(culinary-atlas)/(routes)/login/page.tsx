@@ -11,7 +11,6 @@ import GoogleIcon from '@/../public/icons/GoogleIcon';
 import FacebookIcon from '@/../public/icons/Facebook';
 import AppleIcon from '@/../public/icons/Apple';
 import { useAuth } from '@/hooks/useAuth';
-import { BASE_URL } from '@/configs/api';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,7 +26,6 @@ export default function Login() {
     e.preventDefault();
     setError('');
     
-    // Validation
     if (!email || !password) {
       setError('Please enter both email and password');
       return;
@@ -41,7 +39,6 @@ export default function Login() {
     setIsLoading(true);
     
     try {
-      console.log(BASE_URL);
       await login(
         { email, password },
         (err: any) => {
@@ -61,10 +58,11 @@ export default function Login() {
   };
 
   return (
-    <div className="flex justify-center items-center md:w-[75%] min-h-screen mx-auto">
-      <div className="flex flex-col lg:flex-row w-full h-[80vh] border shadow-lg">
+    <div className="flex justify-center items-center min-h-screen p-4 md:p-0">
+      <div className="flex flex-col lg:flex-row w-full max-w-6xl shadow-xl border rounded-lg overflow-hidden">
+
         {/* Left Side - Image */}
-        <div className="hidden lg:flex md:w-1/2 relative bg-gradient-to-br from-blue-600 to-blue-400">
+        <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-blue-600 to-blue-400">
           <div className="absolute inset-0">
             <Image
               src="/images/login-image.png"
@@ -76,41 +74,48 @@ export default function Login() {
             <div className="absolute inset-0 bg-gradient-to-b from-blue-900/40 via-transparent to-transparent"></div>
           </div>
           
-          <div className="relative z-10 flex flex-col items-center justify-start w-full p-8 md:p-12 text-white text-center">
-            <div className="hidden lg:block">
-              <h1 className="font-nicomoji text-[20px] mb-4 md:mb-6 leading-tight whitespace-nowrap">
-                Danang Culinary Atlas
-              </h1>
-            </div>
-            <p className="text-base md:text-[12px] font-mulish leading-relaxed max-w-sm md:max-w-md px-4">
+          <div className="relative z-10 flex flex-col justify-start items-center w-full p-8 md:p-12 text-white">
+            <h1 className="font-nicomoji text-[20px] mb-4 md:mb-6 leading-tight whitespace-nowrap">
+              Danang Culinary Atlas
+            </h1>
+            <p className="text-sm md:text-base font-mulish leading-relaxed max-w-xs text-center">
               Let your journey be more than just sightseeing make it a colorful and flavorful culinary adventure.
             </p>
           </div>
         </div>
 
         {/* Right Side - Form */}
-        <div className="w-full h-full lg:w-1/2 flex items-center justify-center sm:p-8 lg:p-10 bg-white">
-          <div className="w-full h-[90%] max-w-md">
-            <div className="flex flex-col justify-center items-center mb-6">
-              <h2 className="font-mulish font-extrabold text-[#69C3CF] md:text-5xl sm:text-4xl">
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-10 bg-white">
+          <div className="w-full max-w-md space-y-6">
+
+            {/* Header */}
+            <div className="text-center mb-4">
+              <h2 className="font-mulish font-extrabold text-[#69C3CF] text-4xl sm:text-5xl">
                 Welcome
               </h2>
-              <p className="font-mulish font-normal text-[#000000] md:text-[15px] sm:text-[10px]">
+              <p className="font-mulish text-sm text-[#000000] mt-1">
                 Login with Email
               </p>
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-4">
-              {/* Error Message */}
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded text-sm">
-                  {error}
-                </div>
-              )}
+            <form onSubmit={handleLogin} className="space-y-5">
 
-              {/* Email Input */}
+              {/* Error Area - Fixed Height */}
+              <div className="h-[3.25rem] flex items-start">
+                {error ? (
+                  <div className="w-full bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm animate-fadeIn">
+                    {error}
+                  </div>
+                ) : (
+                  <div className="w-full opacity-0 pointer-events-none">
+                    <div className="px-4 py-2">Placeholder</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Email */}
               <div>
-                <label className="block text-sm text-[#69C3CF] font-poppins font-bold mb-1">
+                <label className="block text-sm font-bold text-[#69C3CF] mb-1 font-poppins">
                   Email
                 </label>
                 <div className="relative">
@@ -120,15 +125,15 @@ export default function Login() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
-                    className="pl-10 h-12 border-[#69C3CF] text-[#000000] font-poppins font-medium text-[14px]"
+                    className="pl-10 h-12 border-[#69C3CF] font-poppins text-sm"
                     disabled={isLoading}
                   />
                 </div>
               </div>
 
-              {/* Password Input */}
+              {/* Password */}
               <div>
-                <label className="block text-sm text-[#69C3CF] font-poppins font-bold mb-1">
+                <label className="block text-sm font-bold text-[#69C3CF] mb-1 font-poppins">
                   Password
                 </label>
                 <div className="relative">
@@ -138,7 +143,7 @@ export default function Login() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="******"
-                    className="pl-10 pr-10 h-12 border-[#69C3CF] text-[#000000] font-poppins font-medium"
+                    className="pl-10 pr-10 h-12 border-[#69C3CF] font-poppins text-sm"
                     disabled={isLoading}
                   />
                   <button
@@ -151,71 +156,64 @@ export default function Login() {
                 </div>
               </div>
 
-              {/* Remember Me & Forgot Password */}
-              <div className="flex items-center justify-between pt-1">
+              {/* Remember Me & Forgot */}
+              <div className="flex items-center justify-between text-xs">
                 <label className="flex items-center space-x-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 text-[#69C3CF] border-gray-300 rounded focus:ring-[#69C3CF]"
+                    className="w-4 h-4 text-[#69C3CF] rounded focus:ring-[#69C3CF]"
                   />
-                  <span className="text-xs font-poppins text-gray-600">Remember me</span>
+                  <span className="text-gray-600 font-poppins">Remember me</span>
                 </label>
-                <Link 
-                  href="/forgot-password" 
-                  className="text-[10px] font-poppins text-[#69C3CF] hover:underline"
-                >
+                <Link href="/forgot-password" className="text-[#69C3CF] hover:underline font-poppins">
                   Forgot your Password?
                 </Link>
               </div>
 
               {/* Login Button */}
-              <div className="flex justify-center mt-6">
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-32 bg-[#69C3CF] hover:bg-[#5AB3BF] rounded-md text-white h-10 font-poppins font-medium text-sm disabled:opacity-50"
-                >
-                  {isLoading ? 'LOGGING IN...' : 'LOGIN'}
-                </Button>
-              </div>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-11 bg-[#69C3CF] hover:bg-[#5AB3BF] text-white font-poppins text-sm font-medium rounded-md disabled:opacity-50"
+              >
+                {isLoading ? 'LOGGING IN...' : 'LOGIN'}
+              </Button>
             </form>
 
             {/* Divider */}
-            <div className="flex flex-col relative mt-4">
-              <div className="justify-center absolute inset-0 flex items-center">
-                <div className="w-[70%] border-t border-gray-300"></div>
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center">
-                <span className="px-2 bg-white text-gray-400">OR</span>
+                <span className="px-3 bg-white text-gray-400 text-sm">OR</span>
               </div>
             </div>
 
-            {/* Social Login Buttons */}
-            <div className="flex justify-center space-x-4 mt-4">
+            {/* Social Login */}
+            <div className="flex justify-center gap-3">
               <Button
                 type="button"
                 variant="outline"
-                className="h-[48px] w-[85px] bg-[#E7F2F5]"
+                className="h-12 w-20 bg-[#E7F2F5] border-[#E7F2F5] hover:bg-[#d8e8ec]"
                 onClick={() => handleSocialLogin('Google')}
               >
                 <GoogleIcon />
               </Button>
-
               <Button
                 type="button"
                 variant="outline"
-                className="h-[48px] w-[85px] bg-[#E7F2F5]"
+                className="h-12 w-20 bg-[#E7F2F5] border-[#E7F2F5] hover:bg-[#d8e8ec]"
                 onClick={() => handleSocialLogin('Facebook')}
               >
                 <FacebookIcon />
               </Button>
-
               <Button
                 type="button"
                 variant="outline"
-                className="h-[48px] w-[85px] bg-[#E7F2F5]"
+                className="h-12 w-20 bg-[#E7F2F5] border-[#E7F2F5] hover:bg-[#d8e8ec]"
                 onClick={() => handleSocialLogin('Apple')}
               >
                 <AppleIcon />
@@ -223,14 +221,12 @@ export default function Login() {
             </div>
 
             {/* Register Link */}
-            <div className="mt-6 text-center">
-              <p className="text-[10px] font-mulish">
-                Don&apos;t have account?{' '}
-                <Link href="/register" className="text-[#69C3CF] hover:text-[#5AB3BF] font-semibold transition-colors">
-                  Register Now
-                </Link>
-              </p>
-            </div>
+            <p className="text-center text-xs font-mulish text-gray-600">
+              Don't have account?{' '}
+              <Link href="/register" className="text-[#69C3CF] hover:text-[#5AB3BF] font-semibold">
+                Register Now
+              </Link>
+            </p>
           </div>
         </div>
       </div>
