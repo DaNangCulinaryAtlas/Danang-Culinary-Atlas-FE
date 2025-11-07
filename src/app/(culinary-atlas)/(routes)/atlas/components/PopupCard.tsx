@@ -17,7 +17,7 @@ export default function PopupCard({ restaurant, onClose }: PopupCardProps) {
         <Image
           width={320}
           height={160}
-          src={restaurant.image}
+          src={restaurant.images.photo || '/images/danang-find-restaurant.jpg'}
           alt={restaurant.name}
           className="w-full h-full object-cover"
         />
@@ -44,20 +44,14 @@ export default function PopupCard({ restaurant, onClose }: PopupCardProps) {
 
         {/* Rating and additional info */}
         <div className="flex items-center gap-4 mb-3">
-          {restaurant.rating && (
+          {restaurant.averageRating && (
             <div className="flex items-center gap-1">
-              <StarRating rating={restaurant.rating} />
-              <span className="font-semibold text-gray-900">{restaurant.rating}</span>
-              {restaurant.reviews && (
-                <span className="text-xs text-gray-500">({restaurant.reviews})</span>
+              <StarRating rating={restaurant.averageRating} />
+              <span className="font-semibold text-gray-900">{restaurant.averageRating}</span>
+              {restaurant.totalReviews && (
+                <span className="text-xs text-gray-500">({restaurant.totalReviews})</span>
               )}
             </div>
-          )}
-          
-          {restaurant.price && (
-            <span className="text-sm text-gray-600">
-              {restaurant.price}
-            </span>
           )}
         </div>
         {/* View Details Button */}

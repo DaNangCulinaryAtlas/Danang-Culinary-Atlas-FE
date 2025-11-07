@@ -67,8 +67,8 @@ export default function RestaurantMarker({
   return (
     <>
       <Marker
-        longitude={restaurant.lng}
-        latitude={restaurant.lat}
+        longitude={restaurant.longitude}
+        latitude={restaurant.latitude}
         anchor="bottom"
       >
         <div
@@ -81,7 +81,7 @@ export default function RestaurantMarker({
             <Image
               width={100}
               height={100}
-              src={restaurant.image}
+              src={restaurant.images.photo || '/images/danang-find-restaurant.jpg'}
               alt={restaurant.name}
               className="w-full h-full object-cover"
             />
@@ -91,8 +91,8 @@ export default function RestaurantMarker({
 
       {showPopup && (
         <Popup
-          longitude={restaurant.lng}
-          latitude={restaurant.lat}
+          longitude={restaurant.longitude}
+          latitude={restaurant.latitude}
           anchor="top"
           offset={[0, 15]}
           closeButton={false}

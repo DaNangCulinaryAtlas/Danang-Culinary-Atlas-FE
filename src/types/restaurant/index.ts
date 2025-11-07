@@ -66,3 +66,11 @@ export interface GetRestaurantsParams {
   wardId?: number;
   approvalStatus?: string;
 }
+
+export interface getRestaurantsForMapParams {
+  zoomLevel: number;
+  minLat: number;
+  maxLat: number;
+  minLng: number;
+  maxLng: number;
+}
