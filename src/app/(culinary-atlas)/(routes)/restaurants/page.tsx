@@ -6,11 +6,9 @@ import RestaurantCard from "@/components/restaurants/RestaurantCard";
 import Pagination from "./components/Pagination";
 import FilterSideBar from "./components/FilterSideBar";
 import FindRestaurants from "./components/FindRestaurants";
-import SortDropdown from "./components/SortDropdown";
 import SearchResultPages from "./components/SearchResultPages";
 import ViewToggle from "./components/ViewToggle";
 import SearchResult from "./components/SearchResult";
-import SortOption from "@/types/sort-option";
 import ViewMode from "@/types/view-mode";
 import { FilterState } from "@/types/filter";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
@@ -18,147 +16,53 @@ import { getRestaurantsAsync } from "@/stores/restaurant/action";
 
 function RestaurantSearchContent() {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [resultsPerPage, setResultsPerPage] = useState(10);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [resultsPerPage, setResultsPerPage] = useState(9);
 
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
 
-  const { 
-    restaurants, 
-    loading, 
-    error, 
-    totalPages, 
-    totalElements 
+  const {
+    restaurants,
+    loading,
+    error,
+    totalPages,
+    totalElements
   } = useAppSelector((state) => state.restaurant);
 
   // Initialize from URL params
   const [currentPage, setCurrentPage] = useState(() =>
     parseInt(searchParams.get("page") || "1", 10)
   );
-  const [size, setSize] = useState(() =>
-    parseInt(searchParams.get("size") || "10", 10)
-  );
-  const [sortBy, setSortBy] = useState<SortOption>(() =>
-    (searchParams.get("sort") as SortOption) || "rating-low-high"
-  );
-  
+
   const [filters, setFilters] = useState<FilterState>(() => ({
-    priceRange: searchParams.get("priceRange")?.split(",") || [],
-    cuisineTypes: searchParams.get("cuisine")?.split(",") || [],
-    minRating: searchParams.get("minRating") 
-      ? parseFloat(searchParams.get("minRating")!) 
-      : null,
+    cuisineTypes: [],
+    minRating: null,
   }));
 
-  // Debounce search query
+  // Main fetch effect - simple fetch without filters
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  // Main fetch effect
-  useEffect(() => {
-    const getSortParams = () => {
-      switch (sortBy) {
-        case "rating-high-low":
-          return { sortBy: "avgRating", sortDirection: "desc" as const };
-        case "rating-low-high":
-          return { sortBy: "avgRating", sortDirection: "asc" as const };
-        case "price-high-low":
-          return { sortBy: "price", sortDirection: "desc" as const };
-        case "price-low-high":
-          return { sortBy: "price", sortDirection: "asc" as const };
-        default:
-          return { sortBy: "createdAt", sortDirection: "desc" as const };
-      }
-    };
-
-    const { sortBy: sortField, sortDirection } = getSortParams();
-
-    // Build params object
-    const params: any = {
+    dispatch(getRestaurantsAsync({
       page: currentPage - 1,
-      size: resultsPerPage,
-      sortBy: sortField,
-      sortDirection,
-    };
+      size: resultsPerPage
+    }));
+  }, [dispatch, currentPage, resultsPerPage]);
 
-    // Add optional params only if they have values
-    if (debouncedSearch) {
-      params.search = debouncedSearch;
-    }
-    if (filters.minRating) {
-      params.minRating = filters.minRating;
-    }
-    if (filters.cuisineTypes.length > 0) {
-      params.cuisine = filters.cuisineTypes;
-    }
-    // Note: priceRange would need backend support
-    // if (filters.priceRange.length > 0) {
-    //   params.priceRange = filters.priceRange;
-    // }
-
-    dispatch(getRestaurantsAsync(params));
-  }, [
-    dispatch, 
-    currentPage, 
-    resultsPerPage, 
-    sortBy, 
-    debouncedSearch,
-    filters
-  ]);
-
-  // Update URL when filters change
+  // Update URL when page changes
   useEffect(() => {
     const params = new URLSearchParams();
-    
     params.set("page", currentPage.toString());
-    params.set("size", size.toString());
-    if (searchQuery) params.set("search", searchQuery);
-    if (filters.minRating) params.set("minRating", filters.minRating.toString());
-    if (filters.cuisineTypes.length > 0) {
-      params.set("cuisine", filters.cuisineTypes.join(","));
-    }
-    if (filters.priceRange.length > 0) {
-      params.set("priceRange", filters.priceRange.join(","));
-    }
-
+    params.set("size", resultsPerPage.toString());
     router.push(`?${params.toString()}`, { scroll: false });
-  }, [currentPage, sortBy, searchQuery, filters, router]);
+  }, [currentPage, resultsPerPage, router]);
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  const handleSortChange = useCallback((newSort: SortOption) => {
-    setSortBy(newSort);
-    setCurrentPage(1);
-  }, []);
-
   const handleFilterChange = useCallback((newFilters: Partial<FilterState>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
-    setCurrentPage(1);
-  }, []);
-
-  const handleSearchChange = useCallback((query: string) => {
-    setSearchQuery(query);
-    setCurrentPage(1);
-  }, []);
-
-  const handleClearFilters = useCallback(() => {
-    setFilters({
-      priceRange: [],
-      cuisineTypes: [],
-      minRating: null,
-    });
-    setSearchQuery("");
-    setCurrentPage(1);
   }, []);
 
   const handleRestaurantClick = useCallback((restaurantId: string) => {
@@ -177,11 +81,9 @@ function RestaurantSearchContent() {
         <div className="text-center">
           <p className="text-red-600 text-lg">{error}</p>
           <button
-            onClick={() => dispatch(getRestaurantsAsync({ 
-              page: 0, 
-              size: resultsPerPage,
-              sortBy: 'createdAt',
-              sortDirection: 'desc'
+            onClick={() => dispatch(getRestaurantsAsync({
+              page: 0,
+              size: resultsPerPage
             }))}
             className="mt-4 px-4 py-2 bg-[#44BACA] text-white rounded hover:bg-[#3aa3b3]"
           >
@@ -223,11 +125,6 @@ function RestaurantSearchContent() {
               />
 
               <div className="flex flex-wrap items-center gap-3">
-                <SortDropdown
-                  sortBy={sortBy}
-                  setSortBy={handleSortChange}
-                />
-
                 <SearchResultPages
                   resultsPerPage={resultsPerPage}
                   setResultsPerPage={setResultsPerPage}
@@ -243,13 +140,7 @@ function RestaurantSearchContent() {
             {/* Restaurant Grid/List */}
             {restaurants.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">No restaurants found matching your criteria.</p>
-                <button
-                  onClick={handleClearFilters}
-                  className="mt-4 text-[#44BACA] hover:underline"
-                >
-                  Clear all filters
-                </button>
+                <p className="text-gray-500 text-lg">No restaurants found.</p>
               </div>
             ) : (
               <>

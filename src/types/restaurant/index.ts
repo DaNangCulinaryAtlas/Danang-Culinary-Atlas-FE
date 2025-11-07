@@ -19,6 +19,8 @@ export interface Restaurant {
   openingHours: {
     [key: string]: string;
   };
+  averageRating: number;
+  totalReviews: number;
 }
 
 export interface RestaurantResponse {

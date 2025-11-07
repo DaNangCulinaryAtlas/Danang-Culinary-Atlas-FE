@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import CuisineFeatures from "@/components/cuisinefeatures";
 import DishCard from "@/components/recommendedfood";
@@ -8,10 +8,24 @@ import { Heart, Share2, MapPin, Star } from 'lucide-react';
 import RestaurantCard from "@/components/restaurants/RestaurantCard";
 import GallerySection from "@/components/gallery";
 import { useRouter } from "next/navigation";
-import restaurants from "@/stores/mockRestaurants";
+import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
+import { getRestaurantsAsync } from "@/stores/restaurant/action";
+
 export default function HomePage() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const [searchQuery, setSearchQuery] = useState("");
+
+  const { restaurants, loading, error } = useAppSelector((state) => state.restaurant);
+
+  // Fetch restaurants on component mount - simple fetch without filters
+  useEffect(() => {
+    dispatch(getRestaurantsAsync({
+      page: 0,
+      size: 10
+    }));
+  }, [dispatch]);
+
   const dishes = [
     {
       id: 1,
@@ -218,15 +232,40 @@ export default function HomePage() {
       </h1>
       <div className="px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {restaurants.map((restaurant, index) => (
-              <RestaurantCard
-                key={index}
-                restaurant={restaurant}
-                onClick={() => router.push(`/restaurants/${restaurant.id}`)}
-              />
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#44BACA]"></div>
+            </div>
+          ) : error ? (
+            <div className="text-center py-20">
+              <p className="text-red-600 text-lg">{error}</p>
+              <button
+                onClick={() => dispatch(getRestaurantsAsync({
+                  page: 0,
+                  size: 10,
+                  sortBy: 'createdAt',
+                  sortDirection: 'desc'
+                }))}
+                className="mt-4 px-4 py-2 bg-[#44BACA] text-white rounded hover:bg-[#3aa3b3]"
+              >
+                Try Again
+              </button>
+            </div>
+          ) : restaurants.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-gray-500 text-lg">No restaurants available at the moment.</p>
+            </div>
+          ) : (
+            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {restaurants.slice(0, 8).map((restaurant) => (
+                <RestaurantCard
+                  key={restaurant.restaurantId}
+                  restaurant={restaurant}
+                  onClick={() => router.push(`/restaurants/${restaurant.restaurantId}`)}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

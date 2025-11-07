@@ -1,8 +1,10 @@
 import Image from "next/image";
 import { Heart } from "lucide-react";
 import { Restaurant } from "@/types/restaurant/index";
+import StarRating from "./StarRating";
+
 interface RestaurantCardProps {
-  restaurant:Restaurant ;
+  restaurant: Restaurant;
   onClick?: () => void;
 }
 
@@ -11,50 +13,53 @@ export default function RestaurantCard({
   onClick,
 }: RestaurantCardProps) {
   return (
-    <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+    <div
+      className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer flex flex-col h-full"
       onClick={onClick}
     >
-      {/* Image Section */}
-      <div className="relative w-full h-59 md:h-60">
-      {/* <Image
-          src={restaurant.images.photo}
+      {/* Image Section - Fixed Height */}
+      <div className="relative w-full h-48 flex-shrink-0">
+        <Image
+          src={restaurant.images.photo || "/images/danang-find-restaurant.jpg"}
           alt={restaurant.name}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           fill
           className="object-cover hover:scale-105 transition-transform duration-500"
-        /> */}
+        />
 
         {/* Favorite Icon */}
-        <button className="absolute top-4 right-4 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition">
+        <button
+          className="absolute top-4 right-4 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition"
+          onClick={(e) => {
+            e.stopPropagation();
+            // Handle favorite toggle
+          }}
+        >
           <Heart className="w-5 h-5 text-gray-700 hover:text-red-500 transition-colors" />
         </button>
       </div>
 
-      {/* Info Section */}
-      <div className="p-5 flex flex-col gap-1">
-        {/* Name */}
-        <h3 className="text-[#1C2B38] font-volkhov font-bold text-lg leading-tight">
+      {/* Info Section - Fixed Layout */}
+      <div className="p-5 flex flex-col gap-3 flex-grow">
+        {/* Name - Fixed 2 lines height */}
+        <h3 className="text-[#1C2B38] font-volkhov font-bold text-lg leading-tight line-clamp-2 h-14">
           {restaurant.name}
         </h3>
 
-        {/* Cuisine & Location */}
-        <p className="text-[#778088] text-sm font-mulish">
-          {restaurant.status} | {restaurant.address}
+        {/* Address - Fixed 2 lines height */}
+        <p className="text-[#778088] text-sm font-mulish line-clamp-2 h-10">
+          {restaurant.address}
         </p>
 
-        {/* Price */}
-        {/* <p className="text-[#44BACA] font-semibold text-[16px] mt-1">
-          {restaurant.openingHours}$
-        </p> */}
-
-        {/* Rating */}
-        {/* <div className="flex items-center gap-2 mt-2">
+        {/* Rating - Fixed position at bottom */}
+        <div className="flex items-center gap-2 mt-auto pt-2">
           <div className="flex items-center gap-0.5">
-            <StarRating rating={restaurant.rating} />
+            <StarRating rating={restaurant.averageRating || 0} />
           </div>
-          <p className="text-[#778088] text-sm">
-            {restaurant.rating} ({restaurant.reviews} reviews)
+          <p className="text-[#778088] text-sm whitespace-nowrap">
+            {restaurant.averageRating?.toFixed(1) || "0.0"} ({restaurant.totalReviews || 0} reviews)
           </p>
-        </div> */}
+        </div>
       </div>
     </div>
   );

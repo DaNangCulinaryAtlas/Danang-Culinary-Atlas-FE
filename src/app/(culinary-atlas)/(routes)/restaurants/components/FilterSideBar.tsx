@@ -1,17 +1,10 @@
 // components/FilterSideBar.tsx
 import { memo, useCallback, useMemo } from "react";
 import { RotateCcw } from "lucide-react";
-import {  FilterSideBarProps, FilterOption} from "@/types/filter";
+import { FilterSideBarProps, FilterOption } from "@/types/filter";
 import Star from "@/components/restaurants/Star";
 
 // Constants
-const PRICE_OPTIONS: FilterOption[] = [
-  { label: "Cheap", value: "$10 and under", count: 20 },
-  { label: "Affordable", value: "$20 and under", count: 20 },
-  { label: "Expensive", value: "$30 and under", count: 50 },
-  { label: "Very expensive", value: "$51 and over", count: 5 },
-];
-
 const CUISINE_OPTIONS: FilterOption[] = [
   { label: "Việt Nam", value: "vietnamese", count: 200 },
   { label: "Italian", value: "italian", count: 20 },
@@ -136,7 +129,6 @@ const FilterSideBar = memo(function FilterSideBar({
   // Check if any filters are active
   const hasActiveFilters = useMemo(() => {
     return (
-      filters.priceRange.length > 0 ||
       filters.cuisineTypes.length > 0 ||
       filters.minRating !== null
     );
@@ -145,7 +137,6 @@ const FilterSideBar = memo(function FilterSideBar({
   // Count active filters
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    if (filters.priceRange.length > 0) count += filters.priceRange.length;
     if (filters.cuisineTypes.length > 0) count += filters.cuisineTypes.length;
     if (filters.minRating !== null) count += 1;
     return count;
@@ -153,14 +144,9 @@ const FilterSideBar = memo(function FilterSideBar({
 
   const handleClearAll = useCallback(() => {
     onFilterChange({
-      priceRange: [],
       cuisineTypes: [],
       minRating: null,
     });
-  }, [onFilterChange]);
-
-  const handlePriceChange = useCallback((values: string[]) => {
-    onFilterChange({ priceRange: values });
   }, [onFilterChange]);
 
   const handleCuisineChange = useCallback((values: string[]) => {
@@ -172,7 +158,7 @@ const FilterSideBar = memo(function FilterSideBar({
   }, [onFilterChange]);
 
   return (
-    <aside 
+    <aside
       className="w-full lg:w-64 bg-white rounded-lg shadow-sm border border-gray-100 sticky top-4 h-fit"
       role="complementary"
       aria-label="Search filters"
@@ -188,7 +174,7 @@ const FilterSideBar = memo(function FilterSideBar({
               </span>
             )}
           </div>
-          
+
           {hasActiveFilters && (
             <button
               onClick={handleClearAll}
@@ -200,16 +186,6 @@ const FilterSideBar = memo(function FilterSideBar({
             </button>
           )}
         </div>
-
-        {/* Price Filter */}
-        <CheckboxFilter
-          title="Price Range"
-          options={PRICE_OPTIONS}
-          selectedValues={filters.priceRange}
-          onChange={handlePriceChange}
-        />
-
-        <div className="border-t border-gray-200" />
 
         {/* Cuisine Filter */}
         <CheckboxFilter
@@ -236,13 +212,6 @@ const FilterSideBar = memo(function FilterSideBar({
                 Active Filters
               </h4>
               <div className="flex flex-wrap gap-2">
-                {filters.priceRange.map((price) => (
-                  <FilterTag
-                    key={price}
-                    label={price}
-                    onRemove={() => handlePriceChange(filters.priceRange.filter(p => p !== price))}
-                  />
-                ))}
                 {filters.cuisineTypes.map((cuisine) => (
                   <FilterTag
                     key={cuisine}
