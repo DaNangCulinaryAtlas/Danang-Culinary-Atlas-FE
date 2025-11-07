@@ -8,18 +8,10 @@ import {
   TResetPasswordAuth, 
   TChangePassword 
 } from '@/types/auth';
-
-interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  message?: string;
-  error?: string;
-}
+import { ApiResponse } from '@/types/response';
 
 export const loginAuth = async (data: TLoginAuth): Promise<ApiResponse> => {
   try {
-    console.log("Calling:", API_ENDPOINTS.AUTH.LOGIN);
-    console.log("Full URL:", instanceAxios.defaults.baseURL + API_ENDPOINTS.AUTH.LOGIN);
     const response: AxiosResponse = await instanceAxios.post(
       API_ENDPOINTS.AUTH.LOGIN, 
       data
@@ -32,7 +24,6 @@ export const loginAuth = async (data: TLoginAuth): Promise<ApiResponse> => {
     };
   } catch (error) {
     const axiosError = error as AxiosError<ApiResponse>;
-    console.log(API_ENDPOINTS.AUTH.LOGIN, data);
     return {
       success: false,
       message: axiosError.response?.data?.message || 'Login failed',

@@ -1,6 +1,5 @@
 // Types
 interface FilterState {
-  priceRange: string[];
   cuisineTypes: string[];
   minRating: number | null;
 }
