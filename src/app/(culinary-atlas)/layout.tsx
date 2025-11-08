@@ -12,16 +12,16 @@ export default function DashboardLayout({
 }>) {
   return (
     <>
+    <Provider store={store}>
       <AuthProvider>
-        <Provider store={store}>
           <Header />
             <div className="min-h-screen">
               <div className="h-14"/> 
                   {children}
             </div>
            <Footer />
-        </Provider>
       </AuthProvider>
+    </Provider>
     </>
  )
 }

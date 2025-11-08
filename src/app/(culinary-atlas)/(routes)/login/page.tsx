@@ -10,51 +10,45 @@ import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import GoogleIcon from '@/../public/icons/GoogleIcon';
 import FacebookIcon from '@/../public/icons/Facebook';
 import AppleIcon from '@/../public/icons/Apple';
-import { useAuth } from '@/hooks/useAuth';
+import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
+import { loginUser } from '@/stores/auth/action';
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  
-  const { login } = useAuth();
+
+  const dispatch = useAppDispatch();
   const router = useRouter();
+  const { loading, error: reduxError } = useAppSelector((state) => state.auth);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     if (!email || !password) {
-      setError('Please enter both email and password');
+      setError('Vui lòng nhập cả email và mật khẩu');
       return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Please enter a valid email address');
+      setError('Vui lòng nhập địa chỉ email hợp lệ');
       return;
     }
 
-    setIsLoading(true);
-    
     try {
-      await login(
-        { email, password },
-        (err: any) => {
-          setError(err?.message || 'Login failed. Please check your credentials.');
-          setIsLoading(false);
-        }
-      );
+      await dispatch(loginUser({ email, password })).unwrap();
+      // Login successful, redirect to home
+      router.push('/');
     } catch (err: any) {
-      setError('An unexpected error occurred');
-      setIsLoading(false);
+      setError(err || 'Đăng nhập thất bại. Vui lòng thử lại.');
     }
   };
 
   const handleSocialLogin = (provider: string) => {
     console.log(`Login with ${provider}`);
-    setError(`${provider} login not implemented yet`);
   };
 
   return (
@@ -73,14 +67,13 @@ export default function Login() {
             />
             <div className="absolute inset-0 bg-gradient-to-b from-blue-900/40 via-transparent to-transparent"></div>
           </div>
-          
+
           <div className="relative z-10 flex flex-col justify-start items-center w-full p-8 md:p-12 text-white">
             <h1 className="font-nicomoji text-[20px] mb-4 md:mb-6 leading-tight whitespace-nowrap">
               Danang Culinary Atlas
             </h1>
             <p className="text-sm md:text-base font-mulish leading-relaxed max-w-xs text-center">
-              Let your journey be more than just sightseeing make it a colorful and flavorful culinary adventure.
-            </p>
+            Hãy để hành trình của bạn không chỉ là ngắm cảnh — mà còn là một chuyến phiêu lưu ẩm thực rực rỡ và đậm đà hương vị.            </p>
           </div>
         </div>
 
@@ -102,9 +95,9 @@ export default function Login() {
 
               {/* Error Area - Fixed Height */}
               <div className="h-[3.25rem] flex items-start">
-                {error ? (
+                {(error || reduxError) ? (
                   <div className="w-full bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm animate-fadeIn">
-                    {error}
+                    {error || reduxError}
                   </div>
                 ) : (
                   <div className="w-full opacity-0 pointer-events-none">
@@ -126,7 +119,7 @@ export default function Login() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
                     className="pl-10 h-12 border-[#69C3CF] font-poppins text-sm"
-                    disabled={isLoading}
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -144,7 +137,7 @@ export default function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="******"
                     className="pl-10 pr-10 h-12 border-[#69C3CF] font-poppins text-sm"
-                    disabled={isLoading}
+                    disabled={loading}
                   />
                   <button
                     type="button"
@@ -168,17 +161,17 @@ export default function Login() {
                   <span className="text-gray-600 font-poppins">Remember me</span>
                 </label>
                 <Link href="/forgot-password" className="text-[#69C3CF] hover:underline font-poppins">
-                  Forgot your Password?
+                  Quên mật khẩu?
                 </Link>
               </div>
 
               {/* Login Button */}
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={loading}
                 className="w-full h-11 bg-[#69C3CF] hover:bg-[#5AB3BF] text-white font-poppins text-sm font-medium rounded-md disabled:opacity-50"
               >
-                {isLoading ? 'LOGGING IN...' : 'LOGIN'}
+                {loading ? 'ĐANG ĐĂNG NHẬP' : 'ĐĂNG NHẬP'}
               </Button>
             </form>
 
@@ -222,9 +215,9 @@ export default function Login() {
 
             {/* Register Link */}
             <p className="text-center text-xs font-mulish text-gray-600">
-              Don't have account?{' '}
+              Bạn chưa có tài khoản?{' '}
               <Link href="/register" className="text-[#69C3CF] hover:text-[#5AB3BF] font-semibold">
-                Register Now
+                Đăng ký ngay
               </Link>
             </p>
           </div>

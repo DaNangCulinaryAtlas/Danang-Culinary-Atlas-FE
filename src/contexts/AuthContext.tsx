@@ -1,7 +1,7 @@
 "use client";
 import { ReactNode, createContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { loginAuth } from '@/services/auth';
+import { useAppSelector } from '@/hooks/useRedux';
 import {
   AuthValuesType,
   LoginParams,
@@ -28,17 +28,39 @@ const defaultProvider: AuthValuesType = {
 const AuthContext = createContext(defaultProvider)
 
 const AuthProvider = ({ children }: Props) => {
-  const [user, setUser] = useState<UserDataType | null>(defaultProvider.user);
-  const [loading, setLoading] = useState<boolean>(defaultProvider.loading);
+  // Sync with Redux state
+  const reduxUser = useAppSelector((state) => state.auth.user);
+  const [user, setUser] = useState<UserDataType | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
+  // Sync user state with Redux
+  useEffect(() => {
+    if (reduxUser) {
+      // Convert Redux user type to AuthContext user type
+      setUser({
+        email: reduxUser.email,
+        fullName: reduxUser.fullName,
+        avatarUrl: reduxUser.avatarUrl || null,
+        roles: reduxUser.roles
+      });
+    } else {
+      setUser(null);
+    }
+  }, [reduxUser]);
+
+  // Initialize from localStorage on mount
   useEffect(() => {
     const initAuth = async (): Promise<void> => {
       const storedToken = window.localStorage.getItem('token');
       const storedUser = window.localStorage.getItem('userData');
 
       if (storedToken && storedUser) {
-        setUser(JSON.parse(storedUser));
+        const userData = JSON.parse(storedUser);
+        setUser({
+          ...userData,
+          avatarUrl: userData.avatarUrl || null
+        });
       }
       setLoading(false);
     };
@@ -47,41 +69,13 @@ const AuthProvider = ({ children }: Props) => {
   }, []);
 
   const handleLogin = async (params: LoginParams, errorCallback?: ErrCallbackType) => {
-    try {
-      const response = await loginAuth({ email: params.email, password: params.password });
-
-      if (response.success && response.data) {
-        const { token, email, fullName, avatarUrl, roles } = response.data.data;
-        // Create user data object
-        const userData: UserDataType = {
-          email,
-          fullName,
-          avatarUrl,
-          roles
-        };
-
-        window.localStorage.setItem('token', token);
-        window.localStorage.setItem('userData', JSON.stringify(userData));
-        setUser(userData);
-        
-        // Redirect to Home
-        router.push('/');
-    
-      } else {
-        if (errorCallback) {
-          errorCallback(new Error(response.message || 'Login failed'));
-        }
-      }
-    } catch (err: any) {
-      if (errorCallback) errorCallback(err);
-    }
+    // This is deprecated, use Redux loginUser action instead
+    console.warn('AuthContext.login is deprecated. Use Redux loginUser action instead.');
   };
 
   const handleLogout = async () => {
-    setUser(null);
-    window.localStorage.removeItem('accessToken');
-    window.localStorage.removeItem('userData');
-    router.push('/login');
+    // This is deprecated, use Redux logout action instead
+    console.warn('AuthContext.logout is deprecated. Use Redux logout action instead.');
   };
 
   const values = {

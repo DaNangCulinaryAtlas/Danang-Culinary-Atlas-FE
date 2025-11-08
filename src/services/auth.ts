@@ -3,7 +3,7 @@ import instanceAxios from '@/helpers/axios';
 import { API_ENDPOINTS } from '@/configs/api';
 import { 
   TLoginAuth, 
-  TRegisterAuth, 
+  TSignUpAuth, 
   TForgotPasswordAuth, 
   TResetPasswordAuth, 
   TChangePassword 
@@ -32,10 +32,10 @@ export const loginAuth = async (data: TLoginAuth): Promise<ApiResponse> => {
   }
 };
 
-export const registerAuth = async (data: TRegisterAuth): Promise<ApiResponse> => {
+export const registerAuth = async (data: TSignUpAuth): Promise<ApiResponse> => {
   try {
     const response: AxiosResponse = await instanceAxios.post(
-      API_ENDPOINTS.AUTH.REGISTER,
+      API_ENDPOINTS.AUTH.SIGNUP,
       data
     );
     return {
@@ -47,7 +47,7 @@ export const registerAuth = async (data: TRegisterAuth): Promise<ApiResponse> =>
     const axiosError = error as AxiosError<ApiResponse>;
     return {
       success: false,
-      message: axiosError.response?.data?.message || 'Registration failed',
+      message: axiosError.response?.data?.message || 'Sign up failed',
       error: axiosError.message
     };
   }
