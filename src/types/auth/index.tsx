@@ -11,6 +11,7 @@ export type TLoginAuth = {
   export type TChangePassword = {
     currentPassword: string
     newPassword: string
+    confirmPassword: string
   }
   export type TForgotPasswordAuth = {
     email: string

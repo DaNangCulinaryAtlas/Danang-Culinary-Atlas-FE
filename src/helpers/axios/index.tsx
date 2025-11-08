@@ -13,7 +13,7 @@ instanceAxios.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Get token from localStorage (client-side only)
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('accessToken');
+      const token = localStorage.getItem('token');
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -40,7 +40,7 @@ instanceAxios.interceptors.response.use(
         case 401:
           console.warn('⚠️ Unauthorized - clearing auth data');
           if (typeof window !== 'undefined') {
-            localStorage.removeItem('accessToken');
+            localStorage.removeItem('token');
             localStorage.removeItem('userData');
             // Redirect to login if not already there
             if (!window.location.pathname.includes('/login')) {
