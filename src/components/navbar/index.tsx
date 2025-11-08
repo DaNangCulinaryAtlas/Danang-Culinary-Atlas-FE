@@ -6,11 +6,11 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import MobileMenu from './components/Menu';
 import ProfileModal from './components/ProfileModal';
-import { useAuth } from '@/hooks/useAuth';
+import { useAppSelector } from '@/hooks/useRedux';
 import { CircleUser } from 'lucide-react';
 
 export default function Header() {
-  const { user } = useAuth();
+  const { user } = useAppSelector((state) => state.auth)
   const [modalProfileOpen, setModalProfileOpen] = useState(false);
 
   return (
@@ -63,8 +63,8 @@ export default function Header() {
               <span className="lg:hidden">Packages</span>
             </Link>
             {user ? (
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 onClick={() => setModalProfileOpen(true)}
                 className="p-0 h-auto hover:bg-transparent"
               >

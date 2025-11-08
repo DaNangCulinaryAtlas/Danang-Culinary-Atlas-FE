@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Mulish, Open_Sans, Volkhov, Poppins } from "next/font/google";
 import "./globals.css";
 import localFont from "next/font/local";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const mulish = Mulish({
   subsets: ["latin"],
   variable: "--font-mulish",
@@ -59,6 +61,17 @@ export default function RootLayout({
         className={`${mulish.variable} ${openSans.variable} ${volkhov.variable} ${poppins.variable} ${nicoMoji.variable} antialiased`}
       >
         {children}
+        <ToastContainer
+          position="top-center"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={true}
+          closeOnClick
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+        />
       </body>
     </html>
   );

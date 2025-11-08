@@ -86,14 +86,14 @@ const RestaurantMap: React.FC = () => {
   return (
     <div className="w-full h-full relative">
       {/* Loading indicator */}
-      {loading && (
+      {/* {loading && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 bg-white px-4 py-2 rounded-lg shadow-lg">
           <div className="flex items-center gap-2">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
             <span className="text-sm text-gray-700">Loading restaurants...</span>
           </div>
         </div>
-      )}
+      )} */}
 
       <Map
         ref={mapRef}

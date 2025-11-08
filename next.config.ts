@@ -19,6 +19,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "streetviewpixels-pa.googleapis.com", 
       },
+      {
+        protocol: "https",
+        hostname: "example.com",
+      }
     ],
   },};
 

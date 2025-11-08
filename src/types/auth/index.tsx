@@ -3,9 +3,10 @@ export type TLoginAuth = {
     password: string
   }
   
-  export type TRegisterAuth = {
+  export type TSignUpAuth = {
     email: string
     password: string
+    role: string
   }
   export type TChangePassword = {
     currentPassword: string

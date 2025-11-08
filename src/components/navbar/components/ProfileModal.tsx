@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { X, User, Lock, Settings, LogOut, Mail, Shield } from 'lucide-react';
 import { changePasswordAuth } from '@/services/auth';
 import Image from 'next/image';
+import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
+import { logout } from '@/stores/auth';
 
 interface ProfileModalProps {
     isOpen: boolean;
@@ -14,7 +16,9 @@ interface ProfileModalProps {
 }
 
 export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
-    const { user, logout } = useAuth();
+    const dispatch = useAppDispatch();
+    const router = useRouter();
+    const { user } = useAppSelector((state) => state.auth);
     const [activeTab, setActiveTab] = useState<'profile' | 'password' | 'settings'>('profile');
     const [isChangingPassword, setIsChangingPassword] = useState(false);
     const [passwordData, setPasswordData] = useState({
@@ -63,16 +67,17 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     };
 
     const handleLogout = () => {
-        logout();
+        dispatch(logout());
         onClose();
+        router.push('/login');
     };
 
     return (
-        <div 
+        <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
             onClick={onClose}
         >
-            <div 
+            <div
                 className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
