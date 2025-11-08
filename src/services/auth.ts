@@ -97,7 +97,7 @@ export const resetPasswordAuth = async (data: TResetPasswordAuth): Promise<ApiRe
 
 export const changePasswordAuth = async (data: TChangePassword): Promise<ApiResponse> => {
   try {
-    const response: AxiosResponse = await instanceAxios.post(
+    const response: AxiosResponse = await instanceAxios.put(
       API_ENDPOINTS.AUTH.CHANGE_PASSWORD,
       data
     );
