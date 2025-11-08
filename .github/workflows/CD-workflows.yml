@@ -5,7 +5,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, prod-fe-runner]
+    runs-on: [self-hosted, fe-runner]
     env:
       CONTAINER_NAME: danang-culinary-fe
       IMAGE_NAME: danang-culinary-atlas-fe
