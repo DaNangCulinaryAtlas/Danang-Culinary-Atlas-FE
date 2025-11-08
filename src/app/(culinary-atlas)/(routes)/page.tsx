@@ -75,7 +75,7 @@ export default function HomePage() {
     <div className="mt-auto">
       <div className="relative w-full h-auto mb-32">
         <Image
-          src="/images/HomePage.png"
+          src="/images/Homepage.png"
           className="w-full h-auto"
           alt="Danang Culinary Atlas"
           width={1720}
