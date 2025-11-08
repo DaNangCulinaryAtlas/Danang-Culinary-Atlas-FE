@@ -1,0 +1,15 @@
+services:
+  danang-culinary-fe:
+    image: danang-culinary-atlas-fe:latest
+    container_name: danang-culinary-fe
+    restart: unless-stopped
+    ports:
+      - "${CLIENT_PORT}:${CLIENT_PORT}"
+    env_file:
+      - .env
+    networks:
+      - culinary-network-fe
+
+networks:
+  culinary-network-fe:
+    driver: bridge
