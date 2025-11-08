@@ -1,0 +1,95 @@
+name: CD Phase
+
+on:
+  workflow_call:
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, prod-fe-runner]
+    env:
+      CONTAINER_NAME: danang-culinary-fe
+      IMAGE_NAME: danang-culinary-atlas-fe
+      IMAGE_TAG: ${{ github.sha }}
+      CLIENT_PORT: ${{ secrets.CLIENT_PORT }}
+      NEXT_PUBLIC_APP_API_URL: ${{ secrets.NEXT_PUBLIC_APP_API_URL }}
+      NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Docker Image Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          path: /tmp
+
+      - name: Load Docker Image
+        run: |
+          docker load -i /tmp/danang-culinary-atlas-fe.tar
+          docker images | grep ${{ env.IMAGE_NAME }}
+
+      - name: Tag Image for Deployment
+        run: |
+          docker tag ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} ${{ env.IMAGE_NAME }}:latest
+          echo "Tagged image as latest"
+
+      - name: Stop and Remove Old Container
+        run: |
+          if [ "$(docker ps -aq -f name=${{ env.CONTAINER_NAME }})" ]; then
+            echo "Stopping container ${{ env.CONTAINER_NAME }}..."
+            docker stop ${{ env.CONTAINER_NAME }} || true
+            echo "Removing container ${{ env.CONTAINER_NAME }}..."
+            docker rm ${{ env.CONTAINER_NAME }} || true
+          else
+            echo "No existing container found"
+          fi
+        continue-on-error: true
+
+      - name: Create .env file
+        run: |
+          cat > .env << EOF
+          CLIENT_PORT=${{ env.CLIENT_PORT }}
+          NEXT_PUBLIC_APP_API_URL=${{ env.NEXT_PUBLIC_APP_API_URL }}
+          NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=${{ env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN }}
+          EOF
+          echo ".env file created"
+
+      - name: Deploy with Docker Compose
+        run: |
+          docker-compose down || true
+          docker-compose up -d
+          echo "Container started successfully"
+
+      - name: Verify Deployment
+        run: |
+          echo "Waiting for container to be healthy..."
+          sleep 5
+          docker ps -f name=${{ env.CONTAINER_NAME }}
+          
+          if [ "$(docker ps -q -f name=${{ env.CONTAINER_NAME }})" ]; then
+            echo "✅ Deployment successful!"
+            docker logs --tail 20 ${{ env.CONTAINER_NAME }}
+          else
+            echo "❌ Deployment failed!"
+            docker logs --tail 50 ${{ env.CONTAINER_NAME }}
+            exit 1
+          fi
+
+      - name: Cleanup Old Images
+        run: |
+          echo "Cleaning up dangling images..."
+          docker image prune -f
+          echo "Keeping only current version of ${{ env.IMAGE_NAME }}..."
+          docker images ${{ env.IMAGE_NAME }} --format "{{.ID}} {{.Tag}}" | \
+            grep -v latest | \
+            grep -v ${{ env.IMAGE_TAG }} | \
+            awk '{print $1}' | \
+            xargs -r docker rmi -f || true
+          echo "✅ Cleanup completed - only latest and current SHA version kept"
+        continue-on-error: true
+
+      - name: Show Running Containers
+        run: |
+          echo "All running containers on VPS:"
+          docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
