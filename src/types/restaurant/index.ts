@@ -59,6 +59,8 @@ export interface GetRestaurantsParams {
   sortDirection?: 'asc' | 'desc';
   search?: string;
   minRating?: number;
+  maxRating?: number;
+  cuisineTypes?: string[];
   priceRange?: [number, number];
   cuisine?: string[];
   location?: string;

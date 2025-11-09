@@ -2,6 +2,7 @@
 interface FilterState {
   cuisineTypes: string[];
   minRating: number | null;
+  maxRating: number | null;
 }
 
 interface FilterSideBarProps {
@@ -14,4 +15,5 @@ interface FilterOption {
   value: string;
   count: number;
 }
+
 export type { FilterState, FilterSideBarProps, FilterOption };
