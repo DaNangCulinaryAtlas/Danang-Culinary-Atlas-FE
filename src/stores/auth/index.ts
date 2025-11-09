@@ -4,13 +4,17 @@ import { AxiosResponse } from 'axios'
 import { loginAuth } from '@/services/auth'
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { loginUser, registerUser } from './action';
+import { loginUser, registerUser, fetchUserProfile, updateUserProfile, uploadAvatar } from './action';
 
 interface UserDataType {
+    accountId?: string;
     email: string;
-    fullName: string;
+    fullName: string | null;
     avatarUrl?: string;
     roles: string[];
+    status?: string;
+    dob?: string | null;
+    gender?: string | null;
 }
 
 interface AuthState {
@@ -75,7 +79,6 @@ const authSlice = createSlice({
 
         // Register
         builder.addCase(registerUser.pending, (state) => {
-            // Where is state management for registration? 
             state.loading = true;
             state.error = null;
         });
@@ -95,6 +98,85 @@ const authSlice = createSlice({
             }
         });
         builder.addCase(registerUser.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload as string;
+        });
+
+        // Fetch Profile
+        builder.addCase(fetchUserProfile.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        });
+        builder.addCase(fetchUserProfile.fulfilled, (state, action) => {
+            state.loading = false;
+            const { accountId, email, fullName, avatarUrl, status, dob, gender } = action.payload;
+
+            // Merge the profile data with existing user data (keep roles from login)
+            state.user = {
+                ...state.user,
+                accountId,
+                email,
+                fullName,
+                avatarUrl: avatarUrl ?? undefined,
+                status,
+                dob,
+                gender,
+                roles: state.user?.roles || []
+            };
+
+            // Update localStorage
+            if (typeof window !== 'undefined') {
+                window.localStorage.setItem('userData', JSON.stringify(state.user));
+            }
+        });
+        builder.addCase(fetchUserProfile.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload as string;
+        });
+
+        // Update Profile
+        builder.addCase(updateUserProfile.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        });
+        builder.addCase(updateUserProfile.fulfilled, (state, action) => {
+            state.loading = false;
+            const { accountId, email, fullName, avatarUrl, status, dob, gender } = action.payload;
+
+            // Update user data with new profile information
+            state.user = {
+                ...state.user,
+                accountId,
+                email,
+                fullName,
+                avatarUrl: avatarUrl ?? undefined,
+                status,
+                dob,
+                gender,
+                roles: state.user?.roles || []
+            };
+
+            // Update localStorage
+            if (typeof window !== 'undefined') {
+                window.localStorage.setItem('userData', JSON.stringify(state.user));
+            }
+        });
+        builder.addCase(updateUserProfile.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload as string;
+        });
+
+        // Upload Avatar
+        builder.addCase(uploadAvatar.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        });
+        builder.addCase(uploadAvatar.fulfilled, (state, action) => {
+            state.loading = false;
+            // Don't update user state here, just return the URL
+            // The component will handle updating the form data
+        });
+        builder.addCase(uploadAvatar.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload as string;
         });

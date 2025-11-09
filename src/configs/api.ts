@@ -9,6 +9,14 @@ export const API_ENDPOINTS = {
     RESET_PASSWORD: '/auth/reset-password',
     CHANGE_PASSWORD: '/auth/change-password',
   },
+  PROFILE: {
+    USER: '/profile/user',
+    VENDOR: '/profile/vendor',
+    ADMIN: '/profile/admin',
+    UPDATE_USER: '/profile/user',
+    UPDATE_VENDOR: '/profile/vendor',
+    UPDATE_ADMIN: '/profile/admin',
+  },
   USER: {
     PROFILE: '/user/profile',
     UPDATE: '/user/update',
