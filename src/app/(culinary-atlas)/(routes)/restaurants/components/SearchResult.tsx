@@ -8,11 +8,11 @@ interface SearchResultProps {
 const SearchResult = memo(function SearchResult({ totalResults, searchTime }: SearchResultProps) {
   return (
     <p className="text-gray-600">
-      Found{" "}
+      Tìm thấy{" "}
       <span className="font-semibold text-[#44BACA]">
-        {totalResults} result{totalResults !== 1 ? "s" : ""}
+        {totalResults} kết quả
       </span>{" "}
-      in <span className="font-semibold">{searchTime} seconds</span>
+      trong <span className="font-semibold">{searchTime} giây </span>
     </p>
   );
 });

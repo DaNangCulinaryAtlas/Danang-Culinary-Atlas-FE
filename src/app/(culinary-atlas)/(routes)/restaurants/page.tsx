@@ -12,11 +12,12 @@ import SearchResult from "./components/SearchResult";
 import ViewMode from "@/types/view-mode";
 import { FilterState } from "@/types/filter";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
-import { getRestaurantsAsync } from "@/stores/restaurant/action";
+import { getRestaurantsAsync, searchRestaurantsAsync } from "@/stores/restaurant/action";
 
 function RestaurantSearchContent() {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [resultsPerPage, setResultsPerPage] = useState(9);
+  const [searchTime, setSearchTime] = useState<number>(0);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -38,23 +39,64 @@ function RestaurantSearchContent() {
   const [filters, setFilters] = useState<FilterState>(() => ({
     cuisineTypes: [],
     minRating: null,
+    maxRating: null,
   }));
 
-  // Main fetch effect - simple fetch without filters
+  // Main fetch effect - fetch with filters
   useEffect(() => {
-    dispatch(getRestaurantsAsync({
-      page: currentPage - 1,
-      size: resultsPerPage
-    }));
-  }, [dispatch, currentPage, resultsPerPage]);
+    const startTime = performance.now();
+    const hasFilters = filters.cuisineTypes.length > 0 || filters.minRating !== null || filters.maxRating !== null;
 
-  // Update URL when page changes
+    const params = {
+      page: currentPage - 1,
+      size: resultsPerPage,
+      sortBy: 'average_rating',
+      sortDirection: 'desc' as const,
+      ...(filters.cuisineTypes.length > 0 && { cuisineTypes: filters.cuisineTypes }),
+      ...(filters.minRating !== null && { minRating: filters.minRating }),
+      ...(filters.maxRating !== null && { maxRating: filters.maxRating })
+    };
+
+    const fetchData = async () => {
+      if (hasFilters) {
+        await dispatch(searchRestaurantsAsync(params));
+      } else {
+        await dispatch(getRestaurantsAsync({
+          page: currentPage - 1,
+          size: resultsPerPage
+        }));
+      }
+
+      const endTime = performance.now();
+      const timeInSeconds = ((endTime - startTime) / 1000).toFixed(2);
+      setSearchTime(parseFloat(timeInSeconds));
+    };
+
+    fetchData();
+  }, [dispatch, currentPage, resultsPerPage, filters]);
+
+  // Update URL when page or filters change
   useEffect(() => {
     const params = new URLSearchParams();
     params.set("page", currentPage.toString());
     params.set("size", resultsPerPage.toString());
+
+    if (filters.cuisineTypes.length > 0) {
+      filters.cuisineTypes.forEach(cuisine => {
+        params.append("cuisineTypes", cuisine);
+      });
+    }
+
+    if (filters.minRating !== null) {
+      params.set("minRating", filters.minRating.toString());
+    }
+
+    if (filters.maxRating !== null) {
+      params.set("maxRating", filters.maxRating.toString());
+    }
+
     router.push(`?${params.toString()}`, { scroll: false });
-  }, [currentPage, resultsPerPage, router]);
+  }, [currentPage, resultsPerPage, filters, router]);
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
@@ -63,6 +105,8 @@ function RestaurantSearchContent() {
 
   const handleFilterChange = useCallback((newFilters: Partial<FilterState>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
+    // Reset to page 1 when filters change
+    setCurrentPage(1);
   }, []);
 
   const handleRestaurantClick = useCallback((restaurantId: string) => {
@@ -98,18 +142,20 @@ function RestaurantSearchContent() {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <FindRestaurants />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
-          <aside className="lg:w-64 flex-shrink-0">
-            <FilterSideBar
-              filters={filters}
-              onFilterChange={handleFilterChange}
-            />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+          {/* Sidebar - Fixed positioning */}
+          <aside className="lg:w-64 w-full shrink-0">
+            <div className="lg:sticky lg:top-4">
+              <FilterSideBar
+                filters={filters}
+                onFilterChange={handleFilterChange}
+              />
+            </div>
           </aside>
 
           {/* Main Content */}
-          <main className="flex-1 min-w-0 relative">
+          <main className="flex-1 min-w-0 w-full">
             {/* Loading overlay for subsequent requests */}
             {loading && restaurants.length > 0 && (
               <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 rounded-lg">
@@ -121,7 +167,7 @@ function RestaurantSearchContent() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
               <SearchResult
                 totalResults={totalElements}
-                searchTime={54}
+                searchTime={searchTime}
               />
 
               <div className="flex flex-wrap items-center gap-3">
@@ -139,8 +185,34 @@ function RestaurantSearchContent() {
 
             {/* Restaurant Grid/List */}
             {restaurants.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">No restaurants found.</p>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-12 min-h-[500px] flex items-center justify-center">
+                <div className="text-center max-w-md mx-auto">
+                  <svg
+                    className="w-24 h-24 mx-auto text-gray-300 mb-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                    />
+                  </svg>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                    Không tìm thấy nhà hàng nào,
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                   Chúng tôi không tìm thấy nhà hàng nào phù hợp với bộ lọc hiện tại của bạn.
+                  </p>
+                  <button
+                    onClick={() => setFilters({ cuisineTypes: [], minRating: null, maxRating: null })}
+                    className="px-6 py-3 bg-[#44BACA] text-white rounded-lg hover:bg-[#3aa3b3] transition-colors font-medium shadow-sm hover:shadow-md"
+                  >
+                    Xóa tất cả bộ lọc
+                  </button>
+                </div>
               </div>
             ) : (
               <>

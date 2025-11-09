@@ -1,5 +1,5 @@
 import { Restaurant, RestaurantResponse } from '@/types/restaurant/index';
-import { getRestaurantsAsync } from './action';
+import { getRestaurantsAsync, searchRestaurantsAsync } from './action';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface RestaurantState {
@@ -67,6 +67,23 @@ const restaurantSlice = createSlice({
             .addCase(getRestaurantsAsync.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message || 'Failed to fetch restaurants';
+            })
+            // Add search restaurant cases
+            .addCase(searchRestaurantsAsync.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(searchRestaurantsAsync.fulfilled, (state, action) => {
+                state.loading = false;
+                state.restaurants = action.payload?.data?.content || [];
+                state.totalPages = action.payload?.data?.totalPages;
+                state.totalElements = action.payload.data?.totalElements;
+                state.currentPage = action.payload.data?.number;
+                state.pageSize = action.payload.data?.size;
+            })
+            .addCase(searchRestaurantsAsync.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message || 'Failed to search restaurants';
             });
     }
 });

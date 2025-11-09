@@ -5,7 +5,7 @@ interface SearchResultPagesProps {
   setResultsPerPage: (count: number) => void;
 }
 
-const resultOptions = [6, 12, 24, 48];
+const resultOptions = [9, 12, 24, 48];
 
 const SearchResultPages = memo(function SearchResultPages({ 
   resultsPerPage, 
@@ -14,7 +14,7 @@ const SearchResultPages = memo(function SearchResultPages({
   return (
     <div className="flex items-center gap-2">
       <label htmlFor="results-select" className="text-sm text-gray-600 whitespace-nowrap">
-        Results
+        Kết quả
       </label>
       <select
         id="results-select"

@@ -1,32 +1,37 @@
-import { Search } from 'lucide-react';
 import Image from 'next/image';
 import SearchBox from './SearchBox';
-import PopularCuisines from './PopularCuisines';
-import TagLine from './TagLine';
 
 export default function FindRestaurants() {
     return (
-        <div className="relative w-full h-[400px]">
+        <div className="relative w-full h-[450px] overflow-hidden">
             {/* Background Image */}
             <div className="absolute inset-0 w-full h-full">
                 <Image
                     src="/images/danang-find-restaurant.jpg"
                     alt="Da Nang Background"
-                    width={1920}
-                    height={400}
-                    className="w-full h-full object-cover brightness-75"
+                    fill
+                    className="object-cover object-center"
                     priority
+                    quality={100}
                 />
+                {/* Overlay for better text readability */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50" />
             </div>
 
             {/* Content */}
-            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4">
+            <div className="relative z-10 flex flex-col items-center justify-center h-full px-4 space-y-6">
+                {/* Title */}
+                <div className="text-center space-y-2">
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg font-volkhov">
+                        Khám Phá Ẩm Thực Đà Nẵng
+                    </h1>
+                    <p className="text-lg md:text-xl text-white/90 drop-shadow-md font-mulish">
+                        Tìm kiếm nhà hàng yêu thích của bạn
+                    </p>
+                </div>
 
                 {/* Search Box */}
-                <SearchBox/>
-                
-                {/* Popular Cuisines */}
-                <PopularCuisines/>
+                <SearchBox />
             </div>
         </div>
     );
