@@ -46,6 +46,11 @@ jobs:
           file: ./Dockerfile
           push: false
           tags: danang-culinary-atlas-fe:${{ github.sha }}
+          build-args: |
+            NEXT_PUBLIC_APP_API_URL=${{ secrets.NEXT_PUBLIC_APP_API_URL }}
+            NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=${{ secrets.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN }}
+            NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }}
+            NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=${{ secrets.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           outputs: type=docker,dest=/tmp/danang-culinary-atlas-fe.tar
