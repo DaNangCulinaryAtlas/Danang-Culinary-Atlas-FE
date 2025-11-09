@@ -86,9 +86,13 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                     ...prev,
                     avatarUrl: resultAction.payload,
                 }));
+                toast.success('Avatar uploaded successfully!');
+            } else if (uploadAvatar.rejected.match(resultAction)) {
+                toast.error(resultAction.payload as string || 'Failed to upload avatar');
             }
         } catch (error) {
             console.error('Error uploading image:', error);
+            toast.error('An error occurred while uploading avatar');
         } finally {
             setIsUploading(false);
         }

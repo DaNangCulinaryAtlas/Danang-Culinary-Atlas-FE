@@ -6,7 +6,12 @@ export const uploadImageToCloudinary = async (file: File): Promise<ApiResponse<s
         const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
         if (!cloudName || !uploadPreset) {
-            throw new Error('Cloudinary configuration is missing');
+            console.error('Cloudinary Config Missing:', {
+                cloudName: cloudName ? 'SET' : 'MISSING',
+                uploadPreset: uploadPreset ? 'SET' : 'MISSING',
+                allEnvKeys: Object.keys(process.env).filter(k => k.includes('CLOUDINARY'))
+            });
+            throw new Error('Cloudinary configuration is missing. Please check environment variables.');
         }
 
         // Validate file type
@@ -33,7 +38,13 @@ export const uploadImageToCloudinary = async (file: File): Promise<ApiResponse<s
         );
 
         if (!response.ok) {
-            throw new Error('Failed to upload image');
+            const errorData = await response.json().catch(() => ({}));
+            console.error('Cloudinary Upload Failed:', {
+                status: response.status,
+                statusText: response.statusText,
+                error: errorData
+            });
+            throw new Error(`Failed to upload image: ${response.statusText}`);
         }
 
         const data = await response.json();
@@ -44,6 +55,7 @@ export const uploadImageToCloudinary = async (file: File): Promise<ApiResponse<s
             message: 'Image uploaded successfully'
         };
     } catch (error) {
+        console.error('Upload Image Error:', error);
         return {
             success: false,
             message: error instanceof Error ? error.message : 'Failed to upload image',
