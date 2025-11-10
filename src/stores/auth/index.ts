@@ -24,12 +24,36 @@ interface AuthState {
     error: string | null;
 }
 
-const initialState: AuthState = {
-    user: null,
-    token: null,
-    loading: false,
-    error: null,
+// Initialize state from localStorage if available
+const getInitialState = (): AuthState => {
+    if (typeof window !== 'undefined') {
+        const token = window.localStorage.getItem('token');
+        const userData = window.localStorage.getItem('userData');
+
+        if (token && userData) {
+            try {
+                const parsedUser = JSON.parse(userData);
+                return {
+                    user: parsedUser,
+                    token: token,
+                    loading: false,
+                    error: null,
+                };
+            } catch (error) {
+                console.error('Failed to parse stored user data:', error);
+            }
+        }
+    }
+
+    return {
+        user: null,
+        token: null,
+        loading: false,
+        error: null,
+    };
 };
+
+const initialState: AuthState = getInitialState();
 
 const authSlice = createSlice({
     name: 'auth',
@@ -52,6 +76,22 @@ const authSlice = createSlice({
         },
         clearError: (state) => {
             state.error = null;
+        },
+        hydrateAuth: (state) => {
+            // Manual hydration action if needed
+            if (typeof window !== 'undefined') {
+                const token = window.localStorage.getItem('token');
+                const userData = window.localStorage.getItem('userData');
+
+                if (token && userData) {
+                    try {
+                        state.user = JSON.parse(userData);
+                        state.token = token;
+                    } catch (error) {
+                        console.error('Failed to hydrate auth state:', error);
+                    }
+                }
+            }
         },
     },
     extraReducers: (builder) => {
@@ -183,5 +223,5 @@ const authSlice = createSlice({
     },
 });
 
-export const { setUser, setToken, logout, clearError } = authSlice.actions;
+export const { setUser, setToken, logout, clearError, hydrateAuth } = authSlice.actions;
 export default authSlice.reducer;
