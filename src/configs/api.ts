@@ -25,6 +25,7 @@ export const API_ENDPOINTS = {
     LIST: '/restaurants',
     DETAIL: (id: string) => `/restaurants/${id}`,
     SEARCH: '/restaurants/search',
+    SEARCH_BY_NAME: '/restaurants/name',
     MAP_VIEW: '/restaurants/map-view',
   },
 } as const;

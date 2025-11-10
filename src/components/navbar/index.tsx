@@ -8,9 +8,11 @@ import MobileMenu from './components/Menu';
 import ProfileModal from './components/ProfileModal';
 import { useAppSelector } from '@/hooks/useRedux';
 import { CircleUser } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Header() {
   const { user } = useAppSelector((state) => state.auth)
+  //const { user } = useAuth();
   const [modalProfileOpen, setModalProfileOpen] = useState(false);
 
   return (

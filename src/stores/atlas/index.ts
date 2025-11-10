@@ -55,6 +55,9 @@ const atlasSlice = createSlice({
             state.restaurants = [];
             state.mapBounds = null;
             state.error = null;
+        },
+        syncSearchResultsToMap: (state, action: PayloadAction<Restaurant[]>) => {
+            state.restaurants = action.payload;
         }
     },
     extraReducers: (builder) => {
@@ -75,5 +78,5 @@ const atlasSlice = createSlice({
     }
 });
 
-export const { setMapBounds, setViewState, clearError, resetAtlas } = atlasSlice.actions;
+export const { setMapBounds, setViewState, clearError, resetAtlas, syncSearchResultsToMap } = atlasSlice.actions;
 export default atlasSlice.reducer;
