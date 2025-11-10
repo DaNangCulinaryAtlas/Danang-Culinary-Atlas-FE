@@ -1,14 +1,12 @@
 "use client";
 
-import { useState, useCallback, Suspense, useEffect } from "react";
+import { useState, useCallback, Suspense, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import RestaurantCard from "@/components/restaurants/RestaurantCard";
 import Pagination from "./components/Pagination";
 import FilterSideBar from "./components/FilterSideBar";
 import FindRestaurants from "./components/FindRestaurants";
-import SearchResultPages from "./components/SearchResultPages";
-import ViewToggle from "./components/ViewToggle";
-import SearchResult from "./components/SearchResult";
+import RestaurantHeader from "./components/RestaurantHeader";
+import RestaurantGrid from "./components/RestaurantGrid";
 import ViewMode from "@/types/view-mode";
 import { FilterState } from "@/types/filter";
 import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
@@ -109,30 +107,32 @@ function RestaurantSearchContent() {
     setCurrentPage(1);
   }, []);
 
-  const handleRestaurantClick = useCallback((restaurantId: string) => {
-    router.push(`/restaurants/${restaurantId}`);
-  }, [router]);
-
-  // Show loading state on initial load
-  if (loading && restaurants.length === 0) {
-    return <LoadingState />;
-  }
+  // Memoize the filter sidebar to prevent re-renders
+  const filterSidebar = useMemo(() => (
+    <FilterSideBar
+      filters={filters}
+      onFilterChange={handleFilterChange}
+    />
+  ), [filters, handleFilterChange]);
 
   // Show error state
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 text-lg">{error}</p>
-          <button
-            onClick={() => dispatch(getRestaurantsAsync({
-              page: 0,
-              size: resultsPerPage
-            }))}
-            className="mt-4 px-4 py-2 bg-[#44BACA] text-white rounded hover:bg-[#3aa3b3]"
-          >
-            Try Again
-          </button>
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <FindRestaurants />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-600 text-lg">{error}</p>
+            <button
+              onClick={() => dispatch(getRestaurantsAsync({
+                page: 0,
+                size: resultsPerPage
+              }))}
+              className="mt-4 px-4 py-2 bg-[#44BACA] text-white rounded hover:bg-[#3aa3b3]"
+            >
+              Try Again
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -147,44 +147,24 @@ function RestaurantSearchContent() {
           {/* Sidebar - Fixed positioning */}
           <aside className="lg:w-64 w-full shrink-0">
             <div className="lg:sticky lg:top-4">
-              <FilterSideBar
-                filters={filters}
-                onFilterChange={handleFilterChange}
-              />
+              {filterSidebar}
             </div>
           </aside>
 
           {/* Main Content */}
           <main className="flex-1 min-w-0 w-full">
-            {/* Loading overlay for subsequent requests */}
-            {loading && restaurants.length > 0 && (
-              <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 rounded-lg">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#44BACA]"></div>
-              </div>
-            )}
-
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <SearchResult
-                totalResults={totalElements}
-                searchTime={searchTime}
-              />
+            <RestaurantHeader
+              totalResults={totalElements}
+              searchTime={searchTime}
+              resultsPerPage={resultsPerPage}
+              setResultsPerPage={setResultsPerPage}
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+            />
 
-              <div className="flex flex-wrap items-center gap-3">
-                <SearchResultPages
-                  resultsPerPage={resultsPerPage}
-                  setResultsPerPage={setResultsPerPage}
-                />
-
-                <ViewToggle
-                  viewMode={viewMode}
-                  setViewMode={setViewMode}
-                />
-              </div>
-            </div>
-
-            {/* Restaurant Grid/List */}
-            {restaurants.length === 0 ? (
+            {/* Restaurant Grid with Empty State */}
+            {restaurants.length === 0 && !loading ? (
               <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-12 min-h-[500px] flex items-center justify-center">
                 <div className="text-center max-w-md mx-auto">
                   <svg
@@ -201,10 +181,10 @@ function RestaurantSearchContent() {
                     />
                   </svg>
                   <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                    Không tìm thấy nhà hàng nào,
+                    Không tìm thấy nhà hàng nào
                   </h3>
                   <p className="text-gray-600 mb-6">
-                   Chúng tôi không tìm thấy nhà hàng nào phù hợp với bộ lọc hiện tại của bạn.
+                    Chúng tôi không tìm thấy nhà hàng nào phù hợp với bộ lọc hiện tại của bạn.
                   </p>
                   <button
                     onClick={() => setFilters({ cuisineTypes: [], minRating: null, maxRating: null })}
@@ -216,20 +196,12 @@ function RestaurantSearchContent() {
               </div>
             ) : (
               <>
-                <div className={`
-                  ${viewMode === "grid"
-                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-                    : "flex flex-col gap-4"
-                  }
-                `}>
-                  {restaurants.map((restaurant) => (
-                    <RestaurantCard
-                      key={restaurant.restaurantId}
-                      restaurant={restaurant}
-                      onClick={() => handleRestaurantClick(restaurant.restaurantId)}
-                    />
-                  ))}
-                </div>
+                <RestaurantGrid
+                  restaurants={restaurants}
+                  viewMode={viewMode}
+                  loading={loading}
+                  resultsPerPage={resultsPerPage}
+                />
 
                 {/* Pagination */}
                 {totalPages > 1 && (
