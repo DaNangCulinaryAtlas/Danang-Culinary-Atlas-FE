@@ -10,8 +10,7 @@ import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import GoogleIcon from '@/../public/icons/GoogleIcon';
 import FacebookIcon from '@/../public/icons/Facebook';
 import AppleIcon from '@/../public/icons/Apple';
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
-import { loginUser } from '@/stores/auth/action';
+import { useLoginMutation } from '@/hooks/mutations/useAuthMutations';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -20,9 +19,8 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
 
-  const dispatch = useAppDispatch();
   const router = useRouter();
-  const { loading, error: reduxError } = useAppSelector((state) => state.auth);
+  const loginMutation = useLoginMutation();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,13 +36,18 @@ export default function Login() {
       return;
     }
 
-    try {
-      await dispatch(loginUser({ email, password })).unwrap();
-      // Login successful, redirect to home
-      router.push('/');
-    } catch (err: any) {
-      setError(err || 'Đăng nhập thất bại. Vui lòng thử lại.');
-    }
+    loginMutation.mutate(
+      { email, password },
+      {
+        onSuccess: () => {
+          // Login successful, redirect to home
+          router.push('/');
+        },
+        onError: (err: Error) => {
+          setError(err.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
+        },
+      }
+    );
   };
 
   const handleSocialLogin = (provider: string) => {
@@ -73,7 +76,7 @@ export default function Login() {
               Danang Culinary Atlas
             </h1>
             <p className="text-sm md:text-base font-mulish leading-relaxed max-w-xs text-center">
-            Hãy để hành trình của bạn không chỉ là ngắm cảnh — mà còn là một chuyến phiêu lưu ẩm thực rực rỡ và đậm đà hương vị.            </p>
+              Hãy để hành trình của bạn không chỉ là ngắm cảnh — mà còn là một chuyến phiêu lưu ẩm thực rực rỡ và đậm đà hương vị.            </p>
           </div>
         </div>
 
@@ -95,9 +98,9 @@ export default function Login() {
 
               {/* Error Area - Fixed Height */}
               <div className="h-[3.25rem] flex items-start">
-                {(error || reduxError) ? (
+                {(error || loginMutation.error) ? (
                   <div className="w-full bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm animate-fadeIn">
-                    {error || reduxError}
+                    {error || loginMutation.error?.message}
                   </div>
                 ) : (
                   <div className="w-full opacity-0 pointer-events-none">
@@ -119,7 +122,7 @@ export default function Login() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
                     className="pl-10 h-12 border-[#69C3CF] font-poppins text-sm"
-                    disabled={loading}
+                    disabled={loginMutation.isPending}
                   />
                 </div>
               </div>
@@ -137,7 +140,7 @@ export default function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="******"
                     className="pl-10 pr-10 h-12 border-[#69C3CF] font-poppins text-sm"
-                    disabled={loading}
+                    disabled={loginMutation.isPending}
                   />
                   <button
                     type="button"
@@ -168,10 +171,10 @@ export default function Login() {
               {/* Login Button */}
               <Button
                 type="submit"
-                disabled={loading}
+                disabled={loginMutation.isPending}
                 className="w-full h-11 bg-[#69C3CF] hover:bg-[#5AB3BF] text-white font-poppins text-sm font-medium rounded-md disabled:opacity-50"
               >
-                {loading ? 'ĐANG ĐĂNG NHẬP' : 'ĐĂNG NHẬP'}
+                {loginMutation.isPending ? 'ĐANG ĐĂNG NHẬP' : 'ĐĂNG NHẬP'}
               </Button>
             </form>
 
