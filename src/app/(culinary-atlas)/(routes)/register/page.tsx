@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -10,71 +11,58 @@ import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import GoogleIcon from '@/../public/icons/GoogleIcon';
 import FacebookIcon from '@/../public/icons/Facebook';
 import AppleIcon from '@/../public/icons/Apple';
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
-import { registerUser } from '@/stores/auth/action';
+import { useRegisterMutation } from '@/hooks/mutations/useAuthMutations';
+import { registerSchema, RegisterFormData } from '@/lib/validations/auth';
 import { toast } from 'react-toastify';
+import { useState } from 'react';
 
 export default function Register() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [role, setRole] = useState<'USER' | 'VENDOR'>('USER');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [agreeTerms, setAgreeTerms] = useState(false);
-    const [error, setError] = useState('');
-
-    const dispatch = useAppDispatch();
     const router = useRouter();
-    const { loading, error: reduxError } = useAppSelector((state) => state.auth);
+    const registerMutation = useRegisterMutation();
 
-    const handleRegister = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
+    const {
+        register,
+        handleSubmit,
+        watch,
+        formState: { errors },
+    } = useForm<RegisterFormData>({
+        resolver: zodResolver(registerSchema),
+        defaultValues: {
+            email: '',
+            password: '',
+            confirmPassword: '',
+            role: 'USER',
+            agreeTerms: false,
+        },
+    });
 
-        // Validation
-        if (!email || !password || !confirmPassword) {
-            setError('Vui lòng nhập tất cả các thông tin');
-            return;
-        }
+    const selectedRole = watch('role');
 
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            setError('Vui lòng nhập địa chỉ email hợp lệ');
-            return;
-        }
+    const onSubmit = (data: RegisterFormData) => {
+        registerMutation.mutate(
+            {
+                email: data.email,
+                password: data.password,
+                role: data.role,
+            },
+            {
+                onSuccess: () => {
+                    toast.success('Đăng ký tài khoản thành công! Đang chuyển hướng...', {
+                        position: 'top-right',
+                        autoClose: 2500,
+                    });
 
-        if (password.length < 6) {
-            setError('Mặt khẩu phải có ít nhất 6 ký tự');
-            return;
-        }
-
-        if (password !== confirmPassword) {
-            setError('Mặt khẩu xác nhận không khớp');
-            return;
-        }
-
-        if (!agreeTerms) {
-            setError('Vui lòng đồng ý với Điều khoản và Điều kiện');
-            return;
-        }
-
-        try {
-            const result = await dispatch(registerUser({
-                email,
-                password,
-                role
-            })).unwrap();
-            
-            toast.success('Đăng ký tài khoản thành công', {
-                position: 'top-right',
-                autoClose: 2500,
-            });
-          
-            // Redirect after a short delay
-            setTimeout(() => router.push('/login'), 2500);
-        } catch (err: any) {
-            setError(err || 'Đăng ký thất bại. Vui lòng thử lại.');
-        }
+                    setTimeout(() => router.push('/login'), 2500);
+                },
+                onError: (error) => {
+                    toast.error(error.message || 'Đăng ký thất bại. Vui lòng thử lại.', {
+                        position: 'top-right',
+                    });
+                },
+            }
+        );
     };
 
     const handleSocialRegister = (provider: string) => {
@@ -122,13 +110,13 @@ export default function Register() {
                             </p>
                         </div>
 
-                        <form onSubmit={handleRegister} className="space-y-5">
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
                             {/* Error Area - Fixed Height */}
                             <div className="h-[3.25rem] flex items-start">
-                                {(error || reduxError) ? (
+                                {registerMutation.error ? (
                                     <div className="w-full bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm animate-fadeIn">
-                                        {error || reduxError}
+                                        {registerMutation.error.message}
                                     </div>
                                 ) : (
                                     <div className="w-full opacity-0 pointer-events-none">
@@ -146,13 +134,15 @@ export default function Register() {
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                     <Input
                                         type="email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        {...register('email')}
                                         placeholder="Enter your email"
                                         className="pl-10 h-12 border-[#69C3CF] font-poppins text-sm"
-                                        disabled={loading}
+                                        disabled={registerMutation.isPending}
                                     />
                                 </div>
+                                {errors.email && (
+                                    <p className="text-red-500 text-xs mt-1 font-poppins">{errors.email.message}</p>
+                                )}
                             </div>
 
                             {/* Password */}
@@ -164,11 +154,10 @@ export default function Register() {
                                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                     <Input
                                         type={showPassword ? 'text' : 'password'}
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
+                                        {...register('password')}
                                         placeholder="******"
                                         className="pl-10 pr-10 h-12 border-[#69C3CF] font-poppins text-sm"
-                                        disabled={loading}
+                                        disabled={registerMutation.isPending}
                                     />
                                     <button
                                         type="button"
@@ -178,6 +167,9 @@ export default function Register() {
                                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                     </button>
                                 </div>
+                                {errors.password && (
+                                    <p className="text-red-500 text-xs mt-1 font-poppins">{errors.password.message}</p>
+                                )}
                             </div>
 
                             {/* Confirm Password */}
@@ -189,11 +181,10 @@ export default function Register() {
                                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                     <Input
                                         type={showConfirmPassword ? 'text' : 'password'}
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        {...register('confirmPassword')}
                                         placeholder="******"
                                         className="pl-10 pr-10 h-12 border-[#69C3CF] font-poppins text-sm"
-                                        disabled={loading}
+                                        disabled={registerMutation.isPending}
                                     />
                                     <button
                                         type="button"
@@ -203,8 +194,12 @@ export default function Register() {
                                         {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                     </button>
                                 </div>
+                                {errors.confirmPassword && (
+                                    <p className="text-red-500 text-xs mt-1 font-poppins">{errors.confirmPassword.message}</p>
+                                )}
                             </div>
-                             {/* Role Selection */}
+
+                            {/* Role Selection */}
                             <div>
                                 <label className="block text-sm font-bold text-[#69C3CF] mb-2 font-poppins">
                                     Register as
@@ -213,39 +208,40 @@ export default function Register() {
                                     <label className="flex items-center space-x-2 cursor-pointer flex-1">
                                         <input
                                             type="radio"
-                                            name="role"
                                             value="USER"
-                                            checked={role === 'USER'}
-                                            onChange={(e) => setRole(e.target.value as 'USER')}
+                                            {...register('role')}
                                             className="w-4 h-4 text-[#69C3CF] focus:ring-[#69C3CF]"
-                                            disabled={loading}
+                                            disabled={registerMutation.isPending}
                                         />
                                         <span className="text-sm text-gray-700 font-poppins">Người dùng</span>
                                     </label>
                                     <label className="flex items-center space-x-2 cursor-pointer flex-1">
                                         <input
                                             type="radio"
-                                            name="role"
                                             value="VENDOR"
-                                            checked={role === 'VENDOR'}
-                                            onChange={(e) => setRole(e.target.value as 'VENDOR')}
+                                            {...register('role')}
                                             className="w-4 h-4 text-[#69C3CF] focus:ring-[#69C3CF]"
-                                            disabled={loading}
+                                            disabled={registerMutation.isPending}
                                         />
                                         <span className="text-sm text-gray-700 font-poppins">Chủ nhà hàng</span>
                                     </label>
                                 </div>
                                 <p className="text-xs text-gray-500 mt-1 font-poppins">
-                                    {role === 'USER' ? 'Đăng ký tài khoản người dùng để khám phá ngày nào.' : 'Đăng ký tài khoản chủ nhà hàng để quản lý nhà hàng của bạn.'}
+                                    {selectedRole === 'USER'
+                                        ? 'Đăng ký tài khoản người dùng để khám phá ẩm thực Đà Nẵng.'
+                                        : 'Đăng ký tài khoản chủ nhà hàng để quản lý nhà hàng của bạn.'}
                                 </p>
+                                {errors.role && (
+                                    <p className="text-red-500 text-xs mt-1 font-poppins">{errors.role.message}</p>
+                                )}
                             </div>
+
                             {/* Terms and Conditions */}
                             <div className="flex items-center text-xs">
                                 <label className="flex items-start space-x-2 cursor-pointer">
                                     <input
                                         type="checkbox"
-                                        checked={agreeTerms}
-                                        onChange={(e) => setAgreeTerms(e.target.checked)}
+                                        {...register('agreeTerms')}
                                         className="w-4 h-4 mt-0.5 text-[#69C3CF] rounded focus:ring-[#69C3CF]"
                                     />
                                     <span className="text-gray-600 font-poppins">
@@ -256,14 +252,17 @@ export default function Register() {
                                     </span>
                                 </label>
                             </div>
+                            {errors.agreeTerms && (
+                                <p className="text-red-500 text-xs font-poppins">{errors.agreeTerms.message}</p>
+                            )}
 
                             {/* Register Button */}
                             <Button
                                 type="submit"
-                                disabled={loading}
+                                disabled={registerMutation.isPending}
                                 className="w-full h-11 bg-[#69C3CF] hover:bg-[#5AB3BF] text-white font-poppins text-sm font-medium rounded-md disabled:opacity-50"
                             >
-                                {loading ? 'Đăng ký...' : 'Đăng ký'}
+                                {registerMutation.isPending ? 'ĐANG ĐĂNG KÝ...' : 'ĐĂNG KÝ'}
                             </Button>
                         </form>
 
@@ -307,7 +306,7 @@ export default function Register() {
 
                         {/* Login Link */}
                         <p className="text-center text-xs font-mulish text-gray-600">
-                            Bạn đã đăng ký tài khoản?{' '}
+                            Bạn đã có tài khoản?{' '}
                             <Link href="/login" className="text-[#69C3CF] hover:text-[#5AB3BF] font-semibold">
                                 Đăng nhập
                             </Link>

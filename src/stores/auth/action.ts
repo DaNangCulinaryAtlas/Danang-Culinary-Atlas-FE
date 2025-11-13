@@ -3,7 +3,6 @@ import { loginAuth, registerAuth } from '@/services/auth';
 import { getProfile, updateProfile } from '@/services/profile';
 import { uploadImageToCloudinary } from '@/services/upload-image';
 import { TLoginAuth, TSignUpAuth, TUpdateProfile } from '@/types/auth';
-import { ApiResponse } from '@/types/response';
 
 export const loginUser = createAsyncThunk(
     'auth/login',
