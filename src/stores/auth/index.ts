@@ -24,31 +24,8 @@ interface AuthState {
     ui: UIState;
 }
 
-// Initialize state from localStorage if available
+// Initialize with a consistent state for both server and client
 const getInitialState = (): AuthState => {
-    if (typeof window !== 'undefined') {
-        const token = window.localStorage.getItem('token');
-        const userData = window.localStorage.getItem('userData');
-
-        if (token && userData) {
-            try {
-                const parsedUser = JSON.parse(userData);
-                return {
-                    user: parsedUser,
-                    token: token,
-                    isAuthenticated: true,
-                    ui: {
-                        sidebarOpen: false,
-                        theme: 'light',
-                        language: 'vi',
-                    },
-                };
-            } catch (error) {
-                console.error('Failed to parse stored user data:', error);
-            }
-        }
-    }
-
     return {
         user: null,
         token: null,

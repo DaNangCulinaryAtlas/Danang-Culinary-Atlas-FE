@@ -46,7 +46,6 @@ export function useLoginMutation() {
         onSuccess: (data) => {
             if (data.data.data) {
                 const { token, email, fullName, avatarUrl, roles } = data.data.data;
-                console.log(token, email, fullName, avatarUrl, roles);
                 // Update Redux with user data
                 dispatch(setAuthData({
                     user: { email, fullName, avatarUrl, roles },

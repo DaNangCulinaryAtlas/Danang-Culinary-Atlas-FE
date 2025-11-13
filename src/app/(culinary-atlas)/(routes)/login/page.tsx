@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -11,43 +12,32 @@ import GoogleIcon from '@/../public/icons/GoogleIcon';
 import FacebookIcon from '@/../public/icons/Facebook';
 import AppleIcon from '@/../public/icons/Apple';
 import { useLoginMutation } from '@/hooks/mutations/useAuthMutations';
+import { loginSchema, LoginFormData } from '@/lib/validations/auth';
+import { useState } from 'react';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState('');
-
   const router = useRouter();
   const loginMutation = useLoginMutation();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
-    if (!email || !password) {
-      setError('Vui lòng nhập cả email và mật khẩu');
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Vui lòng nhập địa chỉ email hợp lệ');
-      return;
-    }
-
-    loginMutation.mutate(
-      { email, password },
-      {
-        onSuccess: () => {
-          // Login successful, redirect to home
-          router.push('/');
-        },
-        onError: (err: Error) => {
-          setError(err.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
-        },
-      }
-    );
+  const onSubmit = (data: LoginFormData) => {
+    loginMutation.mutate(data, {
+      onSuccess: () => {
+        router.push('/');
+      },
+    });
   };
 
   const handleSocialLogin = (provider: string) => {
@@ -76,7 +66,8 @@ export default function Login() {
               Danang Culinary Atlas
             </h1>
             <p className="text-sm md:text-base font-mulish leading-relaxed max-w-xs text-center">
-              Hãy để hành trình của bạn không chỉ là ngắm cảnh — mà còn là một chuyến phiêu lưu ẩm thực rực rỡ và đậm đà hương vị.            </p>
+              Hãy để hành trình của bạn không chỉ là ngắm cảnh — mà còn là một chuyến phiêu lưu ẩm thực rực rỡ và đậm đà hương vị.
+            </p>
           </div>
         </div>
 
@@ -94,13 +85,13 @@ export default function Login() {
               </p>
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-5">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
               {/* Error Area - Fixed Height */}
               <div className="h-[3.25rem] flex items-start">
-                {(error || loginMutation.error) ? (
+                {loginMutation.error ? (
                   <div className="w-full bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm animate-fadeIn">
-                    {error || loginMutation.error?.message}
+                    {loginMutation.error.message}
                   </div>
                 ) : (
                   <div className="w-full opacity-0 pointer-events-none">
@@ -118,13 +109,15 @@ export default function Login() {
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <Input
                     type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    {...register('email')}
                     placeholder="Enter your email"
                     className="pl-10 h-12 border-[#69C3CF] font-poppins text-sm"
                     disabled={loginMutation.isPending}
                   />
                 </div>
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-1 font-poppins">{errors.email.message}</p>
+                )}
               </div>
 
               {/* Password */}
@@ -136,8 +129,7 @@ export default function Login() {
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <Input
                     type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    {...register('password')}
                     placeholder="******"
                     className="pl-10 pr-10 h-12 border-[#69C3CF] font-poppins text-sm"
                     disabled={loginMutation.isPending}
@@ -150,6 +142,9 @@ export default function Login() {
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
+                {errors.password && (
+                  <p className="text-red-500 text-xs mt-1 font-poppins">{errors.password.message}</p>
+                )}
               </div>
 
               {/* Remember Me & Forgot */}
@@ -157,8 +152,6 @@ export default function Login() {
                 <label className="flex items-center space-x-2 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
                     className="w-4 h-4 text-[#69C3CF] rounded focus:ring-[#69C3CF]"
                   />
                   <span className="text-gray-600 font-poppins">Remember me</span>
