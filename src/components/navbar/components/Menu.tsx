@@ -1,5 +1,5 @@
 "use client"
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,8 +12,24 @@ import {
   import { ScrollArea } from '@/components/ui/scroll-area';
   import { Menu } from 'lucide-react';
  import menuItems from "@/types/navbar.items";
+
 export default function  MobileMenu(){
     const [open, setOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) {
+        // Render placeholder giống server để tránh hydration mismatch
+        return (
+            <Button className="md:hidden bg-[#69C3CF] w-10 rounded-none hover:bg-[#55a1a7]" disabled>
+                <Menu />
+            </Button>
+        );
+    }
+
     return( 
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>

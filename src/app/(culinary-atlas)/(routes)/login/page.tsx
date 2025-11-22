@@ -22,7 +22,7 @@ export default function Login() {
 
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { loading, error: reduxError } = useAppSelector((state) => state.auth);
+  const { loading, error: reduxError, user } = useAppSelector((state) => state.auth);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,9 +39,19 @@ export default function Login() {
     }
 
     try {
-      await dispatch(loginUser({ email, password })).unwrap();
-      // Login successful, redirect to home
-      router.push('/');
+      const result = await dispatch(loginUser({ email, password })).unwrap();
+      // Login successful, check role and redirect accordingly
+      const userData = result?.data || result;
+      const userRoles = userData?.roles || [];
+      const isAdmin = userRoles.some((role: string) => 
+        role.toUpperCase() === 'ADMIN' || role === 'Admin'
+      );
+      
+      if (isAdmin) {
+        router.push('/admin');
+      } else {
+        router.push('/');
+      }
     } catch (err: any) {
       setError(err || 'Đăng nhập thất bại. Vui lòng thử lại.');
     }

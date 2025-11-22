@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -12,8 +12,13 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function Header() {
   const { user } = useAppSelector((state) => state.auth)
-  //const { user } = useAuth();
   const [modalProfileOpen, setModalProfileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Chỉ render phần phụ thuộc vào user sau khi component đã mount trên client
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <>
@@ -64,7 +69,14 @@ export default function Header() {
               <span className="hidden lg:inline">Our Packages</span>
               <span className="lg:hidden">Packages</span>
             </Link>
-            {user ? (
+            {!mounted ? (
+              // Render placeholder giống với server để tránh hydration mismatch
+              <Button asChild className="ml-2 bg-[#FFDA32] w-20 lg:w-[90px] h-9 lg:h-[40px] text-black font-mulish font-extrabold hover:bg-[#e6c229] transition-colors rounded-none whitespace-nowrap">
+                <Link href="/login">
+                  Login
+                </Link>
+              </Button>
+            ) : user ? (
               <Button
                 variant="ghost"
                 onClick={() => setModalProfileOpen(true)}
@@ -83,11 +95,11 @@ export default function Header() {
                 )}
               </Button>
             ) : (
-              <Link href="/login" className="ml-2">
-                <Button className="bg-[#FFDA32] w-20 lg:w-[90px] h-9 lg:h-[40px] text-black font-mulish font-extrabold hover:bg-[#e6c229] transition-colors rounded-none whitespace-nowrap">
+              <Button asChild className="ml-2 bg-[#FFDA32] w-20 lg:w-[90px] h-9 lg:h-[40px] text-black font-mulish font-extrabold hover:bg-[#e6c229] transition-colors rounded-none whitespace-nowrap">
+                <Link href="/login">
                   Login
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             )}
           </nav>
 
