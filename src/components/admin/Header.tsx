@@ -1,8 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Bell, CircleUser } from "lucide-react"
-import { Input } from "@/components/ui/input"
+import { useRouter } from "next/navigation"
+import { useAppDispatch } from "@/hooks/useRedux"
+import { logout } from "@/stores/auth"
+import { Bell, CircleUser } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -17,35 +19,19 @@ import { adminColors } from "@/configs/colors"
 
 export default function AdminHeader() {
   const [notifications] = useState(3) // Mock notification count
+  const router = useRouter()
+  const dispatch = useAppDispatch()
+
+  const handleLogout = () => {
+    dispatch(logout())
+    router.push('/')
+  }
 
   return (
     <header 
-      className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-white/95 backdrop-blur-xl shadow-md"
+      className="sticky top-0 z-40 flex h-16 items-center justify-end gap-4 border-b bg-white/95 backdrop-blur-xl shadow-md px-6"
       style={{ borderColor: adminColors.primary[100] }}
     >
-      {/* Global Search */}
-      <div className="flex-1 max-w-md">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors" style={{ color: adminColors.primary[400] }} />
-          <Input
-            type="search"
-            placeholder="Tìm kiếm toàn cục..."
-            className="pl-9 bg-white/80 backdrop-blur-sm transition-all border-2 focus:border-2"
-            style={{
-              borderColor: adminColors.primary[200],
-            } as React.CSSProperties}
-            onFocus={(e) => {
-              e.target.style.borderColor = adminColors.primary[500]
-              e.target.style.boxShadow = `0 0 0 3px ${adminColors.primary[50]}`
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = adminColors.primary[200]
-              e.target.style.boxShadow = 'none'
-            }}
-          />
-        </div>
-      </div>
-
       <div className="flex items-center gap-2">
         {/* Notifications */}
         <Button 
@@ -93,8 +79,8 @@ export default function AdminHeader() {
                 className="h-9 w-9 rounded-full flex items-center justify-center text-white font-semibold shadow-lg ring-2 transition-transform hover:scale-110"
                 style={{
                   background: adminColors.gradients.primarySoft,
-                  ringColor: adminColors.primary[100]
-                }}
+                  '--tw-ring-color': adminColors.primary[100]
+                } as React.CSSProperties}
               >
                 <CircleUser className="h-5 w-5" />
               </div>
@@ -133,6 +119,7 @@ export default function AdminHeader() {
             <DropdownMenuSeparator style={{ background: adminColors.primary[100] }} />
             <DropdownMenuItem 
               className="cursor-pointer transition-colors font-medium"
+              onClick={handleLogout}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = '#FEE2E2'
                 e.currentTarget.style.color = adminColors.status.error

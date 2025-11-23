@@ -55,7 +55,7 @@ export const API_ENDPOINTS = {
     DISH_DETAIL: (id: string) => `/admin/dishes/${id}`, // Chi tiết món ăn
     DISH_APPROVE: (id: string) => `/admin/dishes/${id}/approve`, // Duyệt món ăn
     DISH_REJECT: (id: string) => `/admin/dishes/${id}/reject`, // Từ chối món ăn
-    DISHES_BULK_APPROVE: '/admin/dishes/bulk-approve', // Duyệt nhiều món ăn cùng lúc
+    DISHES_BULK_APPROVE: '/admin/dishes/bulk-approve', // Duyệt nhiều món ăn cùng lúc -> note 
 
     // Review Moderation - Kiểm duyệt đánh giá
     REVIEWS_LIST: '/admin/reviews', // Danh sách đánh giá (có filter theo status)

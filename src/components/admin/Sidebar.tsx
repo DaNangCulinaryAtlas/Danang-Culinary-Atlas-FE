@@ -1,7 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { useAppDispatch } from "@/hooks/useRedux"
+import { logout } from "@/stores/auth"
 import {
   LayoutDashboard,
   Users,
@@ -58,6 +60,13 @@ const menuItems = [
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const dispatch = useAppDispatch()
+
+  const handleLogout = () => {
+    dispatch(logout())
+    router.push('/')
+  }
 
   return (
     <div 
@@ -165,6 +174,7 @@ export default function Sidebar() {
       >
         <Button
           variant="ghost"
+          onClick={handleLogout}
           className="w-full justify-start text-white hover:text-white transition-all duration-300 rounded-xl group"
           style={{ color: adminColors.primary[200] }}
           onMouseEnter={(e) => {
