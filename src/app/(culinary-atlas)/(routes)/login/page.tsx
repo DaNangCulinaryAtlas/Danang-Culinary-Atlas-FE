@@ -50,7 +50,7 @@ export default function Login() {
       if (isAdmin) {
         router.push('/admin');
       } else {
-        router.push('/');
+      router.push('/');
       }
     } catch (err: any) {
       setError(err || 'Đăng nhập thất bại. Vui lòng thử lại.');

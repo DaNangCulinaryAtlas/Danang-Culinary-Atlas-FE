@@ -112,30 +112,19 @@ export default function UserManagement() {
   return (
     <div className="space-y-6">
       <div 
-        className="rounded-2xl p-8 text-white shadow-2xl"
+        className="rounded-xl p-5 md:p-6 text-white shadow-lg"
         style={{ background: adminColors.gradients.primary }}
       >
-        <h1 className="text-4xl font-bold tracking-tight mb-2">Quản lý Người dùng</h1>
-        <p className="text-lg font-medium" style={{ color: adminColors.primary[200] }}>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-1">Quản lý Người dùng</h1>
+        <p className="text-sm md:text-base font-medium" style={{ color: adminColors.primary[200] }}>
           Quản lý tài khoản User, Vendor và Admin
         </p>
       </div>
 
       {/* Filters and Search */}
-      <Card className="border-2 shadow-lg bg-white" style={{ borderColor: adminColors.primary[200] }}>
-        <CardHeader 
-          className="border-b"
-          style={{ 
-            background: `linear-gradient(to right, ${adminColors.primary[50]}, rgba(230, 244, 248, 0.5), white)`,
-            borderColor: adminColors.primary[200]
-          }}
-        >
-          <CardTitle className="font-bold" style={{ color: adminColors.primary[600] }}>
-            Bộ lọc và Tìm kiếm
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-4 md:flex-row">
+      <Card className="border shadow-md bg-white" style={{ borderColor: adminColors.primary[200] }}>
+        <CardContent className="p-4 md:p-5">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -148,7 +137,7 @@ export default function UserManagement() {
               </div>
             </div>
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-full md:w-[180px]">
+              <SelectTrigger className="w-full md:w-[160px] h-9">
                 <SelectValue placeholder="Vai trò" />
               </SelectTrigger>
               <SelectContent>
@@ -159,7 +148,7 @@ export default function UserManagement() {
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-[180px]">
+              <SelectTrigger className="w-full md:w-[160px] h-9">
                 <SelectValue placeholder="Trạng thái" />
               </SelectTrigger>
               <SelectContent>
