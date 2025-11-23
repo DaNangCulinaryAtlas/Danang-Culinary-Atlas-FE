@@ -1,9 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Users, Store, Clock, Flag, TrendingUp, TrendingDown } from "lucide-react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { adminColors } from "@/configs/colors"
 
 // Mock data - sẽ được thay thế bằng API calls
@@ -39,39 +37,6 @@ const metrics = [
     trend: "up",
     icon: Flag,
     description: "Chưa xử lý",
-  },
-]
-
-const recentActivities = [
-  {
-    id: 1,
-    action: "Vendor A vừa đăng ký quán mới",
-    time: "5 phút trước",
-    type: "restaurant",
-  },
-  {
-    id: 2,
-    action: "User B vừa gửi báo cáo",
-    time: "12 phút trước",
-    type: "report",
-  },
-  {
-    id: 3,
-    action: "Món ăn 'Bún Bò Huế' đã được duyệt",
-    time: "1 giờ trước",
-    type: "dish",
-  },
-  {
-    id: 4,
-    action: "Vendor C đã cập nhật thông tin quán",
-    time: "2 giờ trước",
-    type: "restaurant",
-  },
-  {
-    id: 5,
-    action: "User D đã đăng ký tài khoản mới",
-    time: "3 giờ trước",
-    type: "user",
   },
 ]
 
@@ -171,154 +136,40 @@ export default function AdminDashboard() {
         })}
       </div>
 
-      {/* Charts Section - Placeholder */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card 
-          className="border-2 shadow-xl hover:shadow-2xl transition-all duration-300 bg-white backdrop-blur-sm"
-          style={{ borderColor: adminColors.primary[200] }}
+      {/* Chart Section - Phân bố loại hình quán ăn */}
+      <Card 
+        className="border-2 shadow-xl hover:shadow-2xl transition-all duration-300 bg-white backdrop-blur-sm"
+        style={{ borderColor: '#A7F3D0' }}
+      >
+        <CardHeader 
+          className="border-b"
+          style={{ 
+            background: 'linear-gradient(to right, #D1FAE5, rgba(209, 250, 229, 0.5), white)',
+            borderColor: '#A7F3D0'
+          }}
         >
-          <CardHeader 
-            className="border-b"
-            style={{ 
-              background: `linear-gradient(to right, ${adminColors.primary[50]}, rgba(230, 244, 248, 0.5), white)`,
-              borderColor: adminColors.primary[200]
-            }}
-          >
-            <CardTitle className="font-bold text-lg" style={{ color: adminColors.primary[600] }}>
-              Lượng truy cập và đăng ký
-            </CardTitle>
-            <CardDescription className="font-semibold" style={{ color: adminColors.primary[400] }}>
-              Biểu đồ đường theo thời gian
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div 
-              className="h-[300px] flex items-center justify-center rounded-xl border-2 border-dashed transition-all hover:border-solid"
-              style={{
-                background: `linear-gradient(135deg, ${adminColors.primary[50]}, white, ${adminColors.primary[50]})`,
-                borderColor: adminColors.primary[200]
-              }}
-            >
-              <div className="text-center">
-                <div className="text-5xl mb-3">📊</div>
-                <p className="text-sm font-semibold" style={{ color: adminColors.primary[500] }}>
-                  Biểu đồ đường - Cần tích hợp thư viện chart
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card 
-          className="border-2 shadow-xl hover:shadow-2xl transition-all duration-300 bg-white backdrop-blur-sm"
-          style={{ borderColor: '#A7F3D0' }}
-        >
-          <CardHeader 
-            className="border-b"
-            style={{ 
-              background: 'linear-gradient(to right, #D1FAE5, rgba(209, 250, 229, 0.5), white)',
+          <CardTitle className="font-bold text-lg" style={{ color: '#059669' }}>
+            Phân bố loại hình quán ăn
+          </CardTitle>
+          <CardDescription className="font-semibold" style={{ color: adminColors.accent.emerald }}>
+            Biểu đồ tròn dựa trên RestaurantTag
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div 
+            className="h-[300px] flex items-center justify-center rounded-xl border-2 border-dashed transition-all hover:border-solid"
+            style={{
+              background: 'linear-gradient(135deg, rgba(209, 250, 229, 0.5), white, rgba(209, 250, 229, 0.3))',
               borderColor: '#A7F3D0'
             }}
           >
-            <CardTitle className="font-bold text-lg" style={{ color: '#059669' }}>
-              Phân bố loại hình quán ăn
-            </CardTitle>
-            <CardDescription className="font-semibold" style={{ color: adminColors.accent.emerald }}>
-              Biểu đồ tròn dựa trên RestaurantTag
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div 
-              className="h-[300px] flex items-center justify-center rounded-xl border-2 border-dashed transition-all hover:border-solid"
-              style={{
-                background: 'linear-gradient(135deg, rgba(209, 250, 229, 0.5), white, rgba(209, 250, 229, 0.3))',
-                borderColor: '#A7F3D0'
-              }}
-            >
-              <div className="text-center">
-                <div className="text-5xl mb-3">🥧</div>
-                <p className="text-sm font-semibold" style={{ color: adminColors.accent.emerald }}>
-                  Biểu đồ tròn - Cần tích hợp thư viện chart
-                </p>
-              </div>
+            <div className="text-center">
+              <div className="text-5xl mb-3">🥧</div>
+              <p className="text-sm font-semibold" style={{ color: adminColors.accent.emerald }}>
+                Biểu đồ tròn - Cần tích hợp thư viện chart
+              </p>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Activities */}
-      <Card 
-        className="border-2 shadow-xl bg-white backdrop-blur-sm overflow-hidden"
-        style={{ borderColor: adminColors.primary[200] }}
-      >
-        <CardHeader 
-          className="relative overflow-hidden text-white"
-          style={{ background: adminColors.gradients.primary }}
-        >
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-15"></div>
-          <div className="relative">
-            <CardTitle className="text-white text-xl font-bold drop-shadow-sm">Hoạt động gần đây</CardTitle>
-            <CardDescription className="font-semibold" style={{ color: adminColors.primary[200] }}>
-              Danh sách 5 hành động gần nhất
-            </CardDescription>
           </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow 
-                className="hover:bg-transparent border-b"
-                style={{ 
-                  background: adminColors.primary[50], 
-                  borderColor: adminColors.primary[200] 
-                }}
-              >
-                <TableHead className="font-bold text-sm" style={{ color: adminColors.primary[600] }}>
-                  Hành động
-                </TableHead>
-                <TableHead className="font-bold text-sm" style={{ color: adminColors.primary[600] }}>
-                  Thời gian
-                </TableHead>
-                <TableHead className="font-bold text-sm" style={{ color: adminColors.primary[600] }}>
-                  Loại
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {recentActivities.map((activity, index) => (
-                <TableRow 
-                  key={activity.id}
-                  className="transition-all duration-200 border-b hover:shadow-sm"
-                  style={{ borderColor: adminColors.primary[100] }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = adminColors.primary[50]
-                    e.currentTarget.style.transform = 'translateX(4px)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'transparent'
-                    e.currentTarget.style.transform = 'translateX(0)'
-                  }}
-                >
-                  <TableCell className="font-semibold text-gray-700 py-4">
-                    {activity.action}
-                  </TableCell>
-                  <TableCell className="text-gray-500 py-4 font-medium">{activity.time}</TableCell>
-                  <TableCell className="py-4">
-                    <Badge 
-                      className="font-semibold px-3 py-1 border shadow-sm"
-                      style={{
-                        background: `linear-gradient(to right, ${adminColors.primary[50]}, ${adminColors.primary[100]})`,
-                        color: adminColors.primary[700],
-                        borderColor: adminColors.primary[200]
-                      }}
-                    >
-                      {activity.type}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
         </CardContent>
       </Card>
     </div>
