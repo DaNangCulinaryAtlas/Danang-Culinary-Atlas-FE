@@ -3,6 +3,8 @@
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { adminColors } from "@/configs/colors"
@@ -21,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Search, Eye, Lock, Unlock, UserCog } from "lucide-react"
+import { Search, Eye, Lock, Unlock, Mail } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -29,6 +31,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog"
 import Image from "next/image"
 
@@ -67,6 +70,44 @@ export default function UserManagement() {
   const [searchQuery, setSearchQuery] = useState("")
   const [roleFilter, setRoleFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
+  const [selectedUser, setSelectedUser] = useState<typeof users[0] | null>(null)
+  const [emailSubject, setEmailSubject] = useState("")
+  const [emailContent, setEmailContent] = useState("")
+  const [isSendingEmail, setIsSendingEmail] = useState(false)
+
+  const handleSendEmail = async () => {
+    if (!selectedUser || !emailSubject.trim() || !emailContent.trim()) {
+      return
+    }
+
+    setIsSendingEmail(true)
+    try {
+      // TODO: API call to send email
+      // await sendEmailToUser(selectedUser.id, {
+      //   to: selectedUser.email,
+      //   subject: emailSubject,
+      //   content: emailContent
+      // })
+      
+      console.log("Sending email to:", selectedUser.email)
+      console.log("Subject:", emailSubject)
+      console.log("Content:", emailContent)
+      
+      // Reset form
+      setEmailSubject("")
+      setEmailContent("")
+      setSelectedUser(null)
+      
+      // TODO: Show success toast
+      alert("Email đã được gửi thành công!")
+    } catch (error) {
+      console.error("Error sending email:", error)
+      // TODO: Show error toast
+      alert("Có lỗi xảy ra khi gửi email!")
+    } finally {
+      setIsSendingEmail(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -231,9 +272,82 @@ export default function UserManagement() {
                           <Unlock className="h-4 w-4" />
                         )}
                       </Button>
-                      <Button variant="ghost" size="icon" title="Phân quyền">
-                        <UserCog className="h-4 w-4" />
-                      </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            title="Gửi email"
+                            onClick={() => setSelectedUser(user)}
+                          >
+                            <Mail className="h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle>Gửi Email</DialogTitle>
+                            <DialogDescription>
+                              Gửi email tới: <span className="font-semibold text-foreground">{user.email}</span>
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="email-subject">Tiêu đề</Label>
+                              <Input
+                                id="email-subject"
+                                placeholder="Nhập tiêu đề email..."
+                                value={emailSubject}
+                                onChange={(e) => setEmailSubject(e.target.value)}
+                                className="w-full"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="email-content">Nội dung</Label>
+                              <Textarea
+                                id="email-content"
+                                placeholder="Nhập nội dung email..."
+                                value={emailContent}
+                                onChange={(e) => setEmailContent(e.target.value)}
+                                rows={8}
+                                className="w-full resize-none"
+                              />
+                            </div>
+                            <div className="rounded-lg bg-muted p-3">
+                              <p className="text-sm text-muted-foreground">
+                                <span className="font-semibold">Người nhận:</span> {user.email}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                <span className="font-semibold">Tên:</span> {user.name}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                <span className="font-semibold">Vai trò:</span> {user.role}
+                              </p>
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                setEmailSubject("")
+                                setEmailContent("")
+                                setSelectedUser(null)
+                              }}
+                            >
+                              Hủy
+                            </Button>
+                            <Button
+                              onClick={handleSendEmail}
+                              disabled={!emailSubject.trim() || !emailContent.trim() || isSendingEmail}
+                              style={{
+                                background: adminColors.gradients.primarySoft
+                              }}
+                              className="text-white hover:opacity-90"
+                            >
+                              {isSendingEmail ? "Đang gửi..." : "Gửi Email"}
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </TableCell>
                 </TableRow>
