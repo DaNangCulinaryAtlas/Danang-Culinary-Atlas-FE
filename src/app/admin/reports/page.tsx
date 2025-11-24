@@ -89,19 +89,6 @@ export default function ReportHandling() {
     console.log("Ban user for report:", id)
   }
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return "destructive"
-      case "medium":
-        return "warning"
-      case "low":
-        return "secondary"
-      default:
-        return "secondary"
-    }
-  }
-
   return (
     <div className="space-y-6">
       <div>
@@ -147,7 +134,6 @@ export default function ReportHandling() {
                 <TableHead>Đối tượng</TableHead>
                 <TableHead>Lý do</TableHead>
                 <TableHead>Thời gian</TableHead>
-                <TableHead>Mức độ</TableHead>
                 <TableHead>Trạng thái</TableHead>
                 <TableHead>Hành động</TableHead>
               </TableRow>
@@ -176,11 +162,6 @@ export default function ReportHandling() {
                   </TableCell>
                   <TableCell>{report.reason}</TableCell>
                   <TableCell>{report.time}</TableCell>
-                  <TableCell>
-                    <Badge variant={getPriorityColor(report.priority) as any}>
-                      {report.priority}
-                    </Badge>
-                  </TableCell>
                   <TableCell>
                     <Badge
                       variant={

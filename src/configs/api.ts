@@ -30,9 +30,9 @@ export const API_ENDPOINTS = {
   },
   ADMIN: {
     // Dashboard - Tổng quan hệ thống
-    DASHBOARD_METRICS: '/admin/dashboard/metrics', // Lấy các chỉ số tổng quan (users, restaurants, pending, reports)
-    DASHBOARD_CHARTS: '/admin/dashboard/charts', // Lấy dữ liệu cho biểu đồ (truy cập, đăng ký, phân bố quán ăn)
-    DASHBOARD_ACTIVITIES: '/admin/dashboard/activities', // Lấy danh sách hoạt động gần đây
+    // DASHBOARD_METRICS: '/admin/dashboard/metrics', // Lấy các chỉ số tổng quan (users, restaurants, pending, reports)
+    // DASHBOARD_CHARTS: '/admin/dashboard/charts', // Lấy dữ liệu cho biểu đồ (truy cập, đăng ký, phân bố quán ăn)
+    // DASHBOARD_ACTIVITIES: '/admin/dashboard/activities', // Lấy danh sách hoạt động gần đây
 
     // User Management - Quản lý người dùng
     USERS_LIST: '/admin/users', // Danh sách tất cả users (có filter, search, pagination)

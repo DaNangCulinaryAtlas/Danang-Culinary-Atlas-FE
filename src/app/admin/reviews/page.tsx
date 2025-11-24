@@ -1,5 +1,7 @@
 "use client"
 
+import { useState } from "react"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -20,7 +22,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Eye, Check, X } from "lucide-react"
+import { Eye, EyeOff, Check, X } from "lucide-react"
 
 // Mock data
 const reviews = [
@@ -64,6 +66,14 @@ export default function ReviewModeration() {
     console.log("Reject review:", id)
   }
 
+  const [hiddenReviews, setHiddenReviews] = useState<number[]>([])
+
+  const toggleVisibility = (id: number) => {
+    setHiddenReviews((prev) =>
+      prev.includes(id) ? prev.filter((reviewId) => reviewId !== id) : [...prev, id]
+    )
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -80,127 +90,142 @@ export default function ReviewModeration() {
             Tổng số: {reviews.length} đánh giá
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Người dùng</TableHead>
-                <TableHead>Quán ăn</TableHead>
-                <TableHead>Đánh giá</TableHead>
-                <TableHead>Bình luận</TableHead>
-                <TableHead>Ngày</TableHead>
-                <TableHead>Trạng thái</TableHead>
-                <TableHead>Hành động</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {reviews.map((review) => (
-                <TableRow key={review.id}>
-                  <TableCell>{review.id}</TableCell>
-                  <TableCell className="font-medium">{review.user}</TableCell>
-                  <TableCell>{review.restaurant}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      {"★".repeat(review.rating)}
-                      {"☆".repeat(5 - review.rating)}
-                    </div>
-                  </TableCell>
-                  <TableCell className="max-w-xs truncate">
-                    {review.comment}
-                  </TableCell>
-                  <TableCell>{review.date}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        review.status === "Approved" ? "approved" : "pending"
-                      }
-                    >
-                      {review.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Chi tiết Đánh giá</DialogTitle>
-                            <DialogDescription>ID: {review.id}</DialogDescription>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            <div>
-                              <span className="font-medium">Người dùng:</span>{" "}
-                              {review.user}
-                            </div>
-                            <div>
-                              <span className="font-medium">Quán ăn:</span>{" "}
-                              {review.restaurant}
-                            </div>
-                            <div>
-                              <span className="font-medium">Đánh giá:</span>{" "}
-                              {"★".repeat(review.rating)}
-                              {"☆".repeat(5 - review.rating)}
-                            </div>
-                            <div>
-                              <span className="font-medium">Bình luận:</span>
-                              <p className="mt-2 p-3 bg-muted rounded-md">
-                                {review.comment}
-                              </p>
-                            </div>
-                            <div>
-                              <span className="font-medium">Ngày:</span>{" "}
-                              {review.date}
-                            </div>
+        <CardContent className="space-y-2.5">
+          {reviews.map((review) => (
+            <div
+              key={review.id}
+              className={`flex flex-col gap-2 rounded-lg border bg-gradient-to-r from-[rgba(12,81,111,0.07)] via-white to-white p-3 shadow-sm transition hover:border-primary/40 hover:shadow-md ${
+                hiddenReviews.includes(review.id) ? "opacity-70" : ""
+              }`}
+            >
+              <div className="flex flex-wrap items-center gap-3 text-xs md:text-sm">
+                <Badge variant="outline" className="text-[10px]">
+                  #{review.id}
+                </Badge>
+                <span className="font-semibold text-primary-foreground">{review.user}</span>
+                <span className="text-muted-foreground">đánh giá</span>
+                <span className="font-medium text-primary">{review.restaurant}</span>
+                <div className="flex items-center gap-1 text-amber-500">
+                  {"★".repeat(review.rating)}
+                  <span className="text-muted-foreground">{review.rating}/5</span>
+                </div>
+                <span className="text-muted-foreground text-xs">{review.date}</span>
+                {hiddenReviews.includes(review.id) && (
+                  <Badge variant="secondary" className="text-[10px]">
+                    Đang ẩn
+                  </Badge>
+                )}
+              </div>
+              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <p className="flex-1 truncate text-sm text-muted-foreground">
+                  {review.comment}
+                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        size="sm"
+                        className="h-8 border-none bg-gradient-to-r from-[#0C516F] via-[#127697] to-[#2AA6C3] text-white shadow-sm hover:opacity-90"
+                      >
+                        <Eye className="mr-2 h-4 w-4" />
+                        Xem chi tiết
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-xl">
+                      <DialogHeader>
+                        <DialogTitle>Chi tiết Đánh giá #{review.id}</DialogTitle>
+                        <DialogDescription>
+                          Người dùng {review.user} đánh giá {review.restaurant}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 text-sm">
+                        <div className="flex justify-between">
+                          <span className="font-medium">Người dùng:</span>
+                          <span>{review.user}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="font-medium">Quán ăn:</span>
+                          <span>{review.restaurant}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="font-medium">Đánh giá:</span>
+                          <div className="flex items-center gap-1 text-amber-500">
+                            {"★".repeat(review.rating)}
+                            <span className="text-xs text-muted-foreground">
+                              {review.rating}/5
+                            </span>
                           </div>
-                          {review.status === "Pending" && (
-                            <DialogFooter>
-                              <Button
-                                variant="outline"
-                                onClick={() => handleReject(review.id)}
-                              >
-                                <X className="mr-2 h-4 w-4" />
-                                Từ chối
-                              </Button>
-                              <Button
-                                onClick={() => handleApprove(review.id)}
-                                className="bg-green-600 hover:bg-green-700"
-                              >
-                                <Check className="mr-2 h-4 w-4" />
-                                Duyệt
-                              </Button>
-                            </DialogFooter>
+                        </div>
+                        <div>
+                          <span className="font-medium">Bình luận:</span>
+                          <p className="mt-2 rounded-md bg-muted p-3 text-sm leading-relaxed">
+                            {review.comment}
+                          </p>
+                        </div>
+                        <div className="flex justify-between text-muted-foreground">
+                          <span>Ngày gửi:</span>
+                          <span>{review.date}</span>
+                        </div>
+                      </div>
+                      <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+                        <Button
+                          variant="secondary"
+                          onClick={() => toggleVisibility(review.id)}
+                          className="flex-1"
+                        >
+                          {hiddenReviews.includes(review.id) ? (
+                            <>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Hiện đánh giá
+                            </>
+                          ) : (
+                            <>
+                              <EyeOff className="mr-2 h-4 w-4" />
+                              Ẩn đánh giá
+                            </>
                           )}
-                        </DialogContent>
-                      </Dialog>
-                      {review.status === "Pending" && (
-                        <>
+                        </Button>
+                        <div className="flex flex-1 gap-2">
                           <Button
-                            variant="ghost"
-                            size="icon"
+                            variant="outline"
                             onClick={() => handleReject(review.id)}
+                            className="flex-1"
                           >
-                            <X className="h-4 w-4" />
+                            <X className="mr-2 h-4 w-4" />
+                            Từ chối
                           </Button>
                           <Button
-                            variant="ghost"
-                            size="icon"
                             onClick={() => handleApprove(review.id)}
+                            className="flex-1 bg-green-600 hover:bg-green-700"
                           >
-                            <Check className="h-4 w-4" />
+                            <Check className="mr-2 h-4 w-4" />
+                            Duyệt
                           </Button>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                        </div>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                  <Button
+                    size="sm"
+                    onClick={() => toggleVisibility(review.id)}
+                    className="h-8 border-none bg-gradient-to-r from-[#0C516F0D] to-[#2AA6C30D] text-primary transition hover:from-[#0C516F22] hover:to-[#2AA6C322]"
+                  >
+                    {hiddenReviews.includes(review.id) ? (
+                      <>
+                        <Eye className="mr-2 h-4 w-4" />
+                        Hiện đánh giá
+                      </>
+                    ) : (
+                      <>
+                        <EyeOff className="mr-2 h-4 w-4" />
+                        Ẩn đánh giá
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
         </CardContent>
       </Card>
     </div>

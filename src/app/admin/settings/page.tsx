@@ -30,16 +30,22 @@ import { Label } from "@/components/ui/label"
 const provinces = [
   { id: 1, name: "Đà Nẵng", code: "DN" },
   { id: 2, name: "Hà Nội", code: "HN" },
+  { id: 3, name: "Hồ Chí Minh", code: "HCM" },
 ]
 
 const districts = [
-  { id: 1, name: "Quận 1", provinceId: 1 },
-  { id: 2, name: "Quận 2", provinceId: 1 },
+  { id: 1, name: "Quận Hải Châu", provinceId: 1 },
+  { id: 2, name: "Quận Sơn Trà", provinceId: 1 },
+  { id: 3, name: "Quận Hoàn Kiếm", provinceId: 2 },
+  { id: 4, name: "Quận Ba Đình", provinceId: 2 },
+  { id: 5, name: "Quận 1", provinceId: 3 },
 ]
 
 const wards = [
-  { id: 1, name: "Phường 1", districtId: 1 },
-  { id: 2, name: "Phường 2", districtId: 1 },
+  { id: 1, name: "Phường Thạch Thang", districtId: 1 },
+  { id: 2, name: "Phường Thuận Phước", districtId: 1 },
+  { id: 3, name: "Phường Phước Mỹ", districtId: 2 },
+  { id: 4, name: "Phường Tràng Tiền", districtId: 3 },
 ]
 
 const restaurantTags = [
@@ -56,8 +62,24 @@ const dishTags = [
 ]
 
 export default function SystemSettings() {
-  const [selectedProvince, setSelectedProvince] = useState<number | null>(null)
+  const [selectedProvince, setSelectedProvince] = useState<number | null>(provinces[0]?.id ?? null)
   const [selectedDistrict, setSelectedDistrict] = useState<number | null>(null)
+
+  const filteredDistricts = selectedProvince
+    ? districts.filter((district) => district.provinceId === selectedProvince)
+    : []
+
+  const filteredWards = selectedDistrict
+    ? wards.filter((ward) => ward.districtId === selectedDistrict)
+    : []
+
+  const currentProvince = selectedProvince
+    ? provinces.find((province) => province.id === selectedProvince)
+    : null
+
+  const currentDistrict = selectedDistrict
+    ? districts.find((district) => district.id === selectedDistrict)
+    : null
 
   return (
     <div className="space-y-6">
@@ -88,7 +110,7 @@ export default function SystemSettings() {
         <TabsContent value="location" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
             {/* Provinces */}
-            <Card>
+            <Card className="border border-primary/10 shadow-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Tỉnh/Thành phố</CardTitle>
@@ -119,45 +141,71 @@ export default function SystemSettings() {
                   </Dialog>
                 </div>
               </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Tên</TableHead>
-                      <TableHead>Mã</TableHead>
-                      <TableHead>Hành động</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {provinces.map((province) => (
-                      <TableRow key={province.id}>
-                        <TableCell>{province.name}</TableCell>
-                        <TableCell>{province.code}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button variant="ghost" size="icon">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+              <CardContent className="space-y-2">
+                {provinces.map((province) => {
+                  const isActive = province.id === selectedProvince
+                  return (
+                    <div
+                      key={province.id}
+                      className={`rounded-lg border p-3 transition hover:border-primary/60 hover:bg-primary/5 ${
+                        isActive ? "border-primary bg-primary/5" : "border-muted"
+                      }`}
+                    >
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        className="flex w-full items-center justify-between text-left"
+                        onClick={() => {
+                          setSelectedProvince(province.id)
+                          setSelectedDistrict(null)
+                        }}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault()
+                            setSelectedProvince(province.id)
+                            setSelectedDistrict(null)
+                          }
+                        }}
+                      >
+                        <div>
+                          <p className="font-semibold">{province.name}</p>
+                          <p className="text-xs text-muted-foreground">Mã: {province.code}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {isActive && (
+                            <Badge variant="secondary" className="text-[11px]">
+                              Đang chọn
+                            </Badge>
+                          )}
+                          <Button variant="ghost" size="icon">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
               </CardContent>
             </Card>
 
             {/* Districts */}
-            <Card>
+            <Card className="border border-primary/10 shadow-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>Quận/Huyện</CardTitle>
+                  <div>
+                    <CardTitle>Quận/Huyện</CardTitle>
+                    <CardDescription className="text-xs">
+                      {currentProvince
+                        ? `Thuộc tỉnh: ${currentProvince.name}`
+                        : "Chọn tỉnh để quản lý quận/huyện"}
+                    </CardDescription>
+                  </div>
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button size="sm">
+                      <Button size="sm" disabled={!selectedProvince}>
                         <Plus className="h-4 w-4" />
                       </Button>
                     </DialogTrigger>
@@ -172,7 +220,7 @@ export default function SystemSettings() {
                         </div>
                         <div>
                           <Label>Tỉnh/Thành phố</Label>
-                          <Input placeholder="Chọn tỉnh/thành phố" />
+                          <Input value={currentProvince?.name ?? ""} disabled />
                         </div>
                       </div>
                       <DialogFooter>
@@ -183,42 +231,80 @@ export default function SystemSettings() {
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Tên</TableHead>
-                      <TableHead>Hành động</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {districts.map((district) => (
-                      <TableRow key={district.id}>
-                        <TableCell>{district.name}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button variant="ghost" size="icon">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                {!selectedProvince ? (
+                  <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                    Vui lòng chọn tỉnh/thành phố để xem danh sách quận/huyện.
+                  </div>
+                ) : filteredDistricts.length === 0 ? (
+                  <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                    Chưa có quận/huyện nào. Hãy thêm mới.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {filteredDistricts.map((district) => {
+                      const isActive = district.id === selectedDistrict
+                      return (
+                        <div
+                          key={district.id}
+                          className={`rounded-lg border p-3 transition hover:border-primary/60 hover:bg-primary/5 ${
+                            isActive ? "border-primary bg-primary/5" : "border-muted"
+                          }`}
+                        >
+                          <div
+                            role="button"
+                            tabIndex={0}
+                            className="flex w-full items-center justify-between text-left"
+                            onClick={() => setSelectedDistrict(district.id)}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault()
+                                setSelectedDistrict(district.id)
+                              }
+                            }}
+                          >
+                            <div>
+                              <p className="font-semibold">{district.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                Thuộc {currentProvince?.name}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {isActive && (
+                                <Badge variant="secondary" className="text-[11px]">
+                                  Đang chọn
+                                </Badge>
+                              )}
+                              <Button variant="ghost" size="icon">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
             {/* Wards */}
-            <Card>
+            <Card className="border border-primary/10 shadow-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>Phường/Xã</CardTitle>
+                  <div>
+                    <CardTitle>Phường/Xã</CardTitle>
+                    <CardDescription className="text-xs">
+                      {currentDistrict
+                        ? `Thuộc quận: ${currentDistrict.name}`
+                        : "Chọn quận/huyện để quản lý phường/xã"}
+                    </CardDescription>
+                  </div>
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button size="sm">
+                      <Button size="sm" disabled={!selectedDistrict}>
                         <Plus className="h-4 w-4" />
                       </Button>
                     </DialogTrigger>
@@ -233,7 +319,7 @@ export default function SystemSettings() {
                         </div>
                         <div>
                           <Label>Quận/Huyện</Label>
-                          <Input placeholder="Chọn quận/huyện" />
+                          <Input value={currentDistrict?.name ?? ""} disabled />
                         </div>
                       </div>
                       <DialogFooter>
@@ -244,31 +330,39 @@ export default function SystemSettings() {
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Tên</TableHead>
-                      <TableHead>Hành động</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {wards.map((ward) => (
-                      <TableRow key={ward.id}>
-                        <TableCell>{ward.name}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button variant="ghost" size="icon">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
+                {!selectedDistrict ? (
+                  <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                    Vui lòng chọn quận/huyện để xem danh sách phường/xã.
+                  </div>
+                ) : filteredWards.length === 0 ? (
+                  <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                    Chưa có phường/xã nào. Hãy thêm mới.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {filteredWards.map((ward) => (
+                      <div
+                        key={ward.id}
+                        className="flex items-center justify-between rounded-lg border border-muted p-3 hover:border-primary/60 hover:bg-primary/5"
+                      >
+                        <div>
+                          <p className="font-semibold">{ward.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Thuộc {currentDistrict?.name}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="ghost" size="icon">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     ))}
-                  </TableBody>
-                </Table>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
