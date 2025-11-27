@@ -91,7 +91,7 @@ export default function ReviewModeration() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2.5">
-          {reviews.map((review) => (
+              {reviews.map((review) => (
             <div
               key={review.id}
               className={`flex flex-col gap-2 rounded-lg border bg-gradient-to-r from-[rgba(12,81,111,0.07)] via-white to-white p-3 shadow-sm transition hover:border-primary/40 hover:shadow-md ${
@@ -106,7 +106,7 @@ export default function ReviewModeration() {
                 <span className="text-muted-foreground">đánh giá</span>
                 <span className="font-medium text-primary">{review.restaurant}</span>
                 <div className="flex items-center gap-1 text-amber-500">
-                  {"★".repeat(review.rating)}
+                      {"★".repeat(review.rating)}
                   <span className="text-muted-foreground">{review.rating}/5</span>
                 </div>
                 <span className="text-muted-foreground text-xs">{review.date}</span>
@@ -115,60 +115,60 @@ export default function ReviewModeration() {
                     Đang ẩn
                   </Badge>
                 )}
-              </div>
+                    </div>
               <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 <p className="flex-1 truncate text-sm text-muted-foreground">
-                  {review.comment}
+                    {review.comment}
                 </p>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Dialog>
-                    <DialogTrigger asChild>
+                      <Dialog>
+                        <DialogTrigger asChild>
                       <Button
                         size="sm"
                         className="h-8 border-none bg-gradient-to-r from-[#0C516F] via-[#127697] to-[#2AA6C3] text-white shadow-sm hover:opacity-90"
                       >
                         <Eye className="mr-2 h-4 w-4" />
                         Xem chi tiết
-                      </Button>
-                    </DialogTrigger>
+                          </Button>
+                        </DialogTrigger>
                     <DialogContent className="max-w-xl">
-                      <DialogHeader>
+                          <DialogHeader>
                         <DialogTitle>Chi tiết Đánh giá #{review.id}</DialogTitle>
                         <DialogDescription>
                           Người dùng {review.user} đánh giá {review.restaurant}
                         </DialogDescription>
-                      </DialogHeader>
+                          </DialogHeader>
                       <div className="space-y-4 text-sm">
                         <div className="flex justify-between">
                           <span className="font-medium">Người dùng:</span>
                           <span>{review.user}</span>
-                        </div>
+                            </div>
                         <div className="flex justify-between">
                           <span className="font-medium">Quán ăn:</span>
                           <span>{review.restaurant}</span>
-                        </div>
+                            </div>
                         <div className="flex justify-between">
                           <span className="font-medium">Đánh giá:</span>
                           <div className="flex items-center gap-1 text-amber-500">
-                            {"★".repeat(review.rating)}
+                              {"★".repeat(review.rating)}
                             <span className="text-xs text-muted-foreground">
                               {review.rating}/5
                             </span>
                           </div>
-                        </div>
-                        <div>
-                          <span className="font-medium">Bình luận:</span>
+                            </div>
+                            <div>
+                              <span className="font-medium">Bình luận:</span>
                           <p className="mt-2 rounded-md bg-muted p-3 text-sm leading-relaxed">
-                            {review.comment}
-                          </p>
-                        </div>
+                                {review.comment}
+                              </p>
+                            </div>
                         <div className="flex justify-between text-muted-foreground">
                           <span>Ngày gửi:</span>
                           <span>{review.date}</span>
-                        </div>
-                      </div>
+                            </div>
+                          </div>
                       <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-between">
-                        <Button
+                              <Button
                           variant="secondary"
                           onClick={() => toggleVisibility(review.id)}
                           className="flex-1"
@@ -219,13 +219,13 @@ export default function ReviewModeration() {
                       <>
                         <EyeOff className="mr-2 h-4 w-4" />
                         Ẩn đánh giá
-                      </>
-                    )}
+                        </>
+                      )}
                   </Button>
                 </div>
               </div>
-            </div>
-          ))}
+                    </div>
+              ))}
         </CardContent>
       </Card>
     </div>

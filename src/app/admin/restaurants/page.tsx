@@ -642,8 +642,8 @@ export default function RestaurantApproval() {
                   </CardTitle>
                   <CardDescription className="font-semibold" style={{ color: adminColors.primary[200] }}>
                     Tổng số: {filteredActiveRestaurants.length} quán
-                  </CardDescription>
-                </CardHeader>
+              </CardDescription>
+            </CardHeader>
                 <CardContent className="p-6">
                   {filteredActiveRestaurants.length === 0 ? (
                     <div className="text-center py-12 text-muted-foreground">
@@ -675,7 +675,7 @@ export default function RestaurantApproval() {
                               )}
                             </div>
                             <CardTitle className="text-lg font-bold truncate" style={{ color: adminColors.primary[700] }}>
-                              {restaurant.name}
+                        {restaurant.name}
                             </CardTitle>
                             <CardDescription className="text-sm line-clamp-2">
                               <MapPin className="h-3 w-3 inline mr-1" />
@@ -688,7 +688,7 @@ export default function RestaurantApproval() {
                                 <p className="text-xs font-semibold text-gray-500">Vendor:</p>
                                 <p className="text-sm font-medium">{restaurant.vendor}</p>
                               </div>
-                              <Badge variant="approved">{restaurant.status}</Badge>
+                        <Badge variant="approved">{restaurant.status}</Badge>
                             </div>
                             <Dialog>
                               <DialogTrigger asChild>
@@ -1046,8 +1046,8 @@ export default function RestaurantApproval() {
                       </Card>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
+            </CardContent>
+          </Card>
             </div>
           )}
         </TabsContent>

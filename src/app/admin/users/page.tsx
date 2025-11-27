@@ -333,7 +333,7 @@ export default function UserManagement() {
                               className="text-white hover:opacity-90"
                             >
                               {isSendingEmail ? "Đang gửi..." : "Gửi Email"}
-                            </Button>
+                      </Button>
                           </DialogFooter>
                         </DialogContent>
                       </Dialog>

@@ -1,4 +1,5 @@
 export const BASE_URL = process.env.NEXT_PUBLIC_APP_API_URL || 'http://178.128.208.78:8081/api/v1';
+export const BASE_URL_2 = BASE_URL.replace('/v1', '');
 
 export const API_ENDPOINTS = {
   AUTH: {
@@ -104,5 +105,12 @@ export const API_ENDPOINTS = {
     NOTIFICATIONS_LIST: '/admin/notifications', // Danh sách thông báo (quán chờ duyệt, báo cáo mới)
     NOTIFICATION_READ: (id: string) => `/admin/notifications/${id}/read`, // Đánh dấu đã đọc
     NOTIFICATIONS_MARK_ALL_READ: '/admin/notifications/read-all', // Đánh dấu tất cả đã đọc
+
+    // Permission Management - Quản trị phân quyền - dùng BASE_URL_2
+    PERMISSIONS_LIST: '/admin/permissions/roles/permissions', // Get all roles with their permissions
+    PERMISSIONS_UPDATE: '/admin/permissions/roles/permissions', // Update roles permissions
+    ROLES_LIST: '/admin/permissions/roles', // Get all roles
+    PERMISSIONS_FOR_ROLE: (roleId: string) => `/admin/permissions/roles/${roleId}/permissions`, // Get permissions for a specific role
+    ACTIONS_LIST: '/admin/permissions/actions', // Get all available actions
   },
 } as const;

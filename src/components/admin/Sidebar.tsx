@@ -6,6 +6,7 @@ import { useAppDispatch } from "@/hooks/useRedux"
 import { logout } from "@/stores/auth"
 import {
   LayoutDashboard,
+  Shield,
   Users,
   Store,
   Utensils,
@@ -24,6 +25,11 @@ const menuItems = [
     title: "Tổng quan",
     href: "/admin",
     icon: LayoutDashboard,
+  },
+  {
+    title: "Quản trị Permission",
+    href: "/admin/permissions",
+    icon: Shield,
   },
   {
     title: "Quản lý Người dùng",

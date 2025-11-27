@@ -42,28 +42,28 @@ const metrics = [
 
 export default function AdminDashboard() {
   const metricColors = [
-    { 
+  {
       bg: adminColors.gradients.primary,
       iconBg: adminColors.gradients.primarySoft,
       value: adminColors.primary[600],
       border: adminColors.primary[200],
       text: adminColors.primary[700]
-    },
-    { 
+  },
+  {
       bg: `linear-gradient(135deg, ${adminColors.accent.emerald}, #059669, #047857)`,
       iconBg: `linear-gradient(135deg, #34D399, ${adminColors.accent.emerald})`,
       value: '#047857',
       border: '#A7F3D0',
       text: adminColors.accent.emerald
-    },
-    { 
+  },
+  {
       bg: `linear-gradient(135deg, ${adminColors.accent.amber}, #D97706, #B45309)`,
       iconBg: `linear-gradient(135deg, #FBBF24, ${adminColors.accent.amber})`,
       value: '#B45309',
       border: '#FDE68A',
       text: adminColors.accent.amber
-    },
-    { 
+  },
+  {
       bg: `linear-gradient(135deg, ${adminColors.status.error}, #DC2626, #B91C1C)`,
       iconBg: `linear-gradient(135deg, #F87171, ${adminColors.status.error})`,
       value: '#B91C1C',
@@ -82,8 +82,8 @@ export default function AdminDashboard() {
         <div className="relative">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3 drop-shadow-sm">Tổng quan</h1>
           <p className="text-lg md:text-xl font-medium" style={{ color: adminColors.primary[200] }}>
-            Cái nhìn toàn cảnh về tình hình hoạt động của hệ thống
-          </p>
+          Cái nhìn toàn cảnh về tình hình hoạt động của hệ thống
+        </p>
         </div>
       </div>
 
@@ -152,9 +152,9 @@ export default function AdminDashboard() {
             Phân bố loại hình quán ăn
           </CardTitle>
           <CardDescription className="font-semibold" style={{ color: adminColors.accent.emerald }}>
-            Biểu đồ tròn dựa trên RestaurantTag
-          </CardDescription>
-        </CardHeader>
+              Biểu đồ tròn dựa trên RestaurantTag
+            </CardDescription>
+          </CardHeader>
         <CardContent className="p-6">
           <div 
             className="h-[300px] flex items-center justify-center rounded-xl border-2 border-dashed transition-all hover:border-solid"
@@ -169,7 +169,7 @@ export default function AdminDashboard() {
                 Biểu đồ tròn - Cần tích hợp thư viện chart
               </p>
             </div>
-          </div>
+      </div>
         </CardContent>
       </Card>
     </div>

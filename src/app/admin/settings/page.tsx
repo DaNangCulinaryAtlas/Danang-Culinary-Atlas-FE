@@ -177,13 +177,13 @@ export default function SystemSettings() {
                               Đang chọn
                             </Badge>
                           )}
-                          <Button variant="ghost" size="icon">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                            <Button variant="ghost" size="icon">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                       </div>
                     </div>
                   )
@@ -196,7 +196,7 @@ export default function SystemSettings() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Quận/Huyện</CardTitle>
+                  <CardTitle>Quận/Huyện</CardTitle>
                     <CardDescription className="text-xs">
                       {currentProvince
                         ? `Thuộc tỉnh: ${currentProvince.name}`
@@ -274,13 +274,13 @@ export default function SystemSettings() {
                                   Đang chọn
                                 </Badge>
                               )}
-                              <Button variant="ghost" size="icon">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
+                            <Button variant="ghost" size="icon">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                           </div>
                         </div>
                       )
@@ -295,7 +295,7 @@ export default function SystemSettings() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Phường/Xã</CardTitle>
+                  <CardTitle>Phường/Xã</CardTitle>
                     <CardDescription className="text-xs">
                       {currentDistrict
                         ? `Thuộc quận: ${currentDistrict.name}`
@@ -351,14 +351,14 @@ export default function SystemSettings() {
                             Thuộc {currentDistrict?.name}
                           </p>
                         </div>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="icon">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                          <div className="flex gap-2">
+                            <Button variant="ghost" size="icon">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                       </div>
                     ))}
                   </div>

@@ -91,7 +91,7 @@ const restaurantsWithPendingDishes = [
     dishes: [
       {
         id: 2,
-        name: "Cơm Gà",
+    name: "Cơm Gà",
         price: 55000,
         image: null,
         tags: ["Mặn"],
@@ -110,9 +110,9 @@ const restaurantsWithPendingDishes = [
         id: 3,
         name: "Bánh Mì Thịt Nướng",
         price: 30000,
-        image: null,
-        tags: ["Mặn"],
-        status: "Pending",
+    image: null,
+    tags: ["Mặn"],
+    status: "Pending",
         description: "Bánh mì thịt nướng giòn tan",
       },
     ],
@@ -335,21 +335,21 @@ export default function DishManagement() {
           <Card className="border shadow-md bg-white" style={{ borderColor: adminColors.primary[200] }}>
             <CardContent className="p-4 md:p-5">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
                   placeholder="Tìm kiếm món ăn hoặc nhà hàng..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 h-9"
-                />
-              </div>
+              />
+            </div>
             </CardContent>
           </Card>
 
           {approvalViewMode === "all" ? (
             <>
               {/* Bulk Actions */}
-              {selectedDishes.length > 0 && (
+            {selectedDishes.length > 0 && (
                 <Card className="border shadow-md bg-white" style={{ borderColor: adminColors.primary[200] }}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -364,12 +364,12 @@ export default function DishManagement() {
                           color: 'white'
                         }}
                       >
-                        <Check className="mr-2 h-4 w-4" />
+                <Check className="mr-2 h-4 w-4" />
                         Duyệt nhanh
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+              </Button>
+          </div>
+        </CardContent>
+      </Card>
               )}
 
               {/* All Pending Dishes Grid */}
@@ -397,92 +397,92 @@ export default function DishManagement() {
                           style={{ borderColor: adminColors.primary[200] }}
                         >
                           <div className="relative aspect-square bg-muted">
-                            {dish.image ? (
-                              <Image
-                                src={dish.image}
-                                alt={dish.name}
-                                fill
-                                className="object-cover"
-                              />
-                            ) : (
-                              <div className="flex h-full items-center justify-center text-muted-foreground">
+              {dish.image ? (
+                <Image
+                  src={dish.image}
+                  alt={dish.name}
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-muted-foreground">
                                 <Utensils className="h-8 w-8" />
-                              </div>
-                            )}
+                </div>
+              )}
                             <div className="absolute top-1.5 right-1.5">
-                              <Checkbox
-                                checked={selectedDishes.includes(dish.id)}
-                                onCheckedChange={() => toggleDishSelection(dish.id)}
+                <Checkbox
+                  checked={selectedDishes.includes(dish.id)}
+                  onCheckedChange={() => toggleDishSelection(dish.id)}
                                 className="bg-white h-4 w-4"
-                              />
-                            </div>
-                          </div>
+                />
+              </div>
+            </div>
                           <CardHeader className="pb-2 px-3 pt-2">
                             <CardTitle className="text-sm font-bold truncate leading-tight" style={{ color: adminColors.primary[700] }}>
                               {dish.name}
                             </CardTitle>
                             <CardDescription className="text-xs truncate">
-                              {dish.restaurant}
-                            </CardDescription>
-                          </CardHeader>
+                  {dish.restaurant}
+              </CardDescription>
+            </CardHeader>
                           <CardContent className="pt-0 px-3 pb-3">
                             <div className="space-y-2">
-                              <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between">
                                 <span className="text-sm font-bold" style={{ color: adminColors.primary[600] }}>
                                   {dish.price.toLocaleString("vi-VN")} đ
-                                </span>
+                  </span>
                                 <Badge variant="pending" className="text-xs px-1.5 py-0">Chờ</Badge>
-                              </div>
-                              <div className="flex flex-wrap gap-1">
+                </div>
+                <div className="flex flex-wrap gap-1">
                                 {dish.tags.slice(0, 2).map((tag) => (
                                   <Badge key={tag} variant="outline" className="text-[10px] px-1 py-0">
-                                    {tag}
-                                  </Badge>
-                                ))}
-                              </div>
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
                               <div className="flex gap-1.5">
-                                <Dialog>
-                                  <DialogTrigger asChild>
+                  <Dialog>
+                    <DialogTrigger asChild>
                                     <Button variant="outline" size="sm" className="flex-1 text-xs h-7 px-2">
                                       <Eye className="mr-1 h-3 w-3" />
-                                      Chi tiết
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent className="max-w-2xl">
-                                    <DialogHeader>
-                                      <DialogTitle>{dish.name}</DialogTitle>
-                                      <DialogDescription>
-                                        Thông tin chi tiết món ăn
-                                      </DialogDescription>
-                                    </DialogHeader>
-                                    <div className="space-y-4">
-                                      <div>
-                                        <h3 className="font-semibold mb-2">Mô tả</h3>
-                                        <p className="text-sm text-muted-foreground">
+                        Chi tiết
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>{dish.name}</DialogTitle>
+                        <DialogDescription>
+                          Thông tin chi tiết món ăn
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="font-semibold mb-2">Mô tả</h3>
+                          <p className="text-sm text-muted-foreground">
                                           {dish.description}
-                                        </p>
-                                      </div>
-                                      <div>
-                                        <h3 className="font-semibold mb-2">Giá</h3>
-                                        <p className="text-lg font-bold">
+                          </p>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold mb-2">Giá</h3>
+                          <p className="text-lg font-bold">
                                           {dish.price.toLocaleString("vi-VN")} đ
-                                        </p>
-                                      </div>
-                                      <div>
-                                        <h3 className="font-semibold mb-2">Tags</h3>
-                                        <div className="flex flex-wrap gap-2">
-                                          {dish.tags.map((tag) => (
-                                            <Badge key={tag} variant="outline">
-                                              {tag}
-                                            </Badge>
-                                          ))}
-                                        </div>
-                                      </div>
-                                      <div>
-                                        <h3 className="font-semibold mb-2">Quán ăn</h3>
+                          </p>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold mb-2">Tags</h3>
+                          <div className="flex flex-wrap gap-2">
+                            {dish.tags.map((tag) => (
+                              <Badge key={tag} variant="outline">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold mb-2">Quán ăn</h3>
                                         <p className="text-sm">{dish.restaurant}</p>
-                                      </div>
-                                    </div>
+                        </div>
+                      </div>
                                     <div className="flex gap-2 pt-4 border-t">
                                       <Button
                                         variant="outline"
@@ -492,17 +492,17 @@ export default function DishManagement() {
                                         <X className="mr-2 h-4 w-4" />
                                         Từ chối
                                       </Button>
-                                      <Button
+                    <Button
                                         onClick={() => handleApprove(dish.id)}
                                         className="flex-1 font-semibold"
                                         style={{
                                           background: adminColors.status.success,
                                           color: 'white'
                                         }}
-                                      >
-                                        <Check className="mr-2 h-4 w-4" />
-                                        Duyệt
-                                      </Button>
+                    >
+                      <Check className="mr-2 h-4 w-4" />
+                      Duyệt
+                    </Button>
                                     </div>
                                   </DialogContent>
                                 </Dialog>
@@ -518,12 +518,12 @@ export default function DishManagement() {
                                   <Check className="mr-1 h-3 w-3" />
                                   Duyệt
                                 </Button>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
                   )}
                 </CardContent>
               </Card>
