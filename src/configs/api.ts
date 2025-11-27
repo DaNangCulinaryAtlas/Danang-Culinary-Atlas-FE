@@ -36,12 +36,13 @@ export const API_ENDPOINTS = {
     // DASHBOARD_ACTIVITIES: '/admin/dashboard/activities', // Lấy danh sách hoạt động gần đây
 
     // User Management - Quản lý người dùng
-    USERS_LIST: '/admin/users', // Danh sách tất cả users (có filter, search, pagination)
-    USER_DETAIL: (id: string) => `/admin/users/${id}`, // Chi tiết user theo ID
-    USER_UPDATE: (id: string) => `/admin/users/${id}`, // Cập nhật thông tin user
-    USER_BAN: (id: string) => `/admin/users/${id}/ban`, // Khóa tài khoản user
-    USER_UNBAN: (id: string) => `/admin/users/${id}/unban`, // Mở khóa tài khoản user
-    USER_CHANGE_ROLE: (id: string) => `/admin/users/${id}/role`, // Thay đổi vai trò (phân quyền)
+    // get list of vendors - http://178.128.208.78:8081/api/v1/admin/accounts/vendors?page=0&size=10
+    VENDORS_LIST: '/admin/accounts/vendors', // Get list of vendors
+    // get list of users - http://178.128.208.78:8081/api/v1/admin/accounts/users?page=0&size=10
+    USERS_LIST: '/admin/accounts/users', // Get list of users
+    UPDATE_ACCOUNT_STATUS: (id: string) => `/admin/accounts/${id}/status`, // Update account status
+    SEND_EMAIL_TO_ACCOUNT: (id: string) => `/admin/accounts/${id}/send-email`, // Send email to account
+    GET_ACCOUNT_DETAIL: (id: string) => `/admin/accounts/${id}`, // Get account detail
 
     // Restaurant Management - Quản lý và kiểm duyệt quán ăn
     RESTAURANTS_PENDING: '/admin/restaurants/pending', // Danh sách quán ăn chờ duyệt
@@ -59,52 +60,27 @@ export const API_ENDPOINTS = {
     DISHES_BULK_APPROVE: '/admin/dishes/bulk-approve', // Duyệt nhiều món ăn cùng lúc -> note 
 
     // Review Moderation - Kiểm duyệt đánh giá
-    REVIEWS_LIST: '/admin/reviews', // Danh sách đánh giá (có filter theo status)
+    REVIEWS_LIST: '/reports/admin', // Danh sách đánh giá (có filter theo status)
     REVIEW_DETAIL: (id: string) => `/admin/reviews/${id}`, // Chi tiết đánh giá
     REVIEW_APPROVE: (id: string) => `/admin/reviews/${id}/approve`, // Duyệt đánh giá
     REVIEW_REJECT: (id: string) => `/admin/reviews/${id}/reject`, // Từ chối đánh giá
 
     // Report Handling - Xử lý báo cáo vi phạm
-    REPORTS_LIST: '/admin/reports', // Danh sách báo cáo (có filter theo status, priority)
-    REPORT_DETAIL: (id: string) => `/admin/reports/${id}`, // Chi tiết báo cáo
-    REPORT_DISMISS: (id: string) => `/admin/reports/${id}/dismiss`, // Bỏ qua báo cáo (giữ nguyên nội dung)
-    REPORT_DELETE_CONTENT: (id: string) => `/admin/reports/${id}/delete-content`, // Xóa nội dung bị báo cáo
-    REPORT_BAN_USER: (id: string) => `/admin/reports/${id}/ban-user`, // Khóa tài khoản người dùng vi phạm
+    REPORTS_LIST: '/reports/admin', // Danh sách báo cáo (bao gồm lý do, status, timestamps)
+    
 
     // System Settings - Cài đặt hệ thống
     // Location Management - Quản lý địa chính
-    PROVINCES_LIST: '/admin/settings/provinces', // Danh sách tỉnh/thành phố
-    PROVINCE_CREATE: '/admin/settings/provinces', // Tạo tỉnh/thành phố mới
-    PROVINCE_UPDATE: (id: string) => `/admin/settings/provinces/${id}`, // Cập nhật tỉnh/thành phố
-    PROVINCE_DELETE: (id: string) => `/admin/settings/provinces/${id}`, // Xóa tỉnh/thành phố
-
-    DISTRICTS_LIST: '/admin/settings/districts', // Danh sách quận/huyện
-    DISTRICTS_BY_PROVINCE: (provinceId: string) => `/admin/settings/districts/province/${provinceId}`, // Quận/huyện theo tỉnh
-    DISTRICT_CREATE: '/admin/settings/districts', // Tạo quận/huyện mới
-    DISTRICT_UPDATE: (id: string) => `/admin/settings/districts/${id}`, // Cập nhật quận/huyện
-    DISTRICT_DELETE: (id: string) => `/admin/settings/districts/${id}`, // Xóa quận/huyện
-
-    WARDS_LIST: '/admin/settings/wards', // Danh sách phường/xã
-    WARDS_BY_DISTRICT: (districtId: string) => `/admin/settings/wards/district/${districtId}`, // Phường/xã theo quận
-    WARD_CREATE: '/admin/settings/wards', // Tạo phường/xã mới
-    WARD_UPDATE: (id: string) => `/admin/settings/wards/${id}`, // Cập nhật phường/xã
-    WARD_DELETE: (id: string) => `/admin/settings/wards/${id}`, // Xóa phường/xã
+    PROVINCES_LIST: '/locations/provinces', // Get all provinces
+    DISTRICTS_BY_PROVINCE: (provinceId: string) => `/locations/provinces/${provinceId}/districts`, // Get all districts by province
+    WARDS_BY_DISTRICT: (districtId: string) => `/locations/districts/${districtId}/wards`, // Get all wards by district
 
     // Tag Management - Quản lý nhãn
-    RESTAURANT_TAGS_LIST: '/admin/settings/restaurant-tags', // Danh sách RestaurantTag
-    RESTAURANT_TAG_CREATE: '/admin/settings/restaurant-tags', // Tạo RestaurantTag mới
-    RESTAURANT_TAG_UPDATE: (id: string) => `/admin/settings/restaurant-tags/${id}`, // Cập nhật RestaurantTag
-    RESTAURANT_TAG_DELETE: (id: string) => `/admin/settings/restaurant-tags/${id}`, // Xóa RestaurantTag
+    RESTAURANT_TAGS_LIST: '/tags/restaurant', // Get all restaurants tags
+    // RESTAURANT_TAG_CREATE: '/tags/restaurant', // Create a new restaurant tag
 
-    DISH_TAGS_LIST: '/admin/settings/dish-tags', // Danh sách DishTag
-    DISH_TAG_CREATE: '/admin/settings/dish-tags', // Tạo DishTag mới
-    DISH_TAG_UPDATE: (id: string) => `/admin/settings/dish-tags/${id}`, // Cập nhật DishTag
-    DISH_TAG_DELETE: (id: string) => `/admin/settings/dish-tags/${id}`, // Xóa DishTag
-
-    // Notifications - Thông báo hệ thống
-    NOTIFICATIONS_LIST: '/admin/notifications', // Danh sách thông báo (quán chờ duyệt, báo cáo mới)
-    NOTIFICATION_READ: (id: string) => `/admin/notifications/${id}/read`, // Đánh dấu đã đọc
-    NOTIFICATIONS_MARK_ALL_READ: '/admin/notifications/read-all', // Đánh dấu tất cả đã đọc
+    DISH_TAGS_LIST: '/tags/dish', // Get all dishes tags
+    // DISH_TAG_CREATE: '/tags/dish', // Create a new dish tag
 
     // Permission Management - Quản trị phân quyền - dùng BASE_URL_2
     PERMISSIONS_LIST: '/admin/permissions/roles/permissions', // Get all roles with their permissions

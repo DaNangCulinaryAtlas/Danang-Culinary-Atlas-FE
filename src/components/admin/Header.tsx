@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAppDispatch } from "@/hooks/useRedux"
 import { logout } from "@/stores/auth"
@@ -18,9 +18,18 @@ import { Badge } from "@/components/ui/badge"
 import { adminColors } from "@/configs/colors"
 
 export default function AdminHeader() {
-  const [notifications] = useState(3) // Mock notification count
+  const notifications = 3
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const dispatch = useAppDispatch()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return null
+  }
 
   const handleLogout = () => {
     dispatch(logout())
