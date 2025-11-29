@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Check, X, MapPin, Clock, FileText, Eye, ArrowLeft, Store, User, Search } from "lucide-react"
+import { Check, X, MapPin, Clock, FileText, Eye, ArrowLeft, Store, User, Search, Loader2 } from "lucide-react"
 import Image from "next/image"
 import {
   Select,
@@ -35,6 +35,38 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { API_ENDPOINTS, BASE_URL } from "@/configs/api"
+
+interface Restaurant {
+  id: string
+  ownerAccountId: string
+  name: string
+  address: string
+  status: string
+  approvalStatus: string
+  createdAt?: string
+  image?: string | null
+  subPhotos?: string[]
+  latitude?: number | null
+  longitude?: number | null
+  averageRating?: number | null
+  totalReviews?: number | null
+}
+
+interface VendorInfo {
+  accountId: string
+  name: string
+  email: string
+  phone: string
+}
+
+interface VendorGroup {
+  ownerAccountId: string
+  name: string
+  email: string
+  phone: string
+  restaurants: Restaurant[]
+}
 
 // Mock data for location filters
 const provinces = [
@@ -251,10 +283,14 @@ const vendors = [
 ]
 
 export default function RestaurantApproval() {
-  const [selectedRestaurant, setSelectedRestaurant] = useState<number | null>(null)
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [vendorsById, setVendorsById] = useState<Record<string, VendorInfo>>({})
+  const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null)
   const [rejectionReason, setRejectionReason] = useState("")
   const [showRejectDialog, setShowRejectDialog] = useState(false)
-  const [selectedVendor, setSelectedVendor] = useState<typeof vendors[0] | null>(null)
+  const [selectedVendor, setSelectedVendor] = useState<VendorGroup | null>(null)
   const [viewMode, setViewMode] = useState<"vendors" | "restaurants">("vendors")
   
   // Search and filter states for pending restaurants
@@ -267,21 +303,86 @@ export default function RestaurantApproval() {
   const [activeViewType, setActiveViewType] = useState<"all" | "vendor">("vendor")
   const [activeSearch, setActiveSearch] = useState("")
   
-  // Filter pending restaurants
-  const filteredPendingRestaurants = pendingRestaurants.filter((restaurant) => {
-    const matchesSearch = !pendingSearch || 
-      restaurant.name.toLowerCase().includes(pendingSearch.toLowerCase())
-    const matchesProvince = pendingProvince === "all" || restaurant.province === pendingProvince
-    const matchesDistrict = pendingDistrict === "all" || restaurant.district === pendingDistrict
-    const matchesWard = pendingWard === "all" || restaurant.ward === pendingWard
-    
-    return matchesSearch && matchesProvince && matchesDistrict && matchesWard
+  // Restaurants từ API: chia pending / active theo approvalStatus & status
+  const pendingFromApi = useMemo(
+    () => restaurants.filter((r) => (r.approvalStatus || "").toUpperCase() === "PENDING"),
+    [restaurants]
+  )
+
+  const activeFromApi = useMemo(
+    () =>
+      restaurants.filter(
+        (r) =>
+          (r.approvalStatus || "").toUpperCase() === "APPROVED" &&
+          (r.status || "").toUpperCase() === "ACTIVE"
+      ),
+    [restaurants]
+  )
+
+  // Filter pending restaurants (search theo tên)
+  const filteredPendingRestaurants = pendingFromApi.filter((restaurant) => {
+    const matchesSearch =
+      !pendingSearch || restaurant.name.toLowerCase().includes(pendingSearch.toLowerCase())
+    // tạm thời bỏ lọc theo tỉnh/quận/xã vì API chưa trả về tên, chỉ có wardId
+    return matchesSearch
   })
-  
+
   // Filter active restaurants (for "all" view)
-  const filteredActiveRestaurants = allActiveRestaurants.filter((restaurant) => {
+  const filteredActiveRestaurants = activeFromApi.filter((restaurant) => {
     return !activeSearch || restaurant.name.toLowerCase().includes(activeSearch.toLowerCase())
   })
+
+  // Group theo vendor từ danh sách active (xem theo Vendor)
+  const vendorGroups: VendorGroup[] = useMemo(() => {
+    const map = new Map<string, VendorGroup>()
+
+    activeFromApi.forEach((r) => {
+      if (!r.ownerAccountId) return
+      const key = r.ownerAccountId
+      const vendorInfo = vendorsById[key]
+      if (!map.has(key)) {
+        map.set(key, {
+          ownerAccountId: key,
+          name: vendorInfo?.name ?? `Vendor ${key.slice(0, 6)}`,
+          email: vendorInfo?.email ?? "",
+          phone: vendorInfo?.phone ?? "",
+          restaurants: [],
+        })
+      }
+      map.get(key)!.restaurants.push(r)
+    })
+
+    // Nếu chưa có data thực (lúc backend chưa kết nối), fallback vào mock vendors
+    if (map.size === 0) {
+      vendors.forEach((v) => {
+        const key = String(v.id)
+        map.set(key, {
+          ownerAccountId: key,
+          name: v.name,
+          email: v.email,
+          phone: v.phone,
+          restaurants: v.restaurants.map(
+            (r: any): Restaurant => ({
+              id: String(r.id),
+              ownerAccountId: key,
+              name: r.name,
+              address: r.address,
+              status: (r.status || "ACTIVE").toUpperCase(),
+              approvalStatus: "APPROVED",
+              createdAt: undefined,
+              image: r.image ?? null,
+              latitude: null,
+              longitude: null,
+              averageRating: null,
+              totalReviews: null,
+            })
+          ),
+        })
+      })
+    }
+
+    return Array.from(map.values())
+  }, [activeFromApi, vendorsById])
   
   // Get districts based on selected province
   const availableDistricts = pendingProvince === "all" 
@@ -293,24 +394,199 @@ export default function RestaurantApproval() {
     ? wards
     : wards.filter(w => w.districtId === districts.find(d => d.name === pendingDistrict)?.id)
 
-  const handleApprove = (id: number) => {
-    // TODO: API call to approve restaurant
-    console.log("Approve restaurant:", id)
+  const fetchRestaurants = async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const token = typeof window !== "undefined" ? window.localStorage.getItem("token") : null
+      const all: Restaurant[] = []
+      let page = 0
+      const size = 100
+
+      // Ví dụ: http://178.128.208.78:8081/api/v1/restaurants/admin?page=0&size=10&sortBy=createdAt&sortDirection=desc
+      // RESTAURANTS_LIST: '/restaurants/admin'
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const params = new URLSearchParams()
+        params.set("page", String(page))
+        params.set("size", String(size))
+        params.set("sortBy", "createdAt")
+        params.set("sortDirection", "desc")
+
+        const response = await fetch(
+          `${BASE_URL}${API_ENDPOINTS.ADMIN.RESTAURANTS_LIST}?${params.toString()}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error("Không thể tải danh sách quán ăn")
+        }
+
+        const data = await response.json()
+        const content = data?.content || data?.data?.content || []
+
+        const normalized: Restaurant[] = content.map((item: any) => ({
+          id: item.restaurantId ?? item.id ?? "",
+          ownerAccountId: item.ownerAccountId ?? "",
+          name: item.name ?? "Không xác định",
+          address: item.address ?? "N/A",
+          status: (item.status || "").toUpperCase(),
+          approvalStatus: (item.approvalStatus || "").toUpperCase(),
+          createdAt: item.createdAt,
+          image: item.images?.photo || null,
+          subPhotos: Array.isArray(item.images?.sub_photo) ? item.images.sub_photo : [],
+          latitude: item.latitude ?? null,
+          longitude: item.longitude ?? null,
+          averageRating: item.averageRating ?? null,
+          totalReviews: item.totalReviews ?? null,
+        }))
+
+        all.push(...normalized)
+
+        if (!Array.isArray(content) || content.length < size) {
+          break
+        }
+
+        page++
+      }
+
+      setRestaurants(all)
+    } catch (err: any) {
+      console.error(err)
+      setError(err?.message || "Có lỗi xảy ra khi tải quán ăn")
+      setRestaurants([])
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleReject = () => {
-    if (selectedRestaurant && rejectionReason) {
-      // TODO: API call to reject restaurant with reason
-      console.log("Reject restaurant:", selectedRestaurant, rejectionReason)
+  const fetchVendors = async () => {
+    try {
+      const token = typeof window !== "undefined" ? window.localStorage.getItem("token") : null
+      const params = new URLSearchParams()
+      params.set("page", "0")
+      params.set("size", "200")
+
+      const response = await fetch(
+        `${BASE_URL}${API_ENDPOINTS.ADMIN.VENDORS_LIST}?${params.toString()}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        }
+      )
+
+      if (!response.ok) {
+        console.error("Không thể tải danh sách vendor")
+        return
+      }
+
+      const data = await response.json()
+      const content = data?.data?.content || data?.content || data?.data || []
+
+      const map: Record<string, VendorInfo> = {}
+      ;(content as any[]).forEach((item: any) => {
+        const accountId = item.accountId ?? item.id
+        if (!accountId) return
+        map[String(accountId)] = {
+          accountId: String(accountId),
+          name:
+            item.fullName ||
+            [item.firstName, item.lastName].filter(Boolean).join(" ") ||
+            item.vendorName ||
+            `Vendor ${String(accountId).slice(0, 6)}`,
+          email: item.email ?? "",
+          phone: item.phoneNumber ?? "",
+        }
+      })
+
+      setVendorsById(map)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  useEffect(() => {
+    fetchRestaurants()
+    fetchVendors()
+  }, [])
+
+  const handleApprove = async (restaurant: Restaurant) => {
+    try {
+      const token = typeof window !== "undefined" ? window.localStorage.getItem("token") : null
+      const body = {
+        status: "APPROVED",
+        rejectionReason: null,
+      }
+
+      const response = await fetch(
+        `${BASE_URL}${API_ENDPOINTS.ADMIN.RESTAURANT_APPROVE(restaurant.id)}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify(body),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error("Không thể duyệt quán ăn")
+      }
+
+      await fetchRestaurants()
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const handleReject = async () => {
+    if (!selectedRestaurant || !rejectionReason.trim()) {
+      return
+    }
+
+    try {
+      const token = typeof window !== "undefined" ? window.localStorage.getItem("token") : null
+      const body = {
+        status: "REJECTED",
+        rejectionReason,
+      }
+
+      const response = await fetch(
+        `${BASE_URL}${API_ENDPOINTS.ADMIN.RESTAURANT_APPROVE(selectedRestaurant.id)}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify(body),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error("Không thể từ chối quán ăn")
+      }
+
       setShowRejectDialog(false)
       setRejectionReason("")
       setSelectedRestaurant(null)
+      await fetchRestaurants()
+    } catch (error) {
+      console.error(error)
     }
   }
 
   return (
     <div className="space-y-6">
-      <div 
+      <div
         className="rounded-xl p-5 md:p-6 text-white shadow-lg"
         style={{ background: adminColors.gradients.primary }}
       >
@@ -323,7 +599,10 @@ export default function RestaurantApproval() {
       <Tabs defaultValue="pending" className="space-y-4">
         <TabsList>
           <TabsTrigger value="pending">
-            Chờ duyệt <Badge variant="destructive" className="ml-2">2</Badge>
+            Chờ duyệt{" "}
+            <Badge variant="destructive" className="ml-2">
+              {pendingFromApi.length}
+            </Badge>
           </TabsTrigger>
           <TabsTrigger value="active">Đang hoạt động</TabsTrigger>
         </TabsList>
@@ -436,14 +715,22 @@ export default function RestaurantApproval() {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {isLoading ? (
+                <div className="flex items-center justify-center py-10 text-muted-foreground">
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Đang tải danh sách quán ăn...
+                </div>
+              ) : error ? (
+                <div className="py-8 text-center text-sm text-red-600">{error}</div>
+              ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>ID</TableHead>
                     <TableHead>Tên quán</TableHead>
                     <TableHead>Địa chỉ</TableHead>
-                    <TableHead>Vendor</TableHead>
-                    <TableHead>Ngày gửi</TableHead>
+                    <TableHead>Trạng thái</TableHead>
+                    <TableHead>Ngày tạo</TableHead>
                     <TableHead>Hành động</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -462,8 +749,14 @@ export default function RestaurantApproval() {
                         {restaurant.name}
                       </TableCell>
                       <TableCell>{restaurant.address}</TableCell>
-                      <TableCell>{restaurant.vendor}</TableCell>
-                      <TableCell>{restaurant.submittedDate}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{restaurant.approvalStatus}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        {restaurant.createdAt
+                          ? new Date(restaurant.createdAt).toLocaleString()
+                          : "-"}
+                      </TableCell>
                       <TableCell>
                         <Dialog>
                           <DialogTrigger asChild>
@@ -497,17 +790,17 @@ export default function RestaurantApproval() {
                                     </div>
                                     <div className="flex items-start gap-2">
                                       <Clock className="h-4 w-4 mt-0.5" />
-                                      <span>
-                                        <span className="font-medium">Giờ mở cửa:</span>{" "}
-                                        08:00 - 22:00
-                                      </span>
+                                        <span>
+                                          <span className="font-medium">Giờ mở cửa:</span>{" "}
+                                          Chưa có thông tin
+                                        </span>
                                     </div>
                                     <div className="flex items-start gap-2">
                                       <FileText className="h-4 w-4 mt-0.5" />
-                                      <span>
-                                        <span className="font-medium">Mô tả:</span>{" "}
-                                        Quán ăn chuyên về bún bò Huế truyền thống
-                                      </span>
+                                        <span>
+                                          <span className="font-medium">Mô tả:</span>{" "}
+                                          Thông tin mô tả đang được cập nhật
+                                        </span>
                                     </div>
                                   </div>
                                 </div>
@@ -523,15 +816,40 @@ export default function RestaurantApproval() {
                               <div className="space-y-4">
                                 <div>
                                   <h3 className="font-semibold mb-2">Hình ảnh quán ăn</h3>
-                                  <div className="grid grid-cols-2 gap-2">
-                                    {[1, 2, 3, 4].map((i) => (
-                                      <div
-                                        key={i}
-                                        className="h-32 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground"
-                                      >
-                                        Hình {i}
+                                  <div className="space-y-3">
+                                    <div className="h-40 bg-muted rounded-md flex items-center justify-center overflow-hidden">
+                                      {restaurant.image ? (
+                                        <Image
+                                          src={restaurant.image}
+                                          alt={restaurant.name}
+                                          width={400}
+                                          height={260}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      ) : (
+                                        <div className="flex flex-col items-center justify-center text-xs text-muted-foreground">
+                                          <Store className="h-8 w-8 mb-1 text-gray-400" />
+                                          Chưa có ảnh đại diện
+                                        </div>
+                                      )}
+                                    </div>
+                                    {restaurant.subPhotos && restaurant.subPhotos.length > 0 && (
+                                      <div className="grid grid-cols-3 gap-2">
+                                        {restaurant.subPhotos.slice(0, 9).map((url, index) => (
+                                          <div
+                                            key={index}
+                                            className="relative h-20 rounded-md overflow-hidden bg-muted"
+                                          >
+                                            <Image
+                                              src={url}
+                                              alt={`${restaurant.name} - hình ${index + 1}`}
+                                              fill
+                                              className="object-cover"
+                                            />
+                                          </div>
+                                        ))}
                                       </div>
-                                    ))}
+                                    )}
                                   </div>
                                 </div>
                                 <div>
@@ -548,7 +866,7 @@ export default function RestaurantApproval() {
                               <Button
                                 variant="outline"
                                 onClick={() => {
-                                  setSelectedRestaurant(restaurant.id)
+                                  setSelectedRestaurant(restaurant)
                                   setShowRejectDialog(true)
                                 }}
                               >
@@ -556,7 +874,7 @@ export default function RestaurantApproval() {
                                 Từ chối
                               </Button>
                               <Button
-                                onClick={() => handleApprove(restaurant.id)}
+                                onClick={() => handleApprove(restaurant)}
                                 className="bg-green-600 hover:bg-green-700"
                               >
                                 <Check className="mr-2 h-4 w-4" />
@@ -571,6 +889,7 @@ export default function RestaurantApproval() {
                   )}
                 </TableBody>
               </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -642,10 +961,17 @@ export default function RestaurantApproval() {
                   </CardTitle>
                   <CardDescription className="font-semibold" style={{ color: adminColors.primary[200] }}>
                     Tổng số: {filteredActiveRestaurants.length} quán
-              </CardDescription>
-            </CardHeader>
+                  </CardDescription>
+                </CardHeader>
                 <CardContent className="p-6">
-                  {filteredActiveRestaurants.length === 0 ? (
+                  {isLoading ? (
+                    <div className="flex items-center justify-center py-10 text-muted-foreground">
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Đang tải danh sách quán ăn...
+                    </div>
+                  ) : error ? (
+                    <div className="py-8 text-center text-sm text-red-600">{error}</div>
+                  ) : filteredActiveRestaurants.length === 0 ? (
                     <div className="text-center py-12 text-muted-foreground">
                       Không tìm thấy quán ăn nào
                     </div>
@@ -685,10 +1011,10 @@ export default function RestaurantApproval() {
                           <CardContent className="pt-0">
                             <div className="flex items-center justify-between mb-4">
                               <div>
-                                <p className="text-xs font-semibold text-gray-500">Vendor:</p>
-                                <p className="text-sm font-medium">{restaurant.vendor}</p>
+                                <p className="text-xs font-semibold text-gray-500">Trạng thái:</p>
+                                <p className="text-sm font-medium">{restaurant.status}</p>
                               </div>
-                        <Badge variant="approved">{restaurant.status}</Badge>
+                              <Badge variant="approved">Hoạt động</Badge>
                             </div>
                             <Dialog>
                               <DialogTrigger asChild>
@@ -729,17 +1055,17 @@ export default function RestaurantApproval() {
                                         </div>
                                         <div className="flex items-start gap-2">
                                           <Clock className="h-4 w-4 mt-0.5" />
-                                          <span>
-                                            <span className="font-medium">Giờ mở cửa:</span>{" "}
-                                            08:00 - 22:00
-                                          </span>
+                                        <span>
+                                          <span className="font-medium">Giờ mở cửa:</span>{" "}
+                                          Chưa có thông tin
+                                        </span>
                                         </div>
                                         <div className="flex items-start gap-2">
                                           <FileText className="h-4 w-4 mt-0.5" />
                                           <span>
-                                            <span className="font-medium">Mô tả:</span>{" "}
-                                            Quán ăn đang hoạt động tốt
-                                          </span>
+                                          <span className="font-medium">Mô tả:</span>{" "}
+                                          Thông tin mô tả đang được cập nhật
+                                        </span>
                                         </div>
                                       </div>
                                     </div>
@@ -755,15 +1081,40 @@ export default function RestaurantApproval() {
                                   <div className="space-y-4">
                                     <div>
                                       <h3 className="font-semibold mb-2">Hình ảnh quán ăn</h3>
-                                      <div className="grid grid-cols-2 gap-2">
-                                        {[1, 2, 3, 4].map((i) => (
-                                          <div
-                                            key={i}
-                                            className="h-32 bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground"
-                                          >
-                                            Hình {i}
+                                      <div className="space-y-3">
+                                        <div className="h-40 bg-muted rounded-md flex items-center justify-center overflow-hidden">
+                                          {restaurant.image ? (
+                                            <Image
+                                              src={restaurant.image}
+                                              alt={restaurant.name}
+                                              width={400}
+                                              height={260}
+                                              className="w-full h-full object-cover"
+                                            />
+                                          ) : (
+                                            <div className="flex flex-col items-center justify-center text-xs text-muted-foreground">
+                                              <Store className="h-8 w-8 mb-1 text-gray-400" />
+                                              Chưa có ảnh đại diện
+                                            </div>
+                                          )}
+                                        </div>
+                                        {restaurant.subPhotos && restaurant.subPhotos.length > 0 && (
+                                          <div className="grid grid-cols-3 gap-2">
+                                            {restaurant.subPhotos.slice(0, 9).map((url, index) => (
+                                              <div
+                                                key={index}
+                                                className="relative h-20 rounded-md overflow-hidden bg-muted"
+                                              >
+                                                <Image
+                                                  src={url}
+                                                  alt={`${restaurant.name} - hình ${index + 1}`}
+                                                  fill
+                                                  className="object-cover"
+                                                />
+                                              </div>
+                                            ))}
                                           </div>
-                                        ))}
+                                        )}
                                       </div>
                                     </div>
                                   </div>
@@ -786,14 +1137,14 @@ export default function RestaurantApproval() {
               >
                 <CardTitle className="text-white text-xl font-bold">Danh sách Vendor</CardTitle>
                 <CardDescription className="font-semibold" style={{ color: adminColors.primary[200] }}>
-                  Tổng số: {vendors.length} vendor đang hoạt động
+                  Tổng số: {vendorGroups.length} vendor đang hoạt động
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {vendors.map((vendor) => (
+                <CardContent className="p-6">
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {vendorGroups.map((vendor) => (
                     <Card
-                      key={vendor.id}
+                      key={vendor.ownerAccountId}
                       className="border-2 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer group bg-white"
                       style={{ borderColor: adminColors.primary[200] }}
                       onClick={() => {
@@ -813,7 +1164,7 @@ export default function RestaurantApproval() {
                             className="h-12 w-12 rounded-xl flex items-center justify-center shadow-lg ring-2 transition-transform group-hover:scale-110"
                             style={{ 
                               background: adminColors.gradients.primarySoft,
-                              ringColor: adminColors.primary[200]
+                              ["--tw-ring-color" as string]: adminColors.primary[200],
                             }}
                           >
                             <User className="h-6 w-6 text-white" />
@@ -846,7 +1197,7 @@ export default function RestaurantApproval() {
                                 color: 'white'
                               }}
                             >
-                              {vendor.totalRestaurants}
+                              {vendor.restaurants.length}
                             </Badge>
                           </div>
                         </div>
@@ -918,7 +1269,7 @@ export default function RestaurantApproval() {
                     Danh sách Quán ăn
                   </CardTitle>
                   <CardDescription className="font-semibold" style={{ color: adminColors.primary[200] }}>
-                    {selectedVendor?.name} - Tổng số: {selectedVendor?.totalRestaurants} quán
+                    {selectedVendor?.name} - Tổng số: {selectedVendor?.restaurants.length ?? 0} quán
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-6">
@@ -955,13 +1306,17 @@ export default function RestaurantApproval() {
                           </CardDescription>
                         </CardHeader>
                         <CardContent className="pt-0">
-                          <div className="flex items-center justify-between mb-4">
-                            <div>
-                              <p className="text-xs font-semibold text-gray-500">Ngày duyệt:</p>
-                              <p className="text-sm font-medium">{restaurant.approvedDate}</p>
+                            <div className="flex items-center justify-between mb-4">
+                              <div>
+                                <p className="text-xs font-semibold text-gray-500">Ngày tạo:</p>
+                                <p className="text-sm font-medium">
+                                  {restaurant.createdAt
+                                    ? new Date(restaurant.createdAt).toLocaleString()
+                                    : "-"}
+                                </p>
+                              </div>
+                              <Badge variant="approved">{restaurant.status}</Badge>
                             </div>
-                            <Badge variant="approved">{restaurant.status}</Badge>
-                          </div>
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button

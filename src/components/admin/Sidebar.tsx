@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import { useAppDispatch } from "@/hooks/useRedux"
 import { logout } from "@/stores/auth"
 import {
@@ -19,6 +20,7 @@ import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { adminColors } from "@/configs/colors"
+import { API_ENDPOINTS, BASE_URL } from "@/configs/api"
 
 const menuItems = [
   {
@@ -40,7 +42,6 @@ const menuItems = [
     title: "Quản lý Quán ăn",
     href: "/admin/restaurants",
     icon: Store,
-    badge: 5, // Số lượng chờ duyệt
   },
   {
     title: "Quản lý Món ăn",
@@ -68,6 +69,51 @@ export default function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const dispatch = useAppDispatch()
+  const [pendingRestaurantsCount, setPendingRestaurantsCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    const fetchPendingRestaurantsCount = async () => {
+      try {
+        const token =
+          typeof window !== "undefined" ? window.localStorage.getItem("token") : null
+
+        const params = new URLSearchParams()
+        params.set("page", "0")
+        params.set("size", "500") // lấy nhiều một lần, đủ cho hầu hết trường hợp
+        params.set("sortBy", "createdAt")
+        params.set("sortDirection", "desc")
+
+        const response = await fetch(
+          `${BASE_URL}${API_ENDPOINTS.ADMIN.RESTAURANTS_LIST}?${params.toString()}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error("Không thể tải danh sách quán ăn")
+        }
+
+        const data = await response.json()
+        const content: any[] = data?.content || data?.data?.content || []
+
+        // Đếm số quán có approvalStatus = PENDING
+        const pendingCount = content.filter(
+          (item) => String(item.approvalStatus || "").toUpperCase() === "PENDING"
+        ).length
+
+        setPendingRestaurantsCount(pendingCount)
+      } catch (error) {
+        console.error(error)
+        setPendingRestaurantsCount(null)
+      }
+    }
+
+    fetchPendingRestaurantsCount()
+  }, [])
 
   const handleLogout = () => {
     dispatch(logout())
@@ -147,7 +193,7 @@ export default function Sidebar() {
                 isActive ? "text-white scale-110" : "group-hover:text-white group-hover:scale-110"
               )} style={!isActive ? { color: adminColors.primary[300] } : {}} />
               <span className="flex-1">{item.title}</span>
-              {item.badge && (
+              {item.href === "/admin/restaurants" && pendingRestaurantsCount !== null && (
                 <Badge 
                   className="ml-auto text-xs font-bold px-2 py-0.5 rounded-full text-white shadow-lg"
                   style={{
@@ -156,7 +202,7 @@ export default function Sidebar() {
                       : `rgba(239, 68, 68, 0.85)`
                   }}
                 >
-                  {item.badge}
+                  {pendingRestaurantsCount}
                 </Badge>
               )}
               {isActive && (

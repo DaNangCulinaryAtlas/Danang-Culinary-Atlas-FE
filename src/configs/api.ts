@@ -36,21 +36,19 @@ export const API_ENDPOINTS = {
     // DASHBOARD_ACTIVITIES: '/admin/dashboard/activities', // Lấy danh sách hoạt động gần đây
 
     // User Management - Quản lý người dùng
-    // get list of vendors - http://178.128.208.78:8081/api/v1/admin/accounts/vendors?page=0&size=10
     VENDORS_LIST: '/admin/accounts/vendors', // Get list of vendors
-    // get list of users - http://178.128.208.78:8081/api/v1/admin/accounts/users?page=0&size=10
     USERS_LIST: '/admin/accounts/users', // Get list of users
     UPDATE_ACCOUNT_STATUS: (id: string) => `/admin/accounts/${id}/status`, // Update account status
     SEND_EMAIL_TO_ACCOUNT: (id: string) => `/admin/accounts/${id}/send-email`, // Send email to account
     GET_ACCOUNT_DETAIL: (id: string) => `/admin/accounts/${id}`, // Get account detail
 
     // Restaurant Management - Quản lý và kiểm duyệt quán ăn
-    RESTAURANTS_PENDING: '/admin/restaurants/pending', // Danh sách quán ăn chờ duyệt
-    RESTAURANTS_ACTIVE: '/admin/restaurants/active', // Danh sách quán ăn đang hoạt động
-    RESTAURANT_DETAIL: (id: string) => `/admin/restaurants/${id}`, // Chi tiết quán ăn (bao gồm business license)
-    RESTAURANT_APPROVE: (id: string) => `/admin/restaurants/${id}/approve`, // Duyệt quán ăn
-    RESTAURANT_REJECT: (id: string) => `/admin/restaurants/${id}/reject`, // Từ chối quán ăn (có lý do)
-    RESTAURANT_UPDATE: (id: string) => `/admin/restaurants/${id}`, // Cập nhật thông tin quán ăn
+    RESTAURANTS_LIST: '/restaurants/admin', // Danh sách quán ăn (any STATUS: ALL, PENDING, APPROVED, REJECTED)
+    RESTAURANT_DETAIL: (id: string) => `/restaurants/${id}`, // Chi tiết quán ăn 
+    RESTAURANT_DELETE: (id: string) => `/restaurants/${id}`, // Xóa quán ăn
+    RESTAURANT_UPDATE: (id: string) => `/restaurants/${id}`, // Cập nhật thông tin quán ăn - PATCH
+    RESTAURANT_APPROVE: (id: string) => `/restaurants/admin/${id}/approval`, // Duyệt quán ăn
+    RESTAURANT_BY_VENDOR_ID: (vendorId: string) => `/vendors/${vendorId}/restaurants`, // Lấy quán ăn theo vendorId
 
     // Dish Management - Quản lý và kiểm duyệt món ăn
     DISHES_LIST: '/admin/dishes', // Danh sách món ăn (có filter theo status, search)
