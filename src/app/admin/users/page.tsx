@@ -3,8 +3,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { adminColors } from "@/configs/colors"
@@ -23,166 +21,50 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Search, Eye, Lock, Unlock, Mail, Loader2 } from "lucide-react"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Search, Eye, Lock, Unlock, Mail, Loader2 } from "lucide-react"
 import Image from "next/image"
-import { BASE_URL, API_ENDPOINTS } from "@/configs/api"
-
-interface AccountItem {
-  id: string
-  name: string
-  email: string
-  role: string
-  status: string
-  avatarUrl?: string | null
-  joinedAt?: string
-  phone?: string
-  vendorName?: string
-}
-
-const roleLabels: Record<string, string> = {
-  USER: "User",
-  VENDOR: "Vendor",
-  ADMIN: "Admin",
-}
-
-const statusLabels: Record<string, string> = {
-  ACTIVE: "Active",
-  BLOCKED: "Blocked",
-  DELETED: "Deleted",
-}
-
-const formatDate = (value?: string) => {
-  if (!value) return "-"
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return date.toLocaleDateString("vi-VN")
-}
-
-const isValidImageUrl = (value?: string | null) => {
-  if (!value || typeof value !== "string") return false
-  try {
-    // Next/Image requires absolute URLs unless configured otherwise
-    const parsed = new URL(value)
-    return Boolean(parsed.protocol && parsed.host)
-  } catch {
-    return false
-  }
-}
+import { useAccounts } from "./hooks/useAccounts"
+import { useAccountActions } from "./hooks/useAccountActions"
+import { formatDate, isValidImageUrl, displayStatus, displayRole } from "./utils/accountUtils"
+import Toast from "./components/Toast"
+import EmailDialog from "./components/EmailDialog"
+import BlockConfirmDialog from "./components/BlockConfirmDialog"
+import type { AccountItem } from "./types"
 
 export default function UserVendorManagement() {
   const [isMounted, setIsMounted] = useState(false)
-  const [accounts, setAccounts] = useState<AccountItem[]>([])
   const [accountType, setAccountType] = useState<"USER" | "VENDOR">("USER")
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("ALL")
   const [selectedAccount, setSelectedAccount] = useState<AccountItem | null>(null)
-  const [emailSubject, setEmailSubject] = useState("")
-  const [emailContent, setEmailContent] = useState("")
-  const [isSendingEmail, setIsSendingEmail] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [confirmAccount, setConfirmAccount] = useState<AccountItem | null>(null)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
-  const [totalAccounts, setTotalAccounts] = useState(0)
-  const [updatingAccountId, setUpdatingAccountId] = useState<string | null>(null)
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null)
-  const [confirmAccount, setConfirmAccount] = useState<AccountItem | null>(null)
 
-  const showToast = (type: "success" | "error", message: string) => {
-    setToast({ type, message })
-    setTimeout(() => setToast(null), 3000)
-  }
+  const { accounts, isLoading, error, totalAccounts, refetch } = useAccounts(accountType, statusFilter)
+  const { updateAccountStatus, sendEmail, updatingAccountId, isSendingEmail } = useAccountActions(refetch)
 
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  const fetchAccounts = async () => {
-    setIsLoading(true)
-    setError(null)
-    try {
-      const token = typeof window !== "undefined" ? window.localStorage.getItem("token") : null
-      const endpoint =
-        accountType === "VENDOR"
-          ? API_ENDPOINTS.ADMIN.VENDORS_LIST
-          : API_ENDPOINTS.ADMIN.USERS_LIST
-      const chunkSize = 200
-      let currentPage = 0
-      let accumulated: AccountItem[] = []
-      let totalElements = 0
-      while (true) {
-        const params = new URLSearchParams()
-        params.set("page", String(currentPage))
-        params.set("size", String(chunkSize))
-        if (statusFilter !== "ALL") params.set("status", statusFilter)
-        const response = await fetch(`${BASE_URL}${endpoint}?${params.toString()}`, {
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-        })
-        if (!response.ok) {
-          throw new Error("Không thể tải danh sách tài khoản")
-        }
-        const data = await response.json()
-        const content = data?.data?.content || data?.data?.items || data?.data || []
-        const normalized: AccountItem[] = content.map((item: any, index: number) => ({
-          id: String(item.accountId ?? item.id ?? item.email ?? `${currentPage}-${index}`),
-          name:
-            item.fullName ||
-            item.name ||
-            [item.firstName, item.lastName].filter(Boolean).join(" ") ||
-            item.email?.split("@")[0] ||
-            "Không xác định",
-          email: item.email ?? "N/A",
-          role: (item.role || accountType).toUpperCase(),
-          status: (item.status || "ACTIVE").toUpperCase(),
-          avatarUrl: item.avatarUrl || item.avatar || null,
-          joinedAt: item.createdAt || item.joinDate || item.updatedAt,
-          phone: item.phoneNumber || item.phone || "",
-          vendorName: item.vendorName || item.businessName || "",
-        }))
-        accumulated = [...accumulated, ...normalized]
-        totalElements =
-          data?.data?.totalElements ||
-          data?.data?.total ||
-          data?.meta?.total ||
-          data?.totalElements ||
-          accumulated.length
-        if (accumulated.length >= totalElements || content.length === 0) {
-          break
-        }
-        currentPage += 1
-      }
-      setAccounts(accumulated)
-      setTotalAccounts(accumulated.length)
-    } catch (err: any) {
-      console.error(err)
-      setError(err?.message || "Có lỗi xảy ra")
-      setAccounts([])
-      setTotalAccounts(0)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchAccounts()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accountType, statusFilter])
-
   useEffect(() => {
     setPage(1)
   }, [accountType, statusFilter, searchQuery])
+
+  const showToast = (type: "success" | "error", message: string) => {
+    setToast({ type, message })
+    setTimeout(() => setToast(null), 3000)
+  }
 
   const filteredAccounts = useMemo(() => {
     const keyword = searchQuery.trim().toLowerCase()
@@ -207,64 +89,22 @@ export default function UserVendorManagement() {
       setConfirmAccount(account)
       return
     }
-    await submitUpdateStatus(account, nextStatus)
+    const result = await updateAccountStatus(account, nextStatus)
+    showToast(result.success ? "success" : "error", result.message)
   }
 
-  const submitUpdateStatus = async (account: AccountItem, nextStatus: string) => {
-    setUpdatingAccountId(account.id)
-    try {
-      const token = typeof window !== "undefined" ? window.localStorage.getItem("token") : null
-      const response = await fetch(`${BASE_URL}${API_ENDPOINTS.ADMIN.UPDATE_ACCOUNT_STATUS(account.id)}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ status: nextStatus }),
-      })
-      if (!response.ok) {
-        throw new Error("Không thể cập nhật trạng thái")
-      }
-      showToast("success", "Đã cập nhật trạng thái tài khoản")
-      fetchAccounts()
-    } catch (error) {
-      console.error(error)
-      showToast("error", "Cập nhật trạng thái thất bại")
-    } finally {
-      setUpdatingAccountId(null)
-    }
+  const handleConfirmBlock = async () => {
+    if (!confirmAccount) return
+    const result = await updateAccountStatus(confirmAccount, "BLOCKED")
+    showToast(result.success ? "success" : "error", result.message)
+    setConfirmAccount(null)
   }
 
-  const handleSendEmail = async () => {
-    if (!selectedAccount || !emailSubject.trim() || !emailContent.trim()) return
-    setIsSendingEmail(true)
-    try {
-      const token = typeof window !== "undefined" ? window.localStorage.getItem("token") : null
-      const response = await fetch(`${BASE_URL}${API_ENDPOINTS.ADMIN.SEND_EMAIL_TO_ACCOUNT(selectedAccount.id)}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ subject: emailSubject, content: emailContent }),
-      })
-      if (!response.ok) {
-        throw new Error("Không thể gửi email")
-      }
-      setEmailSubject("")
-      setEmailContent("")
-      setSelectedAccount(null)
-      showToast("success", "Email đã được gửi thành công")
-    } catch (error) {
-      console.error(error)
-      showToast("error", "Gửi email thất bại")
-    } finally {
-      setIsSendingEmail(false)
-    }
+  const handleSendEmail = async (accountId: string, subject: string, content: string) => {
+    const result = await sendEmail(accountId, subject, content)
+    showToast(result.success ? "success" : "error", result.message)
+    return result
   }
-
-  const displayStatus = (status: string) => statusLabels[status] || status
-  const displayRole = (role: string) => roleLabels[role] || role
 
   if (!isMounted) {
     return null
@@ -272,17 +112,7 @@ export default function UserVendorManagement() {
 
   return (
     <div className="space-y-6">
-      {toast && (
-        <div
-          className={`fixed top-4 right-4 z-50 rounded-lg border px-4 py-3 text-sm shadow-lg transition-all ${
-            toast.type === "success"
-              ? "border-green-200 bg-green-50 text-green-700"
-              : "border-red-200 bg-red-50 text-red-700"
-          }`}
-        >
-          {toast.message}
-        </div>
-      )}
+      {toast && <Toast type={toast.type} message={toast.message} />}
 
       <div
         className="rounded-xl p-5 md:p-6 text-white shadow-lg"
@@ -361,38 +191,38 @@ export default function UserVendorManagement() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Avatar</TableHead>
-                <TableHead>Họ tên</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Vai trò</TableHead>
-                <TableHead>Trạng thái</TableHead>
-                <TableHead>Ngày tham gia</TableHead>
-                <TableHead>Hành động</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Avatar</TableHead>
+                    <TableHead>Họ tên</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Vai trò</TableHead>
+                    <TableHead>Trạng thái</TableHead>
+                    <TableHead>Ngày tham gia</TableHead>
+                    <TableHead>Hành động</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {paginatedAccounts.map((account) => (
                     <TableRow key={account.id}>
                       <TableCell className="font-semibold text-gray-600">{account.id}</TableCell>
-                  <TableCell>
+                      <TableCell>
                         {isValidImageUrl(account.avatarUrl) ? (
-                      <Image
+                          <Image
                             src={account.avatarUrl as string}
                             alt={account.name}
                             width={36}
                             height={36}
                             className="rounded-full object-cover"
-                      />
-                    ) : (
+                          />
+                        ) : (
                           <div className="h-9 w-9 rounded-full bg-gray-100 flex items-center justify-center font-semibold text-gray-500">
                             {account.name.charAt(0)}
-                      </div>
-                    )}
-                  </TableCell>
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell className="font-medium">
                         <div>{account.name}</div>
                         {account.vendorName && (
@@ -403,120 +233,81 @@ export default function UserVendorManagement() {
                         <div>{account.email}</div>
                         {account.phone && <p className="text-xs text-muted-foreground">{account.phone}</p>}
                       </TableCell>
-                  <TableCell>
+                      <TableCell>
                         <Badge variant="secondary">{displayRole(account.role)}</Badge>
-                  </TableCell>
-                  <TableCell>
+                      </TableCell>
+                      <TableCell>
                         <Badge variant={account.status === "ACTIVE" ? "success" : "destructive"}>
                           {displayStatus(account.status)}
-                    </Badge>
-                  </TableCell>
+                        </Badge>
+                      </TableCell>
                       <TableCell>{formatDate(account.joinedAt)}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
-                          <DialogHeader>
-                                <DialogTitle>Chi tiết tài khoản</DialogTitle>
-                                <DialogDescription>ID: {account.id}</DialogDescription>
-                          </DialogHeader>
-                              <div className="space-y-3 text-sm">
-                                <p><strong>Họ tên:</strong> {account.name}</p>
-                                <p><strong>Email:</strong> {account.email}</p>
-                                {account.phone && <p><strong>Số điện thoại:</strong> {account.phone}</p>}
-                                <p><strong>Vai trò:</strong> {displayRole(account.role)}</p>
-                                <p><strong>Trạng thái:</strong> {displayStatus(account.status)}</p>
-                                <p><strong>Ngày tham gia:</strong> {formatDate(account.joinedAt)}</p>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                            title={account.status === "ACTIVE" ? "Khóa tài khoản" : "Mở khóa"}
-                            onClick={() => handleUpdateStatus(account)}
-                            disabled={updatingAccountId === account.id}
-                      >
-                            {updatingAccountId === account.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : account.status === "ACTIVE" ? (
-                          <Lock className="h-4 w-4" />
-                        ) : (
-                          <Unlock className="h-4 w-4" />
-                        )}
-                      </Button>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
                           <Dialog>
                             <DialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                title="Gửi email"
-                                onClick={() => setSelectedAccount(account)}
-                              >
-                                <Mail className="h-4 w-4" />
+                              <Button variant="ghost" size="icon">
+                                <Eye className="h-4 w-4" />
                               </Button>
                             </DialogTrigger>
                             <DialogContent className="max-w-2xl">
                               <DialogHeader>
-                                <DialogTitle>Gửi Email</DialogTitle>
-                                <DialogDescription>
-                                  Gửi tới: <span className="font-semibold text-foreground">{account.email}</span>
-                                </DialogDescription>
+                                <DialogTitle>Chi tiết tài khoản</DialogTitle>
+                                <DialogDescription>ID: {account.id}</DialogDescription>
                               </DialogHeader>
-                              <div className="space-y-4 py-4">
-                                <div className="space-y-2">
-                                  <Label htmlFor="email-subject">Tiêu đề</Label>
-                                  <Input
-                                    id="email-subject"
-                                    placeholder="Nhập tiêu đề email..."
-                                    value={emailSubject}
-                                    onChange={(e) => setEmailSubject(e.target.value)}
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label htmlFor="email-content">Nội dung</Label>
-                                  <Textarea
-                                    id="email-content"
-                                    placeholder="Nhập nội dung email..."
-                                    value={emailContent}
-                                    onChange={(e) => setEmailContent(e.target.value)}
-                                    rows={8}
-                                  />
-                                </div>
+                              <div className="space-y-3 text-sm">
+                                <p>
+                                  <strong>Họ tên:</strong> {account.name}
+                                </p>
+                                <p>
+                                  <strong>Email:</strong> {account.email}
+                                </p>
+                                {account.phone && (
+                                  <p>
+                                    <strong>Số điện thoại:</strong> {account.phone}
+                                  </p>
+                                )}
+                                <p>
+                                  <strong>Vai trò:</strong> {displayRole(account.role)}
+                                </p>
+                                <p>
+                                  <strong>Trạng thái:</strong> {displayStatus(account.status)}
+                                </p>
+                                <p>
+                                  <strong>Ngày tham gia:</strong> {formatDate(account.joinedAt)}
+                                </p>
                               </div>
-                              <DialogFooter>
-                                <Button
-                                  variant="outline"
-                                  onClick={() => {
-                                    setEmailSubject("")
-                                    setEmailContent("")
-                                    setSelectedAccount(null)
-                                  }}
-                                >
-                                  Hủy
-                                </Button>
-                                <Button
-                                  onClick={handleSendEmail}
-                                  disabled={!emailSubject.trim() || !emailContent.trim() || isSendingEmail}
-                                  style={{ background: adminColors.gradients.primarySoft }}
-                                  className="text-white hover:opacity-90"
-                                >
-                                  {isSendingEmail ? "Đang gửi..." : "Gửi Email"}
-                      </Button>
-                              </DialogFooter>
                             </DialogContent>
                           </Dialog>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title={account.status === "ACTIVE" ? "Khóa tài khoản" : "Mở khóa"}
+                            onClick={() => handleUpdateStatus(account)}
+                            disabled={updatingAccountId === account.id}
+                          >
+                            {updatingAccountId === account.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : account.status === "ACTIVE" ? (
+                              <Lock className="h-4 w-4" />
+                            ) : (
+                              <Unlock className="h-4 w-4" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Gửi email"
+                            onClick={() => setSelectedAccount(account)}
+                          >
+                            <Mail className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           )}
         </CardContent>
@@ -567,47 +358,21 @@ export default function UserVendorManagement() {
         </div>
       </div>
 
-      <Dialog open={!!confirmAccount} onOpenChange={(open) => !open && setConfirmAccount(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Xác nhận khóa tài khoản</DialogTitle>
-            <DialogDescription asChild>
-              <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
-                <div>
-                  Email:{" "}
-                  <span className="font-semibold text-foreground">
-                    {confirmAccount?.email ?? "Không xác định"}
-                  </span>
-                </div>
-                <div>
-                  Họ và tên:{" "}
-                  <span className="font-semibold text-foreground">
-                    {confirmAccount?.name ?? "Không xác định"}
-                  </span>
-                </div>
-                <div>Tài khoản sẽ bị khóa và không thể đăng nhập. Bạn có chắc chắn muốn tiếp tục?</div>
-              </div>
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmAccount(null)}>
-              Hủy
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                if (confirmAccount) {
-                  submitUpdateStatus(confirmAccount, "BLOCKED")
-                  setConfirmAccount(null)
-                }
-              }}
-              disabled={!!updatingAccountId && updatingAccountId === confirmAccount?.id}
-            >
-              {updatingAccountId === confirmAccount?.id ? "Đang cập nhật..." : "Khóa tài khoản"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <EmailDialog
+        account={selectedAccount}
+        isOpen={!!selectedAccount}
+        onClose={() => setSelectedAccount(null)}
+        onSend={handleSendEmail}
+        isSending={isSendingEmail}
+      />
+
+      <BlockConfirmDialog
+        account={confirmAccount}
+        isOpen={!!confirmAccount}
+        onClose={() => setConfirmAccount(null)}
+        onConfirm={handleConfirmBlock}
+        isUpdating={!!updatingAccountId && updatingAccountId === confirmAccount?.id}
+      />
     </div>
   )
 }
