@@ -51,6 +51,24 @@ interface Restaurant {
   longitude?: number | null
   averageRating?: number | null
   totalReviews?: number | null
+  wardId?: number | null
+}
+
+interface Province {
+  provinceId: number
+  name: string
+}
+
+interface District {
+  districtId: number
+  name: string
+  provinceId: number
+}
+
+interface Ward {
+  wardId: number
+  name: string
+  districtId: number
 }
 
 interface VendorInfo {
@@ -68,27 +86,6 @@ interface VendorGroup {
   restaurants: Restaurant[]
 }
 
-// Mock data for location filters
-const provinces = [
-  { id: 1, name: "Đà Nẵng" },
-  { id: 2, name: "Hà Nội" },
-  { id: 3, name: "Hồ Chí Minh" },
-]
-
-const districts = [
-  { id: 1, name: "Quận 1", provinceId: 1 },
-  { id: 2, name: "Quận 2", provinceId: 1 },
-  { id: 3, name: "Quận 3", provinceId: 1 },
-  { id: 4, name: "Hải Châu", provinceId: 1 },
-  { id: 5, name: "Thanh Khê", provinceId: 1 },
-]
-
-const wards = [
-  { id: 1, name: "Phường 1", districtId: 1 },
-  { id: 2, name: "Phường 2", districtId: 1 },
-  { id: 3, name: "Phường 3", districtId: 2 },
-  { id: 4, name: "Phường 4", districtId: 2 },
-]
 
 // Mock data
 const pendingRestaurants = [
@@ -293,15 +290,24 @@ export default function RestaurantApproval() {
   const [selectedVendor, setSelectedVendor] = useState<VendorGroup | null>(null)
   const [viewMode, setViewMode] = useState<"vendors" | "restaurants">("vendors")
   
+  // Location data from API
+  const [provinces, setProvinces] = useState<Province[]>([])
+  const [districts, setDistricts] = useState<District[]>([])
+  const [wards, setWards] = useState<Ward[]>([])
+  const [isLoadingLocations, setIsLoadingLocations] = useState(false)
+  
   // Search and filter states for pending restaurants
   const [pendingSearch, setPendingSearch] = useState("")
-  const [pendingProvince, setPendingProvince] = useState("all")
-  const [pendingDistrict, setPendingDistrict] = useState("all")
-  const [pendingWard, setPendingWard] = useState("all")
+  const [pendingProvinceId, setPendingProvinceId] = useState<number | null>(null)
+  const [pendingDistrictId, setPendingDistrictId] = useState<number | null>(null)
+  const [pendingWardId, setPendingWardId] = useState<number | null>(null)
   
   // Search and filter states for active restaurants
   const [activeViewType, setActiveViewType] = useState<"all" | "vendor">("vendor")
   const [activeSearch, setActiveSearch] = useState("")
+  const [activeProvinceId, setActiveProvinceId] = useState<number | null>(null)
+  const [activeDistrictId, setActiveDistrictId] = useState<number | null>(null)
+  const [activeWardId, setActiveWardId] = useState<number | null>(null)
   
   // Restaurants từ API: chia pending / active theo approvalStatus & status
   const pendingFromApi = useMemo(
@@ -319,18 +325,65 @@ export default function RestaurantApproval() {
     [restaurants]
   )
 
-  // Filter pending restaurants (search theo tên)
-  const filteredPendingRestaurants = pendingFromApi.filter((restaurant) => {
-    const matchesSearch =
-      !pendingSearch || restaurant.name.toLowerCase().includes(pendingSearch.toLowerCase())
-    // tạm thời bỏ lọc theo tỉnh/quận/xã vì API chưa trả về tên, chỉ có wardId
-    return matchesSearch
-  })
+  // Filter pending restaurants (search theo tên + location)
+  const filteredPendingRestaurants = useMemo(() => {
+    return pendingFromApi.filter((restaurant) => {
+      const matchesSearch =
+        !pendingSearch || restaurant.name.toLowerCase().includes(pendingSearch.toLowerCase())
+      
+      // Filter by wardId
+      if (pendingWardId !== null) {
+        if (restaurant.wardId !== pendingWardId) return false
+      } else if (pendingDistrictId !== null) {
+        // Filter by district: check if restaurant's ward belongs to selected district
+        const wardIdsInDistrict = wards
+          .filter((w) => w.districtId === pendingDistrictId)
+          .map((w) => w.wardId)
+        if (!restaurant.wardId || !wardIdsInDistrict.includes(restaurant.wardId)) return false
+      } else if (pendingProvinceId !== null) {
+        // Filter by province: check if restaurant's ward belongs to a district in selected province
+        const districtIdsInProvince = districts
+          .filter((d) => d.provinceId === pendingProvinceId)
+          .map((d) => d.districtId)
+        const wardIdsInProvince = wards
+          .filter((w) => districtIdsInProvince.includes(w.districtId))
+          .map((w) => w.wardId)
+        if (!restaurant.wardId || !wardIdsInProvince.includes(restaurant.wardId)) return false
+      }
+      
+      return matchesSearch
+    })
+  }, [pendingFromApi, pendingSearch, pendingProvinceId, pendingDistrictId, pendingWardId, districts, wards])
 
   // Filter active restaurants (for "all" view)
-  const filteredActiveRestaurants = activeFromApi.filter((restaurant) => {
-    return !activeSearch || restaurant.name.toLowerCase().includes(activeSearch.toLowerCase())
-  })
+  const filteredActiveRestaurants = useMemo(() => {
+    return activeFromApi.filter((restaurant) => {
+      const matchesSearch =
+        !activeSearch || restaurant.name.toLowerCase().includes(activeSearch.toLowerCase())
+      
+      // Filter by wardId
+      if (activeWardId !== null) {
+        if (restaurant.wardId !== activeWardId) return false
+      } else if (activeDistrictId !== null) {
+        // Filter by district: check if restaurant's ward belongs to selected district
+        const wardIdsInDistrict = wards
+          .filter((w) => w.districtId === activeDistrictId)
+          .map((w) => w.wardId)
+        if (!restaurant.wardId || !wardIdsInDistrict.includes(restaurant.wardId)) return false
+      } else if (activeProvinceId !== null) {
+        // Filter by province: check if restaurant's ward belongs to a district in selected province
+        const districtIdsInProvince = districts
+          .filter((d) => d.provinceId === activeProvinceId)
+          .map((d) => d.districtId)
+        const wardIdsInProvince = wards
+          .filter((w) => districtIdsInProvince.includes(w.districtId))
+          .map((w) => w.wardId)
+        if (!restaurant.wardId || !wardIdsInProvince.includes(restaurant.wardId)) return false
+      }
+      
+      return matchesSearch
+    })
+  }, [activeFromApi, activeSearch, activeProvinceId, activeDistrictId, activeWardId, districts, wards])
 
   // Group theo vendor từ danh sách active (xem theo Vendor)
   const vendorGroups: VendorGroup[] = useMemo(() => {
@@ -384,15 +437,29 @@ export default function RestaurantApproval() {
     return Array.from(map.values())
   }, [activeFromApi, vendorsById])
   
-  // Get districts based on selected province
-  const availableDistricts = pendingProvince === "all" 
-    ? districts 
-    : districts.filter(d => d.provinceId === provinces.find(p => p.name === pendingProvince)?.id)
-  
-  // Get wards based on selected district
-  const availableWards = pendingDistrict === "all"
-    ? wards
-    : wards.filter(w => w.districtId === districts.find(d => d.name === pendingDistrict)?.id)
+  // Get districts based on selected province (for pending)
+  const availablePendingDistricts = useMemo(() => {
+    if (pendingProvinceId === null) return []
+    return districts.filter((d) => d.provinceId === pendingProvinceId)
+  }, [districts, pendingProvinceId])
+
+  // Get wards based on selected district (for pending)
+  const availablePendingWards = useMemo(() => {
+    if (pendingDistrictId === null) return []
+    return wards.filter((w) => w.districtId === pendingDistrictId)
+  }, [wards, pendingDistrictId])
+
+  // Get districts based on selected province (for active)
+  const availableActiveDistricts = useMemo(() => {
+    if (activeProvinceId === null) return []
+    return districts.filter((d) => d.provinceId === activeProvinceId)
+  }, [districts, activeProvinceId])
+
+  // Get wards based on selected district (for active)
+  const availableActiveWards = useMemo(() => {
+    if (activeDistrictId === null) return []
+    return wards.filter((w) => w.districtId === activeDistrictId)
+  }, [wards, activeDistrictId])
 
   const fetchRestaurants = async () => {
     setIsLoading(true)
@@ -444,6 +511,7 @@ export default function RestaurantApproval() {
           longitude: item.longitude ?? null,
           averageRating: item.averageRating ?? null,
           totalReviews: item.totalReviews ?? null,
+          wardId: item.wardId ?? null,
         }))
 
         all.push(...normalized)
@@ -512,10 +580,120 @@ export default function RestaurantApproval() {
     }
   }
 
+  // Fetch locations data
+  const fetchProvinces = async () => {
+    try {
+      const token = typeof window !== "undefined" ? window.localStorage.getItem("token") : null
+      const response = await fetch(`${BASE_URL}${API_ENDPOINTS.ADMIN.PROVINCES_LIST}`, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      })
+      if (!response.ok) {
+        throw new Error("Không thể tải danh sách tỉnh/thành phố")
+      }
+      const data = await response.json()
+      const provincesList = Array.isArray(data) ? data : data?.data || []
+      setProvinces(provincesList)
+    } catch (err) {
+      console.error("Error fetching provinces:", err)
+    }
+  }
+
+  const fetchDistricts = async (provinceId: number) => {
+    try {
+      const token = typeof window !== "undefined" ? window.localStorage.getItem("token") : null
+      const response = await fetch(
+        `${BASE_URL}${API_ENDPOINTS.ADMIN.DISTRICTS_BY_PROVINCE(String(provinceId))}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        }
+      )
+      if (!response.ok) {
+        throw new Error("Không thể tải danh sách quận/huyện")
+      }
+      const data = await response.json()
+      const districtsList = Array.isArray(data) ? data : data?.data || []
+      // Merge với districts hiện tại (không ghi đè toàn bộ)
+      setDistricts((prev) => {
+        const existing = prev.filter((d) => d.provinceId !== provinceId)
+        return [...existing, ...districtsList]
+      })
+    } catch (err) {
+      console.error("Error fetching districts:", err)
+    }
+  }
+
+  const fetchWards = async (districtId: number) => {
+    try {
+      const token = typeof window !== "undefined" ? window.localStorage.getItem("token") : null
+      const response = await fetch(
+        `${BASE_URL}${API_ENDPOINTS.ADMIN.WARDS_BY_DISTRICT(String(districtId))}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        }
+      )
+      if (!response.ok) {
+        throw new Error("Không thể tải danh sách xã/phường")
+      }
+      const data = await response.json()
+      const wardsList = Array.isArray(data) ? data : data?.data || []
+      // Merge với wards hiện tại (không ghi đè toàn bộ)
+      setWards((prev) => {
+        const existing = prev.filter((w) => w.districtId !== districtId)
+        return [...existing, ...wardsList]
+      })
+    } catch (err) {
+      console.error("Error fetching wards:", err)
+    }
+  }
+
   useEffect(() => {
     fetchRestaurants()
     fetchVendors()
+    fetchProvinces()
   }, [])
+
+  // Fetch districts when province is selected (pending)
+  useEffect(() => {
+    if (pendingProvinceId !== null) {
+      fetchDistricts(pendingProvinceId)
+      setPendingDistrictId(null)
+      setPendingWardId(null)
+    }
+  }, [pendingProvinceId])
+
+  // Fetch wards when district is selected (pending)
+  useEffect(() => {
+    if (pendingDistrictId !== null) {
+      fetchWards(pendingDistrictId)
+      setPendingWardId(null)
+    }
+  }, [pendingDistrictId])
+
+  // Fetch districts when province is selected (active)
+  useEffect(() => {
+    if (activeProvinceId !== null) {
+      fetchDistricts(activeProvinceId)
+      setActiveDistrictId(null)
+      setActiveWardId(null)
+    }
+  }, [activeProvinceId])
+
+  // Fetch wards when district is selected (active)
+  useEffect(() => {
+    if (activeDistrictId !== null) {
+      fetchWards(activeDistrictId)
+      setActiveWardId(null)
+    }
+  }, [activeDistrictId])
 
   const handleApprove = async (restaurant: Restaurant) => {
     try {
@@ -631,18 +809,25 @@ export default function RestaurantApproval() {
                     <Label className="text-xs font-semibold mb-1.5 block" style={{ color: adminColors.primary[700] }}>
                       Tỉnh/Thành phố
                     </Label>
-                    <Select value={pendingProvince} onValueChange={(value) => {
-                      setPendingProvince(value)
-                      setPendingDistrict("all")
-                      setPendingWard("all")
-                    }}>
+                    <Select 
+                      value={pendingProvinceId ? String(pendingProvinceId) : "all"} 
+                      onValueChange={(value) => {
+                        if (value === "all") {
+                          setPendingProvinceId(null)
+                          setPendingDistrictId(null)
+                          setPendingWardId(null)
+                        } else {
+                          setPendingProvinceId(Number(value))
+                        }
+                      }}
+                    >
                       <SelectTrigger className="h-9">
                         <SelectValue placeholder="Chọn tỉnh/thành phố" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Tất cả</SelectItem>
                         {provinces.map((province) => (
-                          <SelectItem key={province.id} value={province.name}>
+                          <SelectItem key={province.provinceId} value={String(province.provinceId)}>
                             {province.name}
                           </SelectItem>
                         ))}
@@ -655,20 +840,24 @@ export default function RestaurantApproval() {
                       Quận/Huyện
                     </Label>
                     <Select 
-                      value={pendingDistrict} 
+                      value={pendingDistrictId ? String(pendingDistrictId) : "all"} 
                       onValueChange={(value) => {
-                        setPendingDistrict(value)
-                        setPendingWard("all")
+                        if (value === "all") {
+                          setPendingDistrictId(null)
+                          setPendingWardId(null)
+                        } else {
+                          setPendingDistrictId(Number(value))
+                        }
                       }}
-                      disabled={pendingProvince === "all"}
+                      disabled={pendingProvinceId === null}
                     >
                       <SelectTrigger className="h-9">
                         <SelectValue placeholder="Chọn quận/huyện" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Tất cả</SelectItem>
-                        {availableDistricts.map((district) => (
-                          <SelectItem key={district.id} value={district.name}>
+                        {availablePendingDistricts.map((district) => (
+                          <SelectItem key={district.districtId} value={String(district.districtId)}>
                             {district.name}
                           </SelectItem>
                         ))}
@@ -681,17 +870,23 @@ export default function RestaurantApproval() {
                       Xã/Phường
                     </Label>
                     <Select 
-                      value={pendingWard} 
-                      onValueChange={setPendingWard}
-                      disabled={pendingDistrict === "all"}
+                      value={pendingWardId ? String(pendingWardId) : "all"} 
+                      onValueChange={(value) => {
+                        if (value === "all") {
+                          setPendingWardId(null)
+                        } else {
+                          setPendingWardId(Number(value))
+                        }
+                      }}
+                      disabled={pendingDistrictId === null}
                     >
                       <SelectTrigger className="h-9">
                         <SelectValue placeholder="Chọn xã/phường" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Tất cả</SelectItem>
-                        {availableWards.map((ward) => (
-                          <SelectItem key={ward.id} value={ward.name}>
+                        {availablePendingWards.map((ward) => (
+                          <SelectItem key={ward.wardId} value={String(ward.wardId)}>
                             {ward.name}
                           </SelectItem>
                         ))}
@@ -935,17 +1130,114 @@ export default function RestaurantApproval() {
 
           {activeViewType === "all" ? (
             <div className="space-y-4">
-              {/* Search for all restaurants */}
+              {/* Search and Filter Card for active restaurants */}
               <Card className="border shadow-md bg-white" style={{ borderColor: adminColors.primary[200] }}>
                 <CardContent className="p-4 md:p-5">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      placeholder="Tìm kiếm theo tên quán ăn..."
-                      value={activeSearch}
-                      onChange={(e) => setActiveSearch(e.target.value)}
-                      className="pl-9 h-9"
-                    />
+                  <div className="space-y-3">
+                    {/* Search by restaurant name */}
+                    <div>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          placeholder="Tìm kiếm theo tên quán ăn..."
+                          value={activeSearch}
+                          onChange={(e) => setActiveSearch(e.target.value)}
+                          className="pl-9 h-9"
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Location Filters */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <Label className="text-xs font-semibold mb-1.5 block" style={{ color: adminColors.primary[700] }}>
+                          Tỉnh/Thành phố
+                        </Label>
+                        <Select 
+                          value={activeProvinceId ? String(activeProvinceId) : "all"} 
+                          onValueChange={(value) => {
+                            if (value === "all") {
+                              setActiveProvinceId(null)
+                              setActiveDistrictId(null)
+                              setActiveWardId(null)
+                            } else {
+                              setActiveProvinceId(Number(value))
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="h-9">
+                            <SelectValue placeholder="Chọn tỉnh/thành phố" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Tất cả</SelectItem>
+                            {provinces.map((province) => (
+                              <SelectItem key={province.provinceId} value={String(province.provinceId)}>
+                                {province.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div>
+                        <Label className="text-xs font-semibold mb-1.5 block" style={{ color: adminColors.primary[700] }}>
+                          Quận/Huyện
+                        </Label>
+                        <Select 
+                          value={activeDistrictId ? String(activeDistrictId) : "all"} 
+                          onValueChange={(value) => {
+                            if (value === "all") {
+                              setActiveDistrictId(null)
+                              setActiveWardId(null)
+                            } else {
+                              setActiveDistrictId(Number(value))
+                            }
+                          }}
+                          disabled={activeProvinceId === null}
+                        >
+                          <SelectTrigger className="h-9">
+                            <SelectValue placeholder="Chọn quận/huyện" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Tất cả</SelectItem>
+                            {availableActiveDistricts.map((district) => (
+                              <SelectItem key={district.districtId} value={String(district.districtId)}>
+                                {district.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div>
+                        <Label className="text-xs font-semibold mb-1.5 block" style={{ color: adminColors.primary[700] }}>
+                          Xã/Phường
+                        </Label>
+                        <Select 
+                          value={activeWardId ? String(activeWardId) : "all"} 
+                          onValueChange={(value) => {
+                            if (value === "all") {
+                              setActiveWardId(null)
+                            } else {
+                              setActiveWardId(Number(value))
+                            }
+                          }}
+                          disabled={activeDistrictId === null}
+                        >
+                          <SelectTrigger className="h-9">
+                            <SelectValue placeholder="Chọn xã/phường" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Tất cả</SelectItem>
+                            {availableActiveWards.map((ward) => (
+                              <SelectItem key={ward.wardId} value={String(ward.wardId)}>
+                                {ward.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
