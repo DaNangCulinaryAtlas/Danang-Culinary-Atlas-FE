@@ -4,6 +4,7 @@ import "./globals.css";
 import localFont from "next/font/local";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { I18nProvider } from '@/components/providers/I18nProvider';
 const mulish = Mulish({
   subsets: ["latin"],
   variable: "--font-mulish",
@@ -19,7 +20,7 @@ const volkhov = Volkhov({
   subsets: ["latin"],
   variable: "--font-volkhov",
   display: "swap",
-  weight: ["400", "700"], 
+  weight: ["400", "700"],
 });
 const nicoMoji = localFont({
   src: "../../public/fonts/NicoMoji-Regular.ttf",
@@ -30,7 +31,7 @@ const poppins = Poppins({
   subsets: ["latin"],
   variable: "--font-poppins",
   display: "swap",
-  weight: ["400", "700"], 
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -56,11 +57,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${mulish.variable} ${openSans.variable} ${volkhov.variable} ${poppins.variable} ${nicoMoji.variable} antialiased`}
+        suppressHydrationWarning
       >
-        {children}
+        <I18nProvider initialLanguage="vi">
+          {children}
+        </I18nProvider>
         <ToastContainer
           position="top-center"
           autoClose={3000}

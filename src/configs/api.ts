@@ -28,4 +28,9 @@ export const API_ENDPOINTS = {
     SEARCH_BY_NAME: '/restaurants/name',
     MAP_VIEW: '/restaurants/map-view',
   },
+  REVIEW: {
+    CREATE: '/reviews',
+    UPDATE: (id: string) => `/reviews/${id}`,
+    DELETE: (id: string) => `/reviews/${id}`,
+  },
 } as const;

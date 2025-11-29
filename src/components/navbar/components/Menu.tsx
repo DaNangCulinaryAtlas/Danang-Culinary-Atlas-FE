@@ -1,5 +1,5 @@
 "use client"
-import React, {useState} from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,13 +8,24 @@ import {
     SheetHeader,
     SheetTitle,
     SheetTrigger,
-  } from '@/components/ui/sheet';
-  import { ScrollArea } from '@/components/ui/scroll-area';
-  import { Menu } from 'lucide-react';
- import menuItems from "@/types/navbar.items";
-export default function  MobileMenu(){
+} from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Menu } from 'lucide-react';
+import menuItems from "@/types/navbar.items";
+export default function MobileMenu() {
     const [open, setOpen] = useState(false);
-    return( 
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    // Don't render the Sheet until client-side hydration is complete
+    if (!isMounted) {
+        return null;
+    }
+
+    return (
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
                 <Button className="md:hidden bg-[#69C3CF] w-10 rounded-none hover:bg-[#55a1a7]">
@@ -24,6 +35,7 @@ export default function  MobileMenu(){
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                 <SheetHeader className="flex justify-between items-center">
                     <SheetTitle className="font-mulish font-bold text-lg">Menu</SheetTitle>
+                    <p className="sr-only">Navigation menu</p>
                 </SheetHeader>
                 <ScrollArea className="h-[calc(100vh-8rem)] mt-6">
                     {menuItems.map((item) => (
@@ -37,7 +49,7 @@ export default function  MobileMenu(){
                         </Link>
                     ))}
                 </ScrollArea>
-                </SheetContent>
-            </Sheet>
+            </SheetContent>
+        </Sheet>
     )
 }

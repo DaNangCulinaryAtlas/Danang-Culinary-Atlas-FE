@@ -10,7 +10,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "**.googleusercontent.com",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.googleusercontent.com",
       },
       {
         protocol: "https",
@@ -18,7 +22,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "streetviewpixels-pa.googleapis.com", 
+        hostname: "streetviewpixels-pa.googleapis.com",
       },
       {
         protocol: "https",
@@ -27,8 +31,14 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "res.cloudinary.com",
-      }
+      },
+      {
+        protocol: "https",
+        hostname: "cdn-icons-png.flaticon.com",
+      },
     ],
-  },};
+    unoptimized: process.env.NODE_ENV === 'production' ? false : true,
+  },
+};
 
 export default nextConfig;

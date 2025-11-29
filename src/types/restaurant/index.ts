@@ -76,3 +76,15 @@ export interface getRestaurantsForMapParams {
   minLng: number;
   maxLng: number;
 }
+
+export interface MapRestaurant {
+  restaurantId: string;
+  name: string;
+  address: string;
+  photo: string;
+  wardId: number;
+  latitude: number;
+  longitude: number;
+  averageRating: number;
+  totalReviews: number;
+}

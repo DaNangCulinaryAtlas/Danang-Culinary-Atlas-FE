@@ -30,6 +30,7 @@ import { useEffect } from 'react';
  * Login Mutation Hook
  * - React Query: Handles the API call, loading, and error states
  * - Redux: Updates the authenticated user state after successful login
+ * - Fetches user profile to get accountId
  */
 export function useLoginMutation() {
     const dispatch = useAppDispatch();
@@ -43,14 +44,39 @@ export function useLoginMutation() {
             }
             return response;
         },
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
             if (data.data.data) {
                 const { token, email, fullName, avatarUrl, roles } = data.data.data;
+
                 // Update Redux with user data
                 dispatch(setAuthData({
                     user: { email, fullName, avatarUrl, roles },
                     token,
                 }));
+
+                // Fetch user profile to get accountId
+                try {
+                    const profileResponse = await getProfile(roles[0] || 'USER');
+                    if (profileResponse.success && profileResponse.data) {
+                        const userWithAccountId = {
+                            ...profileResponse.data,
+                            email,
+                            fullName,
+                            avatarUrl,
+                            roles,
+                        };
+
+                        // Update Redux with complete user data including accountId
+                        dispatch(updateUser(userWithAccountId));
+
+                        // Update localStorage
+                        if (typeof window !== 'undefined') {
+                            window.localStorage.setItem('userData', JSON.stringify(userWithAccountId));
+                        }
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch user profile after login:', error);
+                }
 
                 // Invalidate and refetch user-related queries
                 queryClient.invalidateQueries({ queryKey: ['user-profile'] });
@@ -63,6 +89,7 @@ export function useLoginMutation() {
  * Register Mutation Hook
  * - Registers a new user
  * - Optionally logs them in automatically if token is returned
+ * - Fetches user profile to get accountId
  */
 export function useRegisterMutation() {
     const dispatch = useAppDispatch();
@@ -76,15 +103,40 @@ export function useRegisterMutation() {
             }
             return response;
         },
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
             // Auto-login after registration if token is provided
             if (data.data?.token) {
                 const { token, email, fullName, avatarUrl, roles } = data.data;
-                console.log(token, email, fullName, avatarUrl, roles);    
+                console.log(token, email, fullName, avatarUrl, roles);
+
                 dispatch(setAuthData({
                     user: { email, fullName, avatarUrl, roles },
                     token,
                 }));
+
+                // Fetch user profile to get accountId
+                try {
+                    const profileResponse = await getProfile(roles[0] || 'USER');
+                    if (profileResponse.success && profileResponse.data) {
+                        const userWithAccountId = {
+                            ...profileResponse.data,
+                            email,
+                            fullName,
+                            avatarUrl,
+                            roles,
+                        };
+
+                        // Update Redux with complete user data including accountId
+                        dispatch(updateUser(userWithAccountId));
+
+                        // Update localStorage
+                        if (typeof window !== 'undefined') {
+                            window.localStorage.setItem('userData', JSON.stringify(userWithAccountId));
+                        }
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch user profile after registration:', error);
+                }
 
                 queryClient.invalidateQueries({ queryKey: ['user-profile'] });
             }
@@ -158,7 +210,7 @@ export function useUserProfile(role: string, enabled: boolean = true) {
             const response = await getProfile(role);
             if (!response.success) {
                 throw new Error(response.message || 'Failed to fetch profile');
-            }
+            };
             return response.data;
         },
         enabled, // Only fetch if user is authenticated

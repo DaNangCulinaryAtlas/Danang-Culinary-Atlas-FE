@@ -9,6 +9,7 @@ import { logout } from '@/stores/auth';
 import ProfileTab from './ProfileTab';
 import ChangePasswordTab from './ChangePasswordTab';
 import SettingsTab from './SettingsTab';
+import { useTranslation } from 'react-i18next';
 
 interface ProfileModalProps {
     isOpen: boolean;
@@ -19,6 +20,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     const dispatch = useAppDispatch();
     const router = useRouter();
     const { user } = useAppSelector((state) => state.auth);
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState<'profile' | 'password' | 'settings'>('profile');
 
     if (!isOpen) return null;
@@ -40,7 +42,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
             >
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b flex-shrink-0">
-                    <h2 className="text-2xl font-bold text-gray-800">Profile</h2>
+                    <h2 className="text-2xl font-bold text-gray-800">{t('profile.title')}</h2>
                     <button
                         onClick={onClose}
                         className="text-gray-500 hover:text-gray-700 transition-colors"
@@ -59,7 +61,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                             }`}
                     >
                         <User className="inline-block mr-2" size={18} />
-                        Profile
+                        {t('profile.title')}
                     </button>
                     <button
                         onClick={() => setActiveTab('password')}
@@ -69,7 +71,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                             }`}
                     >
                         <Lock className="inline-block mr-2" size={18} />
-                        Password
+                        {t('profile.changePassword')}
                     </button>
                     <button
                         onClick={() => setActiveTab('settings')}
@@ -79,7 +81,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                             }`}
                     >
                         <Settings className="inline-block mr-2" size={18} />
-                        Settings
+                        {t('profile.settings')}
                     </button>
                 </div>
 
@@ -98,10 +100,10 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                         className="flex items-center gap-2"
                     >
                         <LogOut size={18} />
-                        Logout
+                        {t('profile.logout')}
                     </Button>
                     <Button onClick={onClose} variant="outline">
-                        Close
+                        {t('profile.cancel')}
                     </Button>
                 </div>
             </div>

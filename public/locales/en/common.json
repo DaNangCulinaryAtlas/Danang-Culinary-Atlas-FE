@@ -1,0 +1,96 @@
+{
+    "navbar": {
+        "atlas": "Atlas",
+        "aboutUs": "About us",
+        "restaurants": "Restaurants",
+        "popularRestaurants": "Popular Restaurants",
+        "packages": "Packages",
+        "ourPackages": "Our Packages",
+        "login": "Login"
+    },
+    "profile": {
+        "title": "Profile",
+        "fullName": "Full Name",
+        "email": "Email",
+        "dateOfBirth": "Date of Birth",
+        "gender": "Gender",
+        "avatar": "Avatar",
+        "edit": "Edit",
+        "save": "Save",
+        "cancel": "Cancel",
+        "settings": "Settings",
+        "changePassword": "Change Password",
+        "logout": "Logout"
+    },
+    "language": {
+        "title": "Language",
+        "vietnamese": "Tiếng Việt",
+        "english": "English"
+    },
+    "home": {
+        "heroTitle": "Discover the Essence of Da Nang Culinary",
+        "heroDescription": "Da Nang cuisine - a sophisticated blend of Central Vietnam's flavors. From hearty Mi Quang noodles and crispy Banh Xeo to the freshest seafood. A vibrant and unforgettable culinary journey.",
+        "watchVideo": "Watch Video",
+        "search": "Search",
+        "searchPlaceholder": "Search for dishes, restaurants...",
+        "cuisineTitle": "Da Nang Cuisine",
+        "cuisineDescription": "Explore Da Nang's cuisine with distinctive Central Vietnamese flavors, where delicious dishes from mountains to sea converge, offering a unique and diverse culinary experience.",
+        "recommendedDishes": "Recommended Dishes",
+        "recommendedRestaurants": "Recommended Restaurants",
+        "trendingNow": "Trending now",
+        "bannerTitle": "Da Nang Cuisine",
+        "bannerDescription": "Explore Da Nang's cuisine with distinctive Central Vietnamese flavors, where delicious dishes from mountains to sea converge, offering a unique and diverse culinary experience.",
+        "exploreNow": "Explore Now",
+        "vietnam": "Vietnam",
+        "reviews": "reviews",
+        "noRestaurants": "No restaurants available at the moment.",
+        "tryAgain": "Try Again",
+        "cuisineFeatures": {
+            "feature1Title": "Street-Food Paradise",
+            "feature1Description": "A city where every corner bursts with sizzling flavors—from night-market bites to seaside grills.",
+            "feature2Title": "Heritage in Every Bowl",
+            "feature2Description": "Generations-old recipes keep the soul of Central Vietnam alive in every noodle and broth.",
+            "feature3Title": "Sea-to-Table Freshness",
+            "feature3Description": "Daily catches from the East Sea bring unmatched freshness to iconic seafood dishes.",
+            "feature4Title": "Flavors of East-West",
+            "feature4Description": "Classic Vietnamese taste meets global influence, crafting bold and unique experiences."
+        }
+    },
+    "ourStory": {
+        "title": "The Story of",
+        "subtitle": "A journey born from passion for local cuisine and the desire to transform how people discover Da Nang's delicious flavors.",
+        "problemTitle": "The Challenge",
+        "problemDescription1": "Da Nang – a vibrant tourist city with countless restaurants, street food stalls, and local eateries. But how do you find the truly great ones? Information scattered across the internet, conflicting reviews, incorrect addresses, and recommendations from friends aren't always reliable.",
+        "problemDescription2": "Travelers get lost searching. Locals want to discover hidden gems nearby. Great restaurant owners go unnoticed. Culinary information is fragmented, hard to find, and lacks trustworthy centralization.",
+        "missionTitle": "Our Mission",
+        "missionDescription1": "We – a group of students from Da Nang University of Technology – decided to build something different.",
+        "missionDescription1Part2": "isn't just an app; it's an intelligent culinary map that centralizes accurate, trustworthy, and constantly updated food information.",
+        "missionDescription2": "We want to support three groups: travelers finding real culinary experiences, locals discovering hidden treasures in their own city, and restaurant owners being recognized and valued as they deserve.",
+        "valuesTitle": "Our Core Values",
+        "values": {
+            "value1": {
+                "title": "Interactive Map",
+                "description": "Discover restaurants on a real map, knowing exactly where they are and how far from you."
+            },
+            "value2": {
+                "title": "Smart Search",
+                "description": "Filter by cuisine type, price range, ratings, or unique specialties of each restaurant."
+            },
+            "value3": {
+                "title": "Community Reviews",
+                "description": "Comments, photos, and feedback from real users who've actually dined there."
+            },
+            "value4": {
+                "title": "Personalized Recommendations",
+                "description": "Our system learns your preferences and suggests restaurants perfectly suited to you."
+            }
+        },
+        "journeyTitle": "Our Building Journey",
+        "journeyDescription1": "From initial ideas, brainstorming sessions, to late-night coding sessions – Danang Culinary Atlas was born from a love of food and technology. We source data from trustworthy locations, verify details meticulously, and built an amazing platform.",
+        "journeyDescription2": "Today, when you use this app, you're not just finding a great restaurant – you're joining a community of people who love and respect local cuisine.",
+        "ctaTitle": "Ready to Explore?",
+        "ctaDescription": "Discover Da Nang's delicious flavors in a smarter way. Every restaurant tells a story, every dish is an experience.",
+        "ctaButton": "Start Exploring Now",
+        "footerMessage": "With Danang Culinary Atlas, food is more than just a meal – it's a journey of discovery."
+    }
+}
