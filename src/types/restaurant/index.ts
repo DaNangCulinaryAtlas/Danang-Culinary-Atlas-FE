@@ -57,6 +57,7 @@ export interface GetRestaurantsParams {
   size?: number;
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
+  name?: string;
   search?: string;
   minRating?: number;
   maxRating?: number;

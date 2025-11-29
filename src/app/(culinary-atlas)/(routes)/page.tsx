@@ -7,24 +7,21 @@ import { Button } from "@/components/ui/button";
 import { Heart, Share2, MapPin, Star } from 'lucide-react';
 import RestaurantCard from "@/components/restaurants/RestaurantCard";
 import { useRouter } from "next/navigation";
-import { useAppDispatch, useAppSelector } from "@/hooks/useRedux";
-import { getRestaurantsAsync } from "@/stores/restaurant/action";
+import { useRestaurants } from "@/hooks/queries/useRestaurants";
 import { useTranslation } from 'react-i18next';
 
 export default function HomePage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const dispatch = useAppDispatch();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { restaurants, loading, error } = useAppSelector((state) => state.restaurant);
+  // Fetch restaurants using React Query
+  const { data: restaurantsData, isLoading, error } = useRestaurants({
+    page: 0,
+    size: 10
+  });
 
-  // Fetch restaurants on component mount 
-  useEffect(() => {
-    if (!restaurants || restaurants.length === 0) {
-      dispatch(getRestaurantsAsync({ page: 0, size: 10 }));
-    }
-  }, [dispatch, restaurants]);
+  const restaurants = restaurantsData?.content || [];
 
   const dishes = [
     {
@@ -232,24 +229,15 @@ export default function HomePage() {
       </h1>
       <div className="px-4">
         <div className="max-w-7xl mx-auto">
-          {loading ? (
+          {isLoading ? (
             <div className="flex justify-center items-center py-20">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#44BACA]"></div>
             </div>
           ) : error ? (
             <div className="text-center py-20">
-              <p className="text-red-600 text-lg">{error}</p>
-              <button
-                onClick={() => dispatch(getRestaurantsAsync({
-                  page: 0,
-                  size: 10,
-                  sortBy: 'createdAt',
-                  sortDirection: 'desc'
-                }))}
-                className="mt-4 px-4 py-2 bg-[#44BACA] text-white rounded hover:bg-[#3aa3b3]"
-              >
-                {t('home.tryAgain')}
-              </button>
+              <p className="text-red-600 text-lg">
+                {error instanceof Error ? error.message : 'Failed to load restaurants'}
+              </p>
             </div>
           ) : restaurants.length === 0 ? (
             <div className="text-center py-20">
