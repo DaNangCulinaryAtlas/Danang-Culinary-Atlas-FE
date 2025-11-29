@@ -57,6 +57,7 @@ export interface GetRestaurantsParams {
   size?: number;
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
+  name?: string;
   search?: string;
   minRating?: number;
   maxRating?: number;
@@ -75,4 +76,16 @@ export interface getRestaurantsForMapParams {
   maxLat: number;
   minLng: number;
   maxLng: number;
+}
+
+export interface MapRestaurant {
+  restaurantId: string;
+  name: string;
+  address: string;
+  photo: string;
+  wardId: number;
+  latitude: number;
+  longitude: number;
+  averageRating: number;
+  totalReviews: number;
 }

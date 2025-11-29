@@ -1,6 +1,6 @@
+"use client";
 import Image from 'next/image';
 import SearchBox from './SearchBox';
-
 export default function FindRestaurants() {
     return (
         <div className="relative w-full h-[450px] overflow-hidden">
@@ -30,8 +30,9 @@ export default function FindRestaurants() {
                     </p>
                 </div>
 
+
                 {/* Search Box */}
-                <SearchBox />
+                <SearchBox/>
             </div>
         </div>
     );
