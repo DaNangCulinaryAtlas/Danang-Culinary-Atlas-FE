@@ -1,5 +1,5 @@
 import { Marker, Popup } from 'react-map-gl/maplibre';
-import type { Restaurant } from '@/types/restaurant';
+import type { MapRestaurant } from '@/types/restaurant';
 import { useState, useRef, useEffect } from 'react';
 import PopupCard from './PopupCard';
 import Image from 'next/image';
@@ -7,7 +7,7 @@ import Image from 'next/image';
 export default function RestaurantMarker({ 
   restaurant 
 }: { 
-  restaurant: Restaurant 
+  restaurant: MapRestaurant 
 }) {
   const [showPopup, setShowPopup] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -81,7 +81,7 @@ export default function RestaurantMarker({
             <Image
               width={100}
               height={100}
-              src={restaurant.images.photo || '/images/danang-find-restaurant.jpg'}
+              src={restaurant.photo || '/images/danang-find-restaurant.jpg'}
               alt={restaurant.name}
               className="w-full h-full object-cover"
             />

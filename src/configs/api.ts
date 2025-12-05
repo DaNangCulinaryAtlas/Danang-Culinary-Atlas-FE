@@ -86,5 +86,11 @@ export const API_ENDPOINTS = {
     ROLES_LIST: '/admin/permissions/roles', // Get all roles
     PERMISSIONS_FOR_ROLE: (roleId: string) => `/admin/permissions/roles/${roleId}/permissions`, // Get permissions for a specific role
     ACTIONS_LIST: '/admin/permissions/actions', // Get all available actions
+   
+    REVIEW: {
+    CREATE: '/reviews',
+    UPDATE: (id: string) => `/reviews/${id}`,
+    DELETE: (id: string) => `/reviews/${id}`,
+    },
   },
-} as const;
+};

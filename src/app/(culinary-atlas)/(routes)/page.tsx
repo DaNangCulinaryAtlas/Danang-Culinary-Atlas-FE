@@ -6,12 +6,12 @@ import DishCard from "@/components/recommendedfood";
 import { Button } from "@/components/ui/button";
 import { Heart, Share2, MapPin, Star } from 'lucide-react';
 import RestaurantCard from "@/components/restaurants/RestaurantCard";
-import GallerySection from "@/components/gallery";
 import { useRouter } from "next/navigation";
 import { useRestaurants } from "@/hooks/queries/useRestaurants";
 import { useTranslation } from 'react-i18next';
 
 export default function HomePage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -84,11 +84,11 @@ export default function HomePage() {
         <div className="absolute inset-0 flex items-center justify-center pt-16">
           <div className="text-center max-w-4xl space-y-6">
             <h1 className="hidden md:block text-[#1C2B38] font-bold font-volkhov text-3xl md:text-4xl lg:text-[40px] leading-tight">
-              Khám phá ẩm thực tinh túy Đà Nẵng
+              {t('home.heroTitle')}
             </h1>
 
             <p className="hidden md:block text-[#1C2B38] font-mulish font-semibold text-[11px] max-w-[569px] mx-auto">
-              Ẩm thực Đà Nẵng - sự hòa quyện tinh tế của hương vị miền Trung. Từ tô mì Quảng đậm đà, bánh xèo giòn tan đến những món hải sản tươi ngon bậc nhất. Một hành trình vị giác đầy phóng khoáng và đáng nhớ.
+              {t('home.heroDescription')}
             </p>
 
             {/* Watch Video Button */}
@@ -96,7 +96,7 @@ export default function HomePage() {
               <svg className="w-5 h-5 text-teal-600" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
               </svg>
-              <span className="font-mulish font-semibold text-[#1C2B38]">Watch Video</span>
+              <span className="font-mulish font-semibold text-[#1C2B38]">{t('home.watchVideo')}</span>
             </button>
           </div>
 
@@ -111,7 +111,7 @@ export default function HomePage() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Tìm kiếm món ăn, quán ăn..."
+                  placeholder={t('home.searchPlaceholder')}
                   className="w-full text-gray-600 font-mulish text-sm outline-none placeholder-gray-400"
                 />
               </div>
@@ -119,7 +119,7 @@ export default function HomePage() {
                 type="submit"
                 className="bg-[#FFDA32] hover:bg-yellow-400 text-[#1C2B38] font-mulish font-bold px-8 py-3 rounded-xl transition-all shadow-md"
               >
-                Search
+                {t('home.search')}
               </button>
             </div>
           </form>
@@ -128,8 +128,8 @@ export default function HomePage() {
 
       <div className="flex flex-col">
         <div className="flex flex-col justify-center items-center mt-8 text-center">
-          <h2 className="font-volkhov font-bold sm:text-2xl md:text-3xl lg:text-[36px] text-[#1C2B38]">Ẩm thực Đà Nẵng</h2>
-          <p className="w-[60%] mt-2 font-mulish font-semibold sm:text-sm md:text-[15px] text-[#778088] whitespace-wrap">Khám phá ẩm thực Đà Nẵng với hương vị đặc trưng miền Trung, nơi hội tụ món ngon từ núi đến biển, mang đến trải nghiệm ẩm thực độc đáo và phong phú.</p>
+          <h2 className="font-volkhov font-bold sm:text-2xl md:text-3xl lg:text-[36px] text-[#44BACA]">{t('home.cuisineTitle')}</h2>
+          <p className="w-[60%] mt-2 font-mulish font-semibold sm:text-sm md:text-[15px] text-[#778088] whitespace-wrap">{t('home.cuisineDescription')}</p>
         </div>
         <div className="w-full flex justify-center items-center mt-8">
           <CuisineFeatures />
@@ -137,7 +137,7 @@ export default function HomePage() {
       </div>
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold text-[#44BACA] text-center mb-12">
-          Món Ăn Đề Xuất
+          {t('home.recommendedDishes')}
         </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {dishes.map((dish) => (
@@ -168,19 +168,19 @@ export default function HomePage() {
 
               {/* Trending Badge */}
               <Button className="bg-[#AFFFF0] text-[#1C2B38] font-bold rounded-full px-4 py-2 w-fit">
-                Trending now
+                {t('home.trendingNow')}
               </Button>
 
               {/* Title */}
               <h2 className="font-volkhov font-bold text-white text-xl sm:text-2xl md:text-3xl lg:text-4xl">
-                Ẩm thực Đà Nẵng
+                {t('home.bannerTitle')}
               </h2>
 
               {/* Location + Rating */}
               <div className="flex flex-wrap items-center gap-3 sm:gap-4 lg:gap-6 text-xs sm:text-sm">
                 <div className="flex items-center gap-2 text-white">
                   <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span>Việt Nam</span>
+                  <span>{t('home.vietnam')}</span>
                 </div>
 
                 <div className="h-3 sm:h-4 w-px bg-white/30"></div>
@@ -195,19 +195,19 @@ export default function HomePage() {
                     ))}
                   </div>
                   <span className="font-semibold">4.9</span>
-                  <span className="text-white/80">(300 reviews)</span>
+                  <span className="text-white/80">(300 {t('home.reviews')})</span>
                 </div>
               </div>
 
               {/* Description */}
               <p className="font-mulish font-semibold text-xs sm:text-sm lg:text-base text-white max-w-[400px] sm:max-w-lg">
-                Khám phá ẩm thực Đà Nẵng với hương vị đặc trưng miền Trung, nơi hội tụ món ngon từ núi đến biển, mang đến trải nghiệm ẩm thực độc đáo và phong phú.
+                {t('home.bannerDescription')}
               </p>
 
               {/* Action Buttons */}
               <div className="hidden md:flex items-center gap-4 pt-2">
                 <button className="px-8 py-3 lg:px-10 lg:py-4 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold text-base lg:text-lg rounded-full shadow-lg transform hover:scale-105 transition-all duration-200">
-                  Explore Now
+                  {t('home.exploreNow')}
                 </button>
 
                 {[Heart, Share2].map((Icon, i) => (
@@ -225,52 +225,49 @@ export default function HomePage() {
       </div>
       {/* Restaurants Section */}
       <h1 className="text-4xl font-bold text-[#44BACA] text-center mt-16">
-        Nhà Hàng Đề Xuất
+        {t('home.recommendedRestaurants')}
       </h1>
       <div className="px-4">
         <div className="max-w-7xl mx-auto">
-          {isLoading ? (
+          {/* {isLoading ? (
             <div className="flex justify-center items-center py-20">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#44BACA]"></div>
             </div>
           ) : error ? (
-            <div className="text-center py-20">
-              <p className="text-red-600 text-lg">
-                {error instanceof Error ? error.message : 'Failed to load restaurants'}
-              </p>
-            </div>
-          ) : restaurants.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="text-gray-500 text-lg">No restaurants available at the moment.</p>
-            </div>
-          ) : (
-            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {restaurants.slice(0, 8).map((restaurant) => (
-                <RestaurantCard
-                  key={restaurant.restaurantId}
-                  restaurant={restaurant}
-                  onClick={() => router.push(`/restaurants/${restaurant.restaurantId}`)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+            // <div className="text-center py-20">
+            //   <p className="text-red-600 text-lg">{error}</p>
+            //   <button
+            //     onClick={() => dispatch(getRestaurantsAsync({
+            //       page: 0,
+            //       size: 10,
+            //       sortBy: 'createdAt',
+            //       sortDirection: 'desc'
+            //     }))}
+            //     className="mt-4 px-4 py-2 bg-[#44BACA] text-white rounded hover:bg-[#3aa3b3]"
+            //   >
+            //     {t('home.tryAgain')}
+            //   </button>
+            // </div>
+          // ) : restaurants.length === 0 ? (
+          //   <div className="text-center py-20">
+          //     <p className="text-gray-500 text-lg">{t('home.noRestaurants')}</p>
+          //   </div>
+          // ) : (
+          //   <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          //     {restaurants.slice(0, 8).map((restaurant) => (
+          //       <RestaurantCard
+          //         key={restaurant.restaurantId}
+          //         restaurant={restaurant}
+          //         onClick={() => router.push(`/restaurants/${restaurant.restaurantId}`)}
+          //       />
+          //     ))}
+          //   </div>
+          // )}
+            })
+                    </div> */}
+              </div>
+         </div>
+      <div className="mt-12">
       </div>
-
-      {/* Gallery Section */}
-      <div className="mt-16">
-        <div className="max-w-7xl mx-auto">
-          <div className="px-4">
-            <div className="flex flex-col justify-center items-center text-center">
-              <h2 className="font-volkhov font-bold sm:text-2xl md:text-3xl lg:text-[36px] text-[#44BACA]">Từ Thư Viện Ảnh</h2>
-              <p className="w-[60%] mt-2 font-mulish font-semibold sm:text-sm md:text-[15px] text-[#778088] whitespace-wrap">Khám phá bộ sưu tập hình ảnh sống động về ẩm thực và văn hóa Đà Nẵng, từ những món ăn đường phố hấp dẫn đến cảnh quan tuyệt đẹp của thành phố biển.</p>
-            </div>
-          </div>
-        </div>
-        <GallerySection />
-      </div>
-
-
     </div>
-  );
-}
+  );}

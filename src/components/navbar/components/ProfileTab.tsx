@@ -24,7 +24,6 @@ interface ProfileTabProps {
 
 export default function ProfileTab({ user }: ProfileTabProps) {
     const dispatch = useAppDispatch();
-    const { loading } = useAppSelector((state) => state.auth);
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
@@ -137,22 +136,38 @@ export default function ProfileTab({ user }: ProfileTabProps) {
         setIsEditing(false);
     };
 
-    if (loading && !user?.accountId) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <Loader2 className="w-8 h-8 animate-spin text-[#69C3CF]" />
-            </div>
-        );
-    }
+    // Helper function to validate URL
+    const isValidUrl = (url: string): boolean => {
+        if (!url || typeof url !== 'string') return false;
+        const trimmedUrl = url.trim();
+        if (!trimmedUrl) return false;
+
+        // Check if it starts with http, https, or / (relative path)
+        if (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://') || trimmedUrl.startsWith('/')) {
+            try {
+                // For relative paths, use a dummy base
+                if (trimmedUrl.startsWith('/')) {
+                    return true;
+                }
+                new URL(trimmedUrl);
+                return true;
+            } catch {
+                return false;
+            }
+        }
+        return false;
+    };
+
+    const avatarUrl = isValidUrl(formData.avatarUrl) ? formData.avatarUrl : null;
 
     return (
         <div className="space-y-6">
             {/* Avatar Section */}
             <div className="flex flex-col items-center space-y-4">
                 <div className="relative w-[120px] h-[120px]">
-                    {formData.avatarUrl ? (
+                    {avatarUrl ? (
                         <Image
-                            src={formData.avatarUrl}
+                            src={avatarUrl}
                             alt="Profile"
                             width={120}
                             height={120}
@@ -165,7 +180,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                     )}
 
                     {/* Camera overlay when editing - only shows overlay, not duplicate image */}
-                    {isEditing && (
+                    {isEditing && avatarUrl && (
                         <button
                             type="button"
                             onClick={handleAvatarClick}
@@ -174,7 +189,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                             aria-label="Change avatar"
                         >
                             <Image
-                                src={formData.avatarUrl}
+                                src={avatarUrl}
                                 alt="Profile"
                                 width={120}
                                 height={120}

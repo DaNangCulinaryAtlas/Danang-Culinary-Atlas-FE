@@ -69,6 +69,39 @@ export const searchRestaurants = async (
   }
 }
 
+export const getRestaurantsForMap = async (
+  params: getRestaurantsForMapParams
+): Promise<ApiResponse> => {
+  try {
+    const { zoomLevel, minLat, maxLat, minLng, maxLng } = params;
+
+    const queryParams = new URLSearchParams({
+      zoomLevel: zoomLevel.toString(),
+      minLat: minLat.toString(),
+      maxLat: maxLat.toString(),
+      minLng: minLng.toString(),
+      maxLng: maxLng.toString(),
+    });
+
+    const response: AxiosResponse = await instanceAxios.get(
+      `${API_ENDPOINTS.RESTAURANT.MAP_VIEW}?${queryParams.toString()}`
+    );
+
+    return {
+      success: true,
+      data: response.data,
+      message: 'Fetched restaurants for map successfully'
+    };
+  } catch (error) {
+    const axiosError = error as AxiosError<ApiResponse>;
+    return {
+      success: false,
+      message: axiosError.response?.data?.message || 'Failed to fetch restaurants for map',
+      error: axiosError.message
+    };
+  }
+}
+
 export const searchRestaurantsByName = async (
   params: GetRestaurantsParams & { name: string }
 ): Promise<ApiResponse> => {
@@ -100,25 +133,22 @@ export const searchRestaurantsByName = async (
   }
 }
 
-export const getRestaurantsForMap = async (
-  params: getRestaurantsForMapParams
-): Promise<ApiResponse> => {
+export const getRestaurantDetail = async (restaurantId: string): Promise<ApiResponse> => {
   try {
     const response: AxiosResponse = await instanceAxios.get(
-      API_ENDPOINTS.RESTAURANT.MAP_VIEW,
-      { params }
+      API_ENDPOINTS.RESTAURANT.DETAIL(restaurantId)
     );
 
     return {
       success: true,
       data: response.data,
-      message: 'Fetched restaurants for map successfully'
+      message: 'Fetched restaurant detail successfully'
     };
   } catch (error) {
     const axiosError = error as AxiosError<ApiResponse>;
     return {
       success: false,
-      message: axiosError.response?.data?.message || 'Failed to fetch restaurants for map',
+      message: axiosError.response?.data?.message || 'Failed to fetch restaurant detail',
       error: axiosError.message
     };
   }
