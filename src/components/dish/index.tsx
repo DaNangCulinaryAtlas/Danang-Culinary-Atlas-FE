@@ -6,20 +6,26 @@ interface DishCardProps {
   dish: Dish;
 }
 
-export default function DishCard({ dish }:  DishCardProps ) {
+export default function DishCard({ dish }: DishCardProps) {
   const router = useRouter();
   return (
     <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden flex flex-col"
-      onClick={()=> router.push(`/dishes/${dish.title.replace(/\s+/g, '-').toLowerCase()}`)}
+      onClick={() => router.push(`/dishes/${dish.title.replace(/\s+/g, '-').toLowerCase()}`)}
     >
       {/* Image Section */}
-      <div className="relative w-full h-48 md:h-56 overflow-hidden">
-        <Image
-          src={dish.image}
-          alt={dish.title}
-          fill
-          className="object-cover hover:scale-105 transition-transform duration-300"
-        />
+      <div className="relative w-full h-48 md:h-56 overflow-hidden bg-gray-200">
+        {dish.image ? (
+          <Image
+            src={dish.image}
+            alt={dish.title}
+            fill
+            className="object-cover hover:scale-105 transition-transform duration-300"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-gray-400 text-sm font-medium">No image</span>
+          </div>
+        )}
       </div>
 
       {/* Content Section */}

@@ -1,16 +1,20 @@
 "use client";
-import React, { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter, useParams } from 'next/navigation';
-import { ChevronLeft, MapPin, Star, Loader2 } from 'lucide-react';
+import { ChevronLeft, MapPin, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import StarRating from '@/components/restaurants/StarRating';
 import RestaurantMap from '@/components/restaurants/RestaurantMap';
-import ReviewCard from '@/components/restaurants/ReviewCard';
-import ReviewForm from '@/components/restaurants/ReviewForm';
 import ReviewList from '@/components/restaurants/ReviewList';
+import ReviewForm from '@/components/restaurants/ReviewForm';
 import { useRestaurantDetail } from '@/hooks/queries/useRestaurantDetail';
 import { useRestaurantReviews } from '@/hooks/queries/useRestaurantReviews';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
+import { useWebSocket } from '@/hooks/useWebSocket';
+import { Notification } from '@/services/notification';
+import { Review } from '@/services/review';
 
 export default function RestaurantDetail() {
   const router = useRouter();
@@ -19,6 +23,7 @@ export default function RestaurantDetail() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [sortBy, setSortBy] = useState('relevant');
   const [imageError, setImageError] = useState<{ [key: string]: boolean }>({});
+  const queryClient = useQueryClient();
 
   // Fetch restaurant data
   const { data: restaurant, isLoading, error } = useRestaurantDetail(restaurantId);
@@ -31,6 +36,88 @@ export default function RestaurantDetail() {
     fetchNextPage,
     isFetchingNextPage
   } = useRestaurantReviews(restaurantId, 10);
+
+  // Handle notification from WebSocket
+  const handleNotification = useCallback(async (notification: Notification) => {
+    console.log('🔔 [RestaurantDetail] Notification received:', notification);
+    console.log('📋 [RestaurantDetail] Notification details:', {
+      type: notification.type,
+      targetUrl: notification.targetUrl,
+      message: notification.message,
+      title: notification.title
+    });
+
+    // Check if notification is about a new review
+    if (notification.type === 'NEW_REVIEW') {
+      // Parse targetUrl to get reviewId (format: /reviews/{reviewId})
+      const reviewMatch = notification.targetUrl?.match(/\/reviews\/(\d+)/);
+      const reviewId = reviewMatch ? reviewMatch[1] : null;
+
+      console.log('🎯 [RestaurantDetail] New review notification:', {
+        reviewId,
+        targetUrl: notification.targetUrl,
+        currentRestaurantId: restaurantId
+      });
+
+      if (reviewId) {
+        try {
+          // Fetch the review details to check if it belongs to current restaurant
+          const { getReviewById } = await import('@/services/review');
+          const review = await getReviewById(reviewId);
+
+          console.log('📥 [RestaurantDetail] Fetched review:', review);
+          console.log('🔍 [RestaurantDetail] Comparing restaurant IDs:', {
+            reviewRestaurantId: review.restaurantId,
+            currentRestaurantId: restaurantId,
+            match: String(review.restaurantId) === String(restaurantId)
+          });
+
+          // Only show notification if review is for current restaurant
+          if (String(review.restaurantId) === String(restaurantId)) {
+            toast.success(
+              notification.message || 'Có đánh giá mới',
+              {
+                position: 'top-right',
+                autoClose: 3000,
+              }
+            );
+
+            // Invalidate reviews query to refetch and show new review
+            queryClient.invalidateQueries({ queryKey: ['reviews', restaurantId] });
+
+            // Also invalidate restaurant detail to update rating
+            queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId] });
+          } else {
+            console.log('⏭️ [RestaurantDetail] Review is for different restaurant, skipping UI update');
+          }
+        } catch (error) {
+          console.error('❌ [RestaurantDetail] Error fetching review details:', error);
+        }
+      } else {
+        console.warn('⚠️ [RestaurantDetail] Could not extract reviewId from targetUrl:', notification.targetUrl);
+      }
+    }
+  }, [queryClient, restaurantId]);
+
+  // Connect to WebSocket for notifications (including review notifications)
+  const { isConnected } = useWebSocket(handleNotification);
+  console.log('🔌 [RestaurantDetail] WebSocket connected:', isConnected());
+  useEffect(() => {
+    if (!restaurantId) return;
+
+    console.log('🔄 [RestaurantDetail] Setting up polling for reviews (30s interval)');
+    
+    const intervalId = setInterval(() => {
+      console.log('🔄 [RestaurantDetail] Auto-refreshing reviews...');
+      queryClient.invalidateQueries({ queryKey: ['reviews', restaurantId] });
+    }, 15000); // 15 seconds
+
+    return () => {
+      console.log('🛑 [RestaurantDetail] Stopping polling for reviews');
+      clearInterval(intervalId);
+    };
+  }, [restaurantId, queryClient]);
+
 
   if (isLoading) {
     return (

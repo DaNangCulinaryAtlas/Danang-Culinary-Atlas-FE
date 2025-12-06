@@ -31,23 +31,41 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         const now = new Date();
-        const diffTime = Math.abs(now.getTime() - date.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        if (diffDays === 0) return 'Today';
-        if (diffDays === 1) return 'Yesterday';
-        if (diffDays < 7) return `${diffDays} days ago`;
-        if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-        if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
-        return `${Math.floor(diffDays / 365)} years ago`;
+        // Nếu parse lỗi, return empty
+        if (isNaN(date.getTime())) {
+            return '';
+        }
+
+        const diffTime = now.getTime() - date.getTime();
+
+        // Nếu thời gian trong tương lai, không hiển thị
+        if (diffTime < 0) {
+            return '';
+        }
+
+        const diffMinutes = Math.floor(diffTime / (1000 * 60));
+        const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const diffWeeks = Math.floor(diffDays / 7);
+        const diffMonths = Math.floor(diffDays / 30);
+        const diffYears = Math.floor(diffDays / 365);
+
+        if (diffMinutes < 1) return 'Just now';
+        if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`;
+        if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+        if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+        if (diffWeeks < 4) return `${diffWeeks} week${diffWeeks > 1 ? 's' : ''} ago`;
+        if (diffMonths < 12) return `${diffMonths} month${diffMonths > 1 ? 's' : ''} ago`;
+        return `${diffYears} year${diffYears > 1 ? 's' : ''} ago`;
     };
 
     const handleUpdate = () => {
         if (editComment.trim().length < 2) {
             toast.error('Review must be at least 2 characters', {
-                        position: 'top-right',
-                        autoClose: 2500,
-                    });
+                position: 'top-right',
+                autoClose: 2500,
+            });
             return;
         }
 
@@ -62,7 +80,7 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
             },
             {
                 onSuccess: () => {
-                    toast.success('Review updated successfully! ✨',{
+                    toast.success('Review updated successfully! ✨', {
                         position: 'top-right',
                         autoClose: 2500,
                     });
@@ -72,25 +90,25 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                     if (axios.isAxiosError(error)) {
                         if (error.response?.status === 403) {
                             toast.error('You can only edit your own reviews.', {
-                        position: 'top-right',
-                        autoClose: 2500,
-                    });
+                                position: 'top-right',
+                                autoClose: 2500,
+                            });
                         } else if (error.response?.status === 401) {
                             toast.error('Your session has expired. Please log in again.', {
-                        position: 'top-right',
-                        autoClose: 2500,
-                    });
+                                position: 'top-right',
+                                autoClose: 2500,
+                            });
                         } else {
                             toast.error('Failed to update review.', {
-                        position: 'top-right',
-                        autoClose: 2500,
-                    });
+                                position: 'top-right',
+                                autoClose: 2500,
+                            });
                         }
                     } else {
                         toast.error('An error occurred.', {
-                        position: 'top-right',
-                        autoClose: 2500,
-                    });
+                            position: 'top-right',
+                            autoClose: 2500,
+                        });
                     }
                 },
             }
@@ -107,19 +125,19 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                 if (axios.isAxiosError(error)) {
                     if (error.response?.status === 403) {
                         toast.error('You can only delete your own reviews.', {
-                        position: 'top-right',
-                        autoClose: 2500,
-                    });
+                            position: 'top-right',
+                            autoClose: 2500,
+                        });
                     } else if (error.response?.status === 401) {
                         toast.error('Your session has expired. Please log in again.', {
-                        position: 'top-right',
-                        autoClose: 2500,
-                    });
+                            position: 'top-right',
+                            autoClose: 2500,
+                        });
                     } else {
                         toast.error('Failed to delete review.', {
-                        position: 'top-right',
-                        autoClose: 2500,
-                    });
+                            position: 'top-right',
+                            autoClose: 2500,
+                        });
                     }
                 } else {
                     toast.error('An error occurred.', {
@@ -224,11 +242,6 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                             )}
                         </div>
                     )}
-
-                    <div className="flex gap-4">
-                        <button className="text-xs text-gray-500 hover:text-gray-700">👍 Helpful</button>
-                        <button className="text-xs text-gray-500 hover:text-gray-700">Report</button>
-                    </div>
                 </div>
             </div>
 

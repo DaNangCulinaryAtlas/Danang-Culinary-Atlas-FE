@@ -18,14 +18,20 @@ const RestaurantMapCard: React.FC<RestaurantCardProps> = ({
       onClick={onClick}
     >
       {/* Image - Fixed Height */}
-      <div className="relative h-40 sm:h-48 overflow-hidden flex-shrink-0">
-        <Image
-          width={400}
-          height={192}
-          src={restaurant.images.photo || "/images/danang-find-restaurant.jpg"}
-          alt={restaurant.name}
-          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-        />
+      <div className="relative h-40 sm:h-48 overflow-hidden flex-shrink-0 bg-gray-200">
+        {restaurant.images.photo ? (
+          <Image
+            width={400}
+            height={192}
+            src={restaurant.images.photo}
+            alt={restaurant.name}
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-gray-400 text-sm font-medium">No image</span>
+          </div>
+        )}
         <button
           onClick={(e) => {
             e.stopPropagation();

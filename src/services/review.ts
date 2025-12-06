@@ -70,3 +70,15 @@ export const getRestaurantReviews = async (
         throw error;
     }
 };
+
+export const getReviewById = async (reviewId: string): Promise<Review> => {
+    try {
+        console.log('🔍 [getReviewById] Fetching review:', reviewId);
+        const response = await instanceAxios.get(`/reviews/${reviewId}`);
+        console.log('✅ [getReviewById] Review fetched:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('❌ [getReviewById] Error fetching review:', error);
+        throw error;
+    }
+};

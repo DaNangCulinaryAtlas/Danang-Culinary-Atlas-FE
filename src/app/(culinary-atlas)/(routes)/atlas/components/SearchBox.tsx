@@ -3,6 +3,8 @@ import { Search } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { useSearchRestaurantsByName, useRestaurants } from '@/hooks/queries/useRestaurants';
 import { useQueryClient } from '@tanstack/react-query';
+import { useAppDispatch } from '@/hooks/useRedux';
+import { setSearchQuery, setSearchResults, clearSearch } from '@/stores/atlas';
 
 interface SearchBoxProps {
   onSearchChange?: (data: any) => void;
@@ -11,6 +13,7 @@ interface SearchBoxProps {
 export default function SearchBox({ onSearchChange }: SearchBoxProps) {
   const [searchInput, setSearchInput] = useState('');
   const queryClient = useQueryClient();
+  const dispatch = useAppDispatch();
 
   // Query for search by name
   const { data: searchData } = useSearchRestaurantsByName(
@@ -24,20 +27,27 @@ export default function SearchBox({ onSearchChange }: SearchBoxProps) {
     { page: 0, size: 20 }
   );
 
-  // Debounce search input
+  // Debounce search input and update Redux store
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (searchInput.trim()) {
-        // Search data is already being fetched by the hook
+        // Update Redux store for map to react
+        dispatch(setSearchQuery(searchInput.trim()));
+        if (searchData?.content) {
+          dispatch(setSearchResults(searchData.content));
+        }
+        // Also update local state for RestaurantList
         onSearchChange?.(searchData);
       } else {
+        // Clear search in Redux store
+        dispatch(clearSearch());
         // Show all restaurants when search is empty
         onSearchChange?.(allRestaurantsData);
       }
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [searchInput, searchData, allRestaurantsData, onSearchChange]);
+  }, [searchInput, searchData, allRestaurantsData, onSearchChange, dispatch]);
 
   return (
     <div className="relative mb-4">

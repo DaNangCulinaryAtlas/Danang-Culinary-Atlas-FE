@@ -96,6 +96,18 @@ const RestaurantMap: React.FC = () => {
     const validRestaurants = restaurantList.filter(isValidRestaurant);
     if (validRestaurants.length === 0) return;
 
+    // For single restaurant, center and zoom in close
+    if (validRestaurants.length === 1) {
+      const restaurant = validRestaurants[0];
+      map.flyTo({
+        center: [parseFloat(restaurant.longitude as any), parseFloat(restaurant.latitude as any)],
+        zoom: 17,
+        duration: 1500,
+        essential: true
+      });
+      return;
+    }
+
     // Calculate bounds to fit all restaurants
     const lats = validRestaurants.map(r => parseFloat(r.latitude as any));
     const lngs = validRestaurants.map(r => parseFloat(r.longitude as any));
@@ -105,8 +117,9 @@ const RestaurantMap: React.FC = () => {
     const minLng = Math.min(...lngs);
     const maxLng = Math.max(...lngs);
 
-    // Add padding to bounds
-    const padding = 50;
+    // Adjust padding and maxZoom based on number of restaurants
+    const padding = validRestaurants.length <= 3 ? 100 : 80;
+    const maxZoom = validRestaurants.length <= 3 ? 16 : 15;
 
     map.fitBounds(
       [
@@ -115,8 +128,8 @@ const RestaurantMap: React.FC = () => {
       ],
       {
         padding,
-        duration: 1000,
-        maxZoom: 15
+        duration: 1500,
+        maxZoom
       }
     );
   }, []);

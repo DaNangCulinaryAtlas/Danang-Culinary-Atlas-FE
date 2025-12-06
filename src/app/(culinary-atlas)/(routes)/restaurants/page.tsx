@@ -107,9 +107,15 @@ function RestaurantSearchContent() {
     }
   }, [isLoading]);
 
-  // Update URL when page or filters change
+  // Update URL when page or filters change (but keep search query if exists)
   useEffect(() => {
     const params = new URLSearchParams();
+
+    // Keep search query if it exists
+    if (searchQuery) {
+      params.set("name", searchQuery);
+    }
+
     params.set("page", currentPage.toString());
     params.set("size", resultsPerPage.toString());
 

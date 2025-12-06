@@ -36,7 +36,7 @@ export default function HomePage() {
   // Map restaurant dishes to the Dish type expected by DishCard
   const dishes = (dishesData?.content || []).map((dish) => ({
     id: dish.dishId,
-    image: dish.images && dish.images.length > 0 ? dish.images[0] : "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop",
+    image: dish.images && dish.images.length > 0 ? dish.images[0] : "/images/default-dish.png",
     title: dish.name,
     description: dish.description || "Món ăn đặc sản",
     rating: 4.5,

@@ -18,14 +18,20 @@ export default function RestaurantCard({
       onClick={onClick}
     >
       {/* Image Section - Fixed Height */}
-      <div className="relative w-full h-48 flex-shrink-0">
-        <Image
-          src={restaurant.images.photo || "/images/danang-find-restaurant.jpg"}
-          alt={restaurant.name}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          fill
-          className="object-cover hover:scale-105 transition-transform duration-500"
-        />
+      <div className="relative w-full h-48 flex-shrink-0 bg-gray-200">
+        {restaurant.images.photo ? (
+          <Image
+            src={restaurant.images.photo}
+            alt={restaurant.name}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            fill
+            className="object-cover hover:scale-105 transition-transform duration-500"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-gray-400 text-sm font-medium">No image</span>
+          </div>
+        )}
 
         {/* Favorite Icon */}
         <button

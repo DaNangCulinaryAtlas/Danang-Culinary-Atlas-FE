@@ -671,8 +671,7 @@ export default function DishManagement() {
                                         isSelected ? 'ring-2' : ''
                                       }`}
                                       style={{ 
-                                        borderColor: adminColors.primary[100],
-                                        ringColor: isSelected ? adminColors.primary[400] : 'transparent'
+                                        borderColor: adminColors.primary[100]
                                       }}
                                     >
                                       <div className="relative aspect-square bg-muted">
@@ -991,8 +990,7 @@ export default function DishManagement() {
                               <div 
                                 className="h-12 w-12 rounded-xl flex items-center justify-center shadow-lg ring-2 transition-transform group-hover:scale-110"
                                 style={{ 
-                                  background: adminColors.gradients.primarySoft,
-                                  ringColor: adminColors.primary[200]
+                                  background: adminColors.gradients.primarySoft
                                 }}
                               >
                                 <Store className="h-6 w-6 text-white" />
