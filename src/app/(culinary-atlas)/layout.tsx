@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Footer from "@/components/footer";
 import Header from "@/components/navbar";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -10,7 +10,11 @@ import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
 
 // Component to hydrate auth state from localStorage on client mount
 function AuthHydration() {
+  const renderCount = useRef(0);
+
   useEffect(() => {
+    renderCount.current += 1;
+
     store.dispatch(hydrateAuth());
   }, []);
 

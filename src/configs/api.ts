@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
     FORGOT_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password',
     CHANGE_PASSWORD: '/auth/change-password',
+    REFRESH_TOKEN: '/auth/refresh-token',
   },
   PROFILE: {
     USER: '/profile/user',
@@ -65,7 +66,7 @@ export const API_ENDPOINTS = {
 
     // Report Handling - Xử lý báo cáo vi phạm
     REPORTS_LIST: '/reports/admin', // Danh sách báo cáo (bao gồm lý do, status, timestamps)
-    
+
 
     // System Settings - Cài đặt hệ thống
     // Location Management - Quản lý địa chính
@@ -86,11 +87,11 @@ export const API_ENDPOINTS = {
     ROLES_LIST: '/admin/permissions/roles', // Get all roles
     PERMISSIONS_FOR_ROLE: (roleId: string) => `/admin/permissions/roles/${roleId}/permissions`, // Get permissions for a specific role
     ACTIONS_LIST: '/admin/permissions/actions', // Get all available actions
-   
+
     REVIEW: {
-    CREATE: '/reviews',
-    UPDATE: (id: string) => `/reviews/${id}`,
-    DELETE: (id: string) => `/reviews/${id}`,
+      CREATE: '/reviews',
+      UPDATE: (id: string) => `/reviews/${id}`,
+      DELETE: (id: string) => `/reviews/${id}`,
     },
   },
 };

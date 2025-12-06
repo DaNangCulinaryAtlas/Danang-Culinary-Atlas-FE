@@ -38,7 +38,9 @@ export function useLoginMutation() {
 
     return useMutation<ApiResponse, Error, TLoginAuth>({
         mutationFn: async (credentials: TLoginAuth) => {
+            console.log('🔵 [useLoginMutation] Starting login request');
             const response = await loginAuth(credentials);
+            console.log('📝 [useLoginMutation] Login response:', response.success ? 'Success' : 'Failed');
             if (!response.success) {
                 throw new Error(response.message || 'Login failed');
             }
@@ -46,11 +48,16 @@ export function useLoginMutation() {
         },
         onSuccess: async (data) => {
             if (data.data.data) {
-                const { token, email, fullName, avatarUrl, roles } = data.data.data;
-                // Update Redux with user data
+                const responseData = data.data.data;
+                const token = responseData.accessToken || responseData.token;
+                const refreshToken = responseData.refreshToken;
+                const { email, fullName, avatarUrl, roles, accountId } = responseData;
+
+                // Update Redux with user data and tokens
                 dispatch(setAuthData({
-                    user: { email, fullName, avatarUrl, roles },
+                    user: { email, fullName, avatarUrl, roles, accountId },
                     token,
+                    refreshToken,
                 }));
 
                 // Fetch user profile to get accountId

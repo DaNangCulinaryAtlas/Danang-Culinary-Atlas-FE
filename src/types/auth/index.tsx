@@ -15,10 +15,12 @@ export type TChangePassword = {
 }
 export type TForgotPasswordAuth = {
   email: string
+  platform: 'web' | 'mobile'
 }
 export type TResetPasswordAuth = {
+  token: string
   newPassword: string
-  secretKey: string
+  confirmPassword: string
 }
 
 export type TUserProfile = {

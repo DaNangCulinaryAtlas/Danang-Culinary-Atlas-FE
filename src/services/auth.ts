@@ -1,19 +1,19 @@
 import { AxiosError, AxiosResponse } from 'axios';
 import instanceAxios from '@/helpers/axios';
 import { API_ENDPOINTS } from '@/configs/api';
-import { 
-  TLoginAuth, 
-  TSignUpAuth, 
-  TForgotPasswordAuth, 
-  TResetPasswordAuth, 
-  TChangePassword 
+import {
+  TLoginAuth,
+  TSignUpAuth,
+  TForgotPasswordAuth,
+  TResetPasswordAuth,
+  TChangePassword
 } from '@/types/auth';
 import { ApiResponse } from '@/types/response';
 
 export const loginAuth = async (data: TLoginAuth): Promise<ApiResponse> => {
   try {
     const response: AxiosResponse = await instanceAxios.post(
-      API_ENDPOINTS.AUTH.LOGIN, 
+      API_ENDPOINTS.AUTH.LOGIN,
       data
     );
 
@@ -111,6 +111,38 @@ export const changePasswordAuth = async (data: TChangePassword): Promise<ApiResp
     return {
       success: false,
       message: axiosError.response?.data?.message || 'Failed to change password',
+      error: axiosError.message
+    };
+  }
+};
+
+export const refreshTokenAuth = async (refreshToken: string): Promise<ApiResponse> => {
+  try {
+    console.log('🔄 [refreshTokenAuth] Attempting to refresh token...');
+    const response: AxiosResponse = await instanceAxios.post(
+      API_ENDPOINTS.AUTH.REFRESH_TOKEN,
+      { refreshToken }
+    );
+    console.log('✅ [refreshTokenAuth] Token refreshed successfully');
+    console.log('📝 [refreshTokenAuth] Response:', response.data);
+
+    // Backend returns: { data: { accessToken, refreshToken } }
+    const responseData = response.data.data || response.data;
+    return {
+      success: true,
+      data: {
+        token: responseData.accessToken || responseData.token,
+        refreshToken: responseData.refreshToken,
+        ...responseData
+      },
+      message: 'Token refreshed successfully'
+    };
+  } catch (error) {
+    const axiosError = error as AxiosError<ApiResponse>;
+    console.error('❌ [refreshTokenAuth] Failed to refresh token:', axiosError.message);
+    return {
+      success: false,
+      message: axiosError.response?.data?.message || 'Failed to refresh token',
       error: axiosError.message
     };
   }

@@ -14,9 +14,11 @@ import AppleIcon from '@/../public/icons/Apple';
 import { useLoginMutation } from '@/hooks/mutations/useAuthMutations';
 import { loginSchema, LoginFormData } from '@/lib/validations/auth';
 import { useState } from 'react';
+import ForgotPasswordModal from '@/components/auth/ForgotPasswordModal';
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const router = useRouter();
   const loginMutation = useLoginMutation();
   const {
@@ -35,6 +37,9 @@ export default function Login() {
     loginMutation.mutate(data, {
       onSuccess: () => {
         router.push('/');
+      },
+      onError: (error) => {
+        console.error('Login failed:', error.message);
       },
     });
   };
@@ -155,9 +160,13 @@ export default function Login() {
                   />
                   <span className="text-gray-600 font-poppins">Remember me</span>
                 </label>
-                <Link href="/forgot-password" className="text-[#69C3CF] hover:underline font-poppins">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-[#69C3CF] hover:underline font-poppins"
+                >
                   Quên mật khẩu?
-                </Link>
+                </button>
               </div>
 
               {/* Login Button */}
@@ -218,6 +227,9 @@ export default function Login() {
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal open={showForgotPassword} onOpenChange={setShowForgotPassword} />
     </div>
   );
 }

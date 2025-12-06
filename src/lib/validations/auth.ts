@@ -30,7 +30,7 @@ export const registerSchema = z.object({
     confirmPassword: z
         .string()
         .min(1, 'Xác nhận mật khẩu là bắt buộc'),
-        role: z.enum(['USER', 'VENDOR']),
+    role: z.enum(['USER', 'VENDOR']),
     agreeTerms: z
         .boolean()
         .refine((val) => val === true, {
@@ -49,6 +49,9 @@ export const forgotPasswordSchema = z.object({
 });
 
 export const resetPasswordSchema = z.object({
+    token: z
+        .string()
+        .min(1, 'Token là bắt buộc'),
     newPassword: z
         .string()
         .min(1, 'Mật khẩu mới là bắt buộc')
@@ -59,9 +62,6 @@ export const resetPasswordSchema = z.object({
     confirmPassword: z
         .string()
         .min(1, 'Xác nhận mật khẩu là bắt buộc'),
-    secretKey: z
-        .string()
-        .min(1, 'Mã xác thực là bắt buộc'),
 }).refine((data) => data.newPassword === data.confirmPassword, {
     message: 'Mật khẩu xác nhận không khớp',
     path: ['confirmPassword'],

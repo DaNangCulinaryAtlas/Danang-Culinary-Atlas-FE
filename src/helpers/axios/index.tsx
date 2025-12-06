@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { BASE_URL } from '@/configs/api';
+import { BASE_URL, API_ENDPOINTS } from '@/configs/api';
+
 const instanceAxios = axios.create({
   baseURL: BASE_URL,
   timeout: 30000,
@@ -7,6 +8,25 @@ const instanceAxios = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Flags to prevent multiple refresh attempts and infinite redirect loops
+let isRefreshing = false;
+let isRedirecting = false;
+let failedQueue: Array<{
+  resolve: (value?: any) => void;
+  reject: (reason?: any) => void;
+}> = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
 
 // Request interceptor
 instanceAxios.interceptors.request.use(
@@ -26,28 +46,164 @@ instanceAxios.interceptors.request.use(
   }
 );
 
-// Response interceptor
+// Response interceptor with refresh token logic
 instanceAxios.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
   },
-  (error: AxiosError) => {
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+
+    console.log('🔍 [Axios Interceptor] Error caught:', {
+      status: error.response?.status,
+      url: originalRequest?.url,
+      _retry: originalRequest?._retry
+    });
+
     if (error.response) {
       const status = error.response.status;
-      
-      // Handle specific error codes
-      switch (status) {
-        case 401:
-          console.warn('⚠️ Unauthorized - clearing auth data');
-          if (typeof window !== 'undefined') {
-            localStorage.removeItem('token');
-            localStorage.removeItem('userData');
-            // Redirect to login if not already there
-            if (!window.location.pathname.includes('/login')) {
+
+      // Handle 401 - Try to refresh token
+      if (status === 401 && !originalRequest._retry) {
+        console.log('🔑 [Axios Interceptor] 401 detected, will attempt token refresh');
+        if (originalRequest.url?.includes('/auth/refresh-token')) {
+          // Refresh token itself failed - logout
+          console.error('🔴 Refresh token expired - logging out');
+          if (typeof window !== 'undefined' && !isRedirecting) {
+            const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
+            const isPublicRoute = publicRoutes.some(route => window.location.pathname.includes(route));
+
+            if (!isPublicRoute) {
+              isRedirecting = true;
+              localStorage.removeItem('token');
+              localStorage.removeItem('refreshToken');
+              localStorage.removeItem('userData');
+              console.log('🔄 Redirecting to login...');
               window.location.href = '/login';
             }
           }
-          break;
+          return Promise.reject(error);
+        }
+
+        if (isRefreshing) {
+          // Queue this request while refresh is in progress
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          })
+            .then(token => {
+              if (originalRequest.headers) {
+                originalRequest.headers.Authorization = `Bearer ${token}`;
+              }
+              return instanceAxios(originalRequest);
+            })
+            .catch(err => Promise.reject(err));
+        }
+
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        if (typeof window !== 'undefined') {
+          const refreshToken = localStorage.getItem('refreshToken');
+
+          if (!refreshToken) {
+            console.error('❌ No refresh token available');
+
+            // Define public routes that don't need authentication
+            const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
+            const isPublicRoute = publicRoutes.some(route => window.location.pathname.includes(route));
+
+            if (!isRedirecting && !isPublicRoute) {
+              isRedirecting = true;
+              localStorage.removeItem('token');
+              localStorage.removeItem('userData');
+              console.log('🔄 Redirecting to login (no refresh token)...');
+              window.location.href = '/login';
+            }
+            return Promise.reject(error);
+          }
+
+          try {
+            console.log('🔄 [Axios Interceptor] Attempting to refresh token...');
+            console.log('📝 [Axios Interceptor] Refresh URL:', `${BASE_URL}${API_ENDPOINTS.AUTH.REFRESH_TOKEN}`);
+            console.log('📝 [Axios Interceptor] RefreshToken:', refreshToken);
+
+            // Use plain axios to avoid interceptor loop
+            const response = await axios.post(`${BASE_URL}${API_ENDPOINTS.AUTH.REFRESH_TOKEN}`, {
+              refreshToken,
+            }, {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+
+            console.log('📝 [Axios Interceptor] Refresh response:', response.data);
+
+            // Backend returns: { data: { accessToken, refreshToken } }
+            const responseData = response.data.data || response.data;
+            const newToken = responseData.accessToken || responseData.token;
+            const newRefreshToken = responseData.refreshToken;
+
+            if (!newToken) {
+              throw new Error('No access token in refresh response');
+            }
+
+            console.log('✅ [Axios Interceptor] Token refreshed successfully');
+
+            // Update tokens in localStorage
+            localStorage.setItem('token', newToken);
+            if (newRefreshToken) {
+              localStorage.setItem('refreshToken', newRefreshToken);
+            }
+
+            // Update Redux store if available
+            try {
+              const { store } = await import('@/stores');
+              const { updateTokens } = await import('@/stores/auth');
+              store.dispatch(updateTokens({
+                token: newToken,
+                refreshToken: newRefreshToken
+              }));
+            } catch (storeError) {
+              console.warn('⚠️ Could not update Redux store:', storeError);
+            }
+
+            // Update authorization header
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            }
+
+            processQueue(null, newToken);
+            isRefreshing = false;
+
+            // Retry original request with new token
+            return instanceAxios(originalRequest);
+          } catch (refreshError) {
+            console.error('❌ [Axios Interceptor] Failed to refresh token:', refreshError);
+            processQueue(refreshError, null);
+            isRefreshing = false;
+
+            // Clear auth data and redirect to login
+            if (!isRedirecting) {
+              const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
+              const isPublicRoute = publicRoutes.some(route => window.location.pathname.includes(route));
+
+              if (!isPublicRoute) {
+                isRedirecting = true;
+                localStorage.removeItem('token');
+                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('userData');
+                console.log('🔄 Redirecting to login (refresh failed)...');
+                window.location.href = '/login';
+              }
+            }
+
+            return Promise.reject(refreshError);
+          }
+        }
+      }
+
+      // Handle other error codes
+      switch (status) {
         case 403:
           console.error('❌ Forbidden - insufficient permissions');
           break;
@@ -63,7 +219,7 @@ instanceAxios.interceptors.response.use(
     } else {
       console.error('❌ Error:', error.message);
     }
-    
+
     return Promise.reject(error);
   }
 );

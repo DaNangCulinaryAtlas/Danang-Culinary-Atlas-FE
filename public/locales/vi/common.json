@@ -94,5 +94,54 @@
         "ctaDescription": "Khám phá vị ngon của Đà Nẵng theo cách thông minh hơn. Mỗi quán ăn là một câu chuyện, mỗi món ăn là một trải nghiệm.",
         "ctaButton": "Bắt đầu khám phá ngay",
         "footerMessage": "Với Danang Culinary Atlas, ẩm thực không chỉ là thức ăn – đó là một hành trình khám phá."
+    },
+    "auth": {
+        "forgotPassword": {
+            "title": "Quên mật khẩu?",
+            "subtitle": "Nhập email để nhận link đặt lại mật khẩu",
+            "emailLabel": "Email",
+            "emailPlaceholder": "Nhập địa chỉ email của bạn",
+            "submitButton": "Gửi link đặt lại mật khẩu",
+            "submitting": "Đang gửi...",
+            "backToLogin": "Quay lại đăng nhập",
+            "successTitle": "Kiểm tra email!",
+            "successMessage": "Chúng tôi đã gửi link đặt lại mật khẩu đến",
+            "successNote": "Vui lòng kiểm tra email và làm theo hướng dẫn. Nếu không thấy email, hãy kiểm tra thư mục spam.",
+            "resendButton": "Gửi lại email",
+            "description": "Đừng lo lắng! Chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu đến email của bạn."
+        },
+        "resetPassword": {
+            "title": "Đặt lại mật khẩu",
+            "subtitle": "Nhập mật khẩu mới của bạn",
+            "newPasswordLabel": "Mật khẩu mới",
+            "newPasswordPlaceholder": "Nhập mật khẩu mới",
+            "confirmPasswordLabel": "Xác nhận mật khẩu",
+            "confirmPasswordPlaceholder": "Nhập lại mật khẩu mới",
+            "submitButton": "Đặt lại mật khẩu",
+            "submitting": "Đang xử lý...",
+            "rememberPassword": "Nhớ mật khẩu?",
+            "loginNow": "Đăng nhập ngay",
+            "successMessage": "Đặt lại mật khẩu thành công! Đang chuyển đến trang đăng nhập...",
+            "description": "Tạo mật khẩu mới để bảo vệ tài khoản của bạn.",
+            "requirements": {
+                "title": "Mật khẩu phải có:",
+                "minLength": "Ít nhất 6 ký tự",
+                "uppercase": "Ít nhất 1 chữ hoa (A-Z)",
+                "lowercase": "Ít nhất 1 chữ thường (a-z)",
+                "number": "Ít nhất 1 chữ số (0-9)"
+            }
+        },
+        "validation": {
+            "emailRequired": "Email là bắt buộc",
+            "emailInvalid": "Email không hợp lệ",
+            "passwordRequired": "Mật khẩu là bắt buộc",
+            "passwordMinLength": "Mật khẩu phải có ít nhất 6 ký tự",
+            "passwordUppercase": "Mật khẩu phải có ít nhất 1 chữ hoa",
+            "passwordLowercase": "Mật khẩu phải có ít nhất 1 chữ thường",
+            "passwordNumber": "Mật khẩu phải có ít nhất 1 chữ số",
+            "confirmPasswordRequired": "Xác nhận mật khẩu là bắt buộc",
+            "passwordMismatch": "Mật khẩu xác nhận không khớp",
+            "tokenRequired": "Token là bắt buộc"
+        }
     }
 }

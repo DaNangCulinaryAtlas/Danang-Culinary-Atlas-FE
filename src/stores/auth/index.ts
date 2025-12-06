@@ -18,7 +18,9 @@ interface UserDataType {
 interface AuthState {
     user: UserDataType | null;
     token: string | null;
+    refreshToken: string | null;
     isAuthenticated: boolean;
+    accountId: string | null;
     ui: UIState;
 }
 
@@ -27,7 +29,9 @@ const getInitialState = (): AuthState => {
     return {
         user: null,
         token: null,
+        refreshToken: null,
         isAuthenticated: false,
+        accountId: null,
         ui: {
             sidebarOpen: false,
             theme: 'light',
@@ -43,15 +47,20 @@ const authSlice = createSlice({
     initialState,
     reducers: {
         // Set user data after successful login/register (called by React Query)
-        setAuthData: (state, action: PayloadAction<{ user: UserDataType; token: string }>) => {
+        setAuthData: (state, action: PayloadAction<{ user: UserDataType; token: string; refreshToken?: string }>) => {
             state.user = action.payload.user;
             state.token = action.payload.token;
+            state.refreshToken = action.payload.refreshToken || null;
             state.isAuthenticated = true;
+            state.accountId = action.payload.user.accountId || null;
 
             // Persist to localStorage
             if (typeof window !== 'undefined') {
                 window.localStorage.setItem('token', action.payload.token);
                 window.localStorage.setItem('userData', JSON.stringify(action.payload.user));
+                if (action.payload.refreshToken) {
+                    window.localStorage.setItem('refreshToken', action.payload.refreshToken);
+                }
             }
         },
 
@@ -67,15 +76,35 @@ const authSlice = createSlice({
             }
         },
 
+        // Update tokens (used after refresh token)
+        updateTokens: (state, action: PayloadAction<{ token: string; refreshToken?: string }>) => {
+            state.token = action.payload.token;
+            if (action.payload.refreshToken) {
+                state.refreshToken = action.payload.refreshToken;
+            }
+
+            // Update localStorage
+            if (typeof window !== 'undefined') {
+                window.localStorage.setItem('token', action.payload.token);
+                if (action.payload.refreshToken) {
+                    window.localStorage.setItem('refreshToken', action.payload.refreshToken);
+                }
+            }
+        },
+
         // Logout
         logout: (state) => {
             state.user = null;
             state.token = null;
+            state.refreshToken = null;
             state.isAuthenticated = false;
+            state.accountId = null;
 
             if (typeof window !== 'undefined') {
                 window.localStorage.removeItem('token');
+                window.localStorage.removeItem('refreshToken');
                 window.localStorage.removeItem('userData');
+                window.localStorage.removeItem('accountId');
             }
         },
 
@@ -96,13 +125,17 @@ const authSlice = createSlice({
         hydrateAuth: (state) => {
             if (typeof window !== 'undefined') {
                 const token = window.localStorage.getItem('token');
+                const refreshToken = window.localStorage.getItem('refreshToken');
                 const userData = window.localStorage.getItem('userData');
+                const accountId = window.localStorage.getItem('accountId');
 
                 if (token && userData) {
                     try {
                         state.user = JSON.parse(userData);
                         state.token = token;
+                        state.refreshToken = refreshToken;
                         state.isAuthenticated = true;
+                        state.accountId = accountId;
                     } catch (error) {
                         console.error('Failed to hydrate auth state:', error);
                     }
@@ -115,6 +148,7 @@ const authSlice = createSlice({
 export const {
     setAuthData,
     updateUser,
+    updateTokens,
     logout,
     toggleSidebar,
     setTheme,

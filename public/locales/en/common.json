@@ -94,5 +94,54 @@
         "ctaDescription": "Discover Da Nang's delicious flavors in a smarter way. Every restaurant tells a story, every dish is an experience.",
         "ctaButton": "Start Exploring Now",
         "footerMessage": "With Danang Culinary Atlas, food is more than just a meal – it's a journey of discovery."
+    },
+    "auth": {
+        "forgotPassword": {
+            "title": "Forgot Password?",
+            "subtitle": "Enter your email to receive password reset link",
+            "emailLabel": "Email",
+            "emailPlaceholder": "Enter your email address",
+            "submitButton": "Send Reset Link",
+            "submitting": "Sending...",
+            "backToLogin": "Back to Login",
+            "successTitle": "Check Your Email!",
+            "successMessage": "We've sent a password reset link to",
+            "successNote": "Please check your email and follow the instructions. If you don't see the email, check your spam folder.",
+            "resendButton": "Resend Email",
+            "description": "Don't worry! We'll send instructions to reset your password to your email."
+        },
+        "resetPassword": {
+            "title": "Reset Password",
+            "subtitle": "Enter your new password",
+            "newPasswordLabel": "New Password",
+            "newPasswordPlaceholder": "Enter new password",
+            "confirmPasswordLabel": "Confirm Password",
+            "confirmPasswordPlaceholder": "Re-enter new password",
+            "submitButton": "Reset Password",
+            "submitting": "Processing...",
+            "rememberPassword": "Remember your password?",
+            "loginNow": "Login now",
+            "successMessage": "Password reset successful! Redirecting to login page...",
+            "description": "Create a new password to protect your account.",
+            "requirements": {
+                "title": "Password must have:",
+                "minLength": "At least 6 characters",
+                "uppercase": "At least 1 uppercase letter (A-Z)",
+                "lowercase": "At least 1 lowercase letter (a-z)",
+                "number": "At least 1 number (0-9)"
+            }
+        },
+        "validation": {
+            "emailRequired": "Email is required",
+            "emailInvalid": "Invalid email address",
+            "passwordRequired": "Password is required",
+            "passwordMinLength": "Password must be at least 6 characters",
+            "passwordUppercase": "Password must have at least 1 uppercase letter",
+            "passwordLowercase": "Password must have at least 1 lowercase letter",
+            "passwordNumber": "Password must have at least 1 number",
+            "confirmPasswordRequired": "Confirm password is required",
+            "passwordMismatch": "Passwords do not match",
+            "tokenRequired": "Token is required"
+        }
     }
 }

@@ -106,7 +106,7 @@ export default function RestaurantDetail() {
     if (!restaurantId) return;
 
     console.log('🔄 [RestaurantDetail] Setting up polling for reviews (30s interval)');
-    
+
     const intervalId = setInterval(() => {
       console.log('🔄 [RestaurantDetail] Auto-refreshing reviews...');
       queryClient.invalidateQueries({ queryKey: ['reviews', restaurantId] });
@@ -187,58 +187,82 @@ export default function RestaurantDetail() {
 
         {/* Photo Gallery */}
         <section className="mb-8">
-          {restaurant.images?.sub_photo && restaurant.images.sub_photo.length > 0 ? (
-            <>
-              <div className="relative w-full h-72 md:h-96 rounded-2xl overflow-hidden mb-4 shadow-lg bg-gray-200">
-                {!imageError[`main-${selectedImageIndex}`] ? (
-                  <Image
-                    src={restaurant.images.sub_photo[selectedImageIndex] || restaurant.images.photo}
-                    alt={`${restaurant.name} - ${selectedImageIndex}`}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 80vw"
-                    priority={selectedImageIndex === 0}
-                    onError={() => setImageError({ ...imageError, [`main-${selectedImageIndex}`]: true })}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-300">
-                    <span className="text-gray-600">Image could not be loaded</span>
-                  </div>
-                )}
+          {(() => {
+            // Filter out images with errors
+            const validImages = restaurant.images?.sub_photo?.filter((_, index) => !imageError[`thumb-${index}`]) || [];
+            const hasValidImages = validImages.length > 0;
+
+            return hasValidImages ? (
+              <>
+                <div className="relative w-full h-72 md:h-96 rounded-2xl overflow-hidden mb-4 shadow-lg bg-gray-200">
+                  {!imageError[`main-${selectedImageIndex}`] && restaurant.images.sub_photo[selectedImageIndex] ? (
+                    <Image
+                      src={restaurant.images.sub_photo[selectedImageIndex]}
+                      alt={`${restaurant.name} - ${selectedImageIndex}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 80vw"
+                      priority={selectedImageIndex === 0}
+                      unoptimized
+                      onError={() => {
+                        setImageError({ ...imageError, [`main-${selectedImageIndex}`]: true });
+                        // Auto-switch to next valid image
+                        const nextValidIndex = restaurant.images.sub_photo.findIndex((_, i) =>
+                          i > selectedImageIndex && !imageError[`thumb-${i}`]
+                        );
+                        if (nextValidIndex !== -1) {
+                          setSelectedImageIndex(nextValidIndex);
+                        }
+                      }}
+                    />
+                  ) : restaurant.images?.photo ? (
+                    <Image
+                      src={restaurant.images.photo}
+                      alt={restaurant.name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 80vw"
+                      priority
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-300">
+                      <span className="text-gray-600">No image available</span>
+                    </div>
+                  )}
+                </div>
+                <div className="grid grid-cols-6 gap-2">
+                  {restaurant.images.sub_photo.map((photo, index) => (
+                    // Only render if not in error state
+                    !imageError[`thumb-${index}`] && (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedImageIndex(index)}
+                        className={`relative w-full aspect-square rounded-lg overflow-hidden transition-all duration-300 bg-gray-200 ${selectedImageIndex === index
+                          ? 'ring-2 ring-[#44BACA]'
+                          : 'opacity-70 hover:opacity-100'
+                          }`}
+                      >
+                        <Image
+                          src={photo}
+                          alt={`Thumbnail ${index}`}
+                          fill
+                          className="object-cover"
+                          sizes="100px"
+                          unoptimized
+                          onError={() => setImageError({ ...imageError, [`thumb-${index}`]: true })}
+                        />
+                      </button>
+                    )
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="relative w-full h-72 md:h-96 rounded-2xl overflow-hidden mb-4 shadow-lg bg-gray-300 flex items-center justify-center">
+                <span className="text-gray-600">No images available</span>
               </div>
-              <div className="grid grid-cols-6 gap-2">
-                {restaurant.images.sub_photo.map((photo, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImageIndex(index)}
-                    className={`relative w-full aspect-square rounded-lg overflow-hidden transition-all duration-300 bg-gray-200 ${selectedImageIndex === index
-                      ? 'ring-2 ring-[#44BACA]'
-                      : 'opacity-70 hover:opacity-100'
-                      }`}
-                  >
-                    {!imageError[`thumb-${index}`] ? (
-                      <Image
-                        src={photo}
-                        alt={`Thumbnail ${index}`}
-                        fill
-                        className="object-cover"
-                        sizes="100px"
-                        onError={() => setImageError({ ...imageError, [`thumb-${index}`]: true })}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-300 text-xs text-gray-600">
-                        Error
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="relative w-full h-72 md:h-96 rounded-2xl overflow-hidden mb-4 shadow-lg bg-gray-300 flex items-center justify-center">
-              <span className="text-gray-600">No images available</span>
-            </div>
-          )}
+            );
+          })()}
         </section>
 
         {/* Restaurant Location Map */}
