@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import type { MapRestaurant } from '@/types/restaurant';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { Navigation } from 'lucide-react';
 
 interface PopupCardProps {
   restaurant: MapRestaurant;
@@ -15,6 +16,13 @@ export default function PopupCard({ restaurant, onClose }: PopupCardProps) {
   const handleViewDetails = () => {
     router.push(`/restaurants/${restaurant.restaurantId}`);
     onClose();
+  };
+
+  const handleGetDirections = () => {
+    // Call the getDirections function from the map component
+    if ((window as any).getDirectionsToRestaurant) {
+      (window as any).getDirectionsToRestaurant(restaurant);
+    }
   };
 
   return (
@@ -61,10 +69,22 @@ export default function PopupCard({ restaurant, onClose }: PopupCardProps) {
             </div>
           )}
         </div>
-        {/* View Details Button */}
-        <Button onClick={handleViewDetails} className="w-full bg-[#44BACA] text-white font-medium py-2 rounded-lg hover:bg-[#3a9ba8]">
-          Xem chi tiết
-        </Button>
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <Button
+            onClick={handleGetDirections}
+            className="flex-1 bg-blue-600 text-white font-medium py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2"
+          >
+            <Navigation className="w-4 h-4" />
+            Chỉ đường
+          </Button>
+          <Button
+            onClick={handleViewDetails}
+            className="flex-1 bg-[#44BACA] text-white font-medium py-2 rounded-lg hover:bg-[#3a9ba8]"
+          >
+            Chi tiết
+          </Button>
+        </div>
       </div>
     </div>
   );

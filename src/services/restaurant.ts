@@ -153,3 +153,40 @@ export const getRestaurantDetail = async (restaurantId: string): Promise<ApiResp
     };
   }
 }
+
+export const getRestaurantDishes = async (params: {
+  restaurantId: string;
+  page?: number;
+  size?: number;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
+}): Promise<ApiResponse> => {
+  try {
+    const { restaurantId, page = 0, size = 10, sortBy = 'name', sortDirection = 'asc' } = params;
+
+    const response: AxiosResponse = await instanceAxios.get(
+      `/restaurants/${restaurantId}/dishes`,
+      {
+        params: {
+          page,
+          size,
+          sortBy,
+          sortDirection,
+        }
+      }
+    );
+
+    return {
+      success: true,
+      data: response.data,
+      message: 'Fetched restaurant dishes successfully'
+    };
+  } catch (error) {
+    const axiosError = error as AxiosError<ApiResponse>;
+    return {
+      success: false,
+      message: axiosError.response?.data?.message || 'Failed to fetch restaurant dishes',
+      error: axiosError.message
+    };
+  }
+}

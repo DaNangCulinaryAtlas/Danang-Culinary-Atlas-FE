@@ -1,14 +1,17 @@
 "use client";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import Map, { NavigationControl, MapRef } from 'react-map-gl/maplibre';
+import Map, { NavigationControl, MapRef, Source, Layer, Marker } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { MAP_STYLES } from '@/styles/map-styles';
 import RestaurantMarker from './RestaurantMarker';
+import DirectionsPanel from './DirectionsPanel';
 import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
 import { setViewState } from '@/stores/atlas';
 import { useRestaurantsForMap } from '@/hooks/queries/useRestaurantsForMap';
 import type { MapRestaurant, Restaurant } from '@/types/restaurant';
 import type { ViewStateChangeEvent } from 'react-map-gl/maplibre';
+import { getDirectionsOSRM, type RouteResponse } from '@/services/directions';
+import { MapPin } from 'lucide-react';
 
 // Validation helpers
 const isValidLatitude = (lat: any): boolean => {
@@ -48,20 +51,25 @@ const restaurantToMapRestaurant = (restaurant: Restaurant): MapRestaurant => {
 const RestaurantMap: React.FC = () => {
   const mapRef = useRef<MapRef>(null);
   const dispatch = useAppDispatch();
-  const { viewState } = useAppSelector((state) => state.atlas);
-  const { restaurants: searchResults, searchQuery } = useAppSelector((state) => state.restaurant);
+  const { viewState, searchQuery, searchResults } = useAppSelector((state) => state.atlas);
 
   // Map bounds state for TanStack Query
   const [mapBounds, setMapBounds] = useState({
-    zoomLevel: 15,
-    minLat: 16.0228683164663,
-    maxLat: 16.085970325587937,
-    minLng: 108.17567930024103,
-    maxLng: 108.22859051574727,
+    zoomLevel: 16,
+    minLat: 16.05436760477849,
+    maxLat: 16.069721958688916,
+    minLng: 108.21832403109659,
+    maxLng: 108.23373468121076,
   });
 
   // Debounce timer ref to prevent too many API calls
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Directions state
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [routeData, setRouteData] = useState<RouteResponse | null>(null);
+  const [isLoadingRoute, setIsLoadingRoute] = useState(false);
+  const [selectedRestaurantForDirections, setSelectedRestaurantForDirections] = useState<MapRestaurant | null>(null);
 
   // Determine if we should fetch from map bounds or use search results
   const shouldFetchFromBounds = !searchQuery;
@@ -73,7 +81,7 @@ const RestaurantMap: React.FC = () => {
   });
 
   // Display either search results or map restaurants (cast to MapRestaurant for rendering)
-  const restaurants: MapRestaurant[] = searchQuery 
+  const restaurants: MapRestaurant[] = searchQuery
     ? searchResults.map(restaurantToMapRestaurant)
     : mapRestaurants;
   const loading = isLoading || isFetching;
@@ -83,7 +91,7 @@ const RestaurantMap: React.FC = () => {
     if (!mapRef.current || restaurantList.length === 0) return;
 
     const map = mapRef.current;
-    
+
     // Filter only valid restaurants
     const validRestaurants = restaurantList.filter(isValidRestaurant);
     if (validRestaurants.length === 0) return;
@@ -184,6 +192,107 @@ const RestaurantMap: React.FC = () => {
     };
   }, []);
 
+  // Get user's current location
+  const getUserLocation = useCallback(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { longitude, latitude } = position.coords;
+          setUserLocation([longitude, latitude]);
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          alert('Không thể lấy vị trí của bạn. Vui lòng cho phép truy cập vị trí.');
+        }
+      );
+    } else {
+      alert('Trình duyệt của bạn không hỗ trợ định vị.');
+    }
+  }, []);
+
+  // Get directions to restaurant
+  const getDirectionsToRestaurant = useCallback(async (restaurant: MapRestaurant) => {
+    // Get user location first if not available
+    if (!userLocation) {
+      getUserLocation();
+      // Wait a bit for location to be set
+      setTimeout(() => {
+        if (userLocation) {
+          getDirectionsToRestaurant(restaurant);
+        }
+      }, 1000);
+      return;
+    }
+
+    setIsLoadingRoute(true);
+    setSelectedRestaurantForDirections(restaurant);
+
+    try {
+      const route = await getDirectionsOSRM(
+        userLocation[0],
+        userLocation[1],
+        restaurant.longitude,
+        restaurant.latitude
+      );
+
+      setRouteData(route);
+
+      // Fit map to show entire route
+      if (mapRef.current) {
+        const allCoords = [userLocation, ...route.coordinates];
+        const lngs = allCoords.map(c => c[0]);
+        const lats = allCoords.map(c => c[1]);
+
+        mapRef.current.fitBounds(
+          [
+            [Math.min(...lngs), Math.min(...lats)],
+            [Math.max(...lngs), Math.max(...lats)]
+          ],
+          {
+            padding: 100,
+            duration: 1000
+          }
+        );
+      }
+    } catch (error) {
+      console.error('Error getting directions:', error);
+      alert('Không thể tìm đường đi. Vui lòng thử lại.');
+    } finally {
+      setIsLoadingRoute(false);
+    }
+  }, [userLocation, getUserLocation]);
+
+  // Clear directions
+  const clearDirections = useCallback(() => {
+    setRouteData(null);
+    setSelectedRestaurantForDirections(null);
+  }, []);
+
+  // Expose getDirections function to children via context or callback
+  useEffect(() => {
+    // Store function in window for access from markers
+    (window as any).getDirectionsToRestaurant = getDirectionsToRestaurant;
+    return () => {
+      delete (window as any).getDirectionsToRestaurant;
+    };
+  }, [getDirectionsToRestaurant]);
+
+  // Request user location on mount
+  useEffect(() => {
+    getUserLocation();
+  }, [getUserLocation]);
+
+  // Route layer style
+  const routeLayerStyle = {
+    id: 'route',
+    type: 'line' as const,
+    paint: {
+      'line-color': '#3b82f6',
+      'line-width': 5,
+      'line-opacity': 0.8
+    }
+  };
+
   return (
     <div className="w-full h-full relative">
       {/* Loading indicator */}
@@ -206,8 +315,62 @@ const RestaurantMap: React.FC = () => {
         {/* Navigation Controls (Zoom +/-) */}
         <NavigationControl position="top-right" />
 
-        {/* Restaurant Markers */}
-        {restaurants?.filter(isValidRestaurant).map((restaurant) => (
+        {/* Route Line */}
+        {routeData && (
+          <Source
+            id="route"
+            type="geojson"
+            data={{
+              type: 'Feature',
+              properties: {},
+              geometry: {
+                type: 'LineString',
+                coordinates: routeData.coordinates
+              }
+            }}
+          >
+            <Layer {...routeLayerStyle} />
+          </Source>
+        )}
+
+        {/* User Location Marker */}
+        {userLocation && routeData && (
+          <Marker
+            longitude={userLocation[0]}
+            latitude={userLocation[1]}
+            anchor="bottom"
+          >
+            <div className="flex flex-col items-center">
+              <div className="bg-blue-600 text-white p-2 rounded-full shadow-lg border-4 border-white">
+                <MapPin className="w-6 h-6" fill="white" />
+              </div>
+              <div className="mt-1 bg-blue-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-md">
+                Vị trí của bạn
+              </div>
+            </div>
+          </Marker>
+        )}
+
+        {/* Destination Restaurant Marker */}
+        {selectedRestaurantForDirections && routeData && (
+          <Marker
+            longitude={selectedRestaurantForDirections.longitude}
+            latitude={selectedRestaurantForDirections.latitude}
+            anchor="bottom"
+          >
+            <div className="flex flex-col items-center">
+              <div className="bg-red-600 text-white p-2 rounded-full shadow-lg border-4 border-white animate-bounce">
+                <MapPin className="w-6 h-6" fill="white" />
+              </div>
+              <div className="mt-1 bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-md max-w-[150px] truncate">
+                {selectedRestaurantForDirections.name}
+              </div>
+            </div>
+          </Marker>
+        )}
+
+        {/* Restaurant Markers - Hide when showing directions */}
+        {!routeData && restaurants?.filter(isValidRestaurant).map((restaurant) => (
           <RestaurantMarker
             key={restaurant.restaurantId}
             restaurant={restaurant}
@@ -230,6 +393,25 @@ const RestaurantMap: React.FC = () => {
           <span className="text-sm text-gray-500">
             {searchQuery ? 'No restaurants match your search' : 'No restaurants found in this area'}
           </span>
+        </div>
+      )}
+
+      {/* Directions Info Panel */}
+      {routeData && selectedRestaurantForDirections && (
+        <DirectionsPanel
+          routeData={routeData}
+          selectedRestaurant={selectedRestaurantForDirections}
+          onClose={clearDirections}
+        />
+      )}
+
+      {/* Loading route indicator */}
+      {isLoadingRoute && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 bg-white px-4 py-2 rounded-lg shadow-lg">
+          <div className="flex items-center gap-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+            <span className="text-sm text-gray-700">Đang tìm đường...</span>
+          </div>
         </div>
       )}
     </div>

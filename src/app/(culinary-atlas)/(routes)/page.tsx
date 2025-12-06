@@ -2,12 +2,13 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import CuisineFeatures from "@/components/cuisinefeatures";
-import DishCard from "@/components/recommendedfood";
+import DishCard from "@/components/dish";
 import { Button } from "@/components/ui/button";
 import { Heart, Share2, MapPin, Star } from 'lucide-react';
-import RestaurantCard from "@/components/restaurants/RestaurantCard";
+import DishCarousel from "@/components/restaurants/DishCarousel";
 import { useRouter } from "next/navigation";
 import { useRestaurants } from "@/hooks/queries/useRestaurants";
+import { useRestaurantDishes } from "@/hooks/queries/useRestaurantDishes";
 import { useTranslation } from 'react-i18next';
 
 export default function HomePage() {
@@ -21,47 +22,27 @@ export default function HomePage() {
     size: 10
   });
 
+  // Fetch dishes from specific restaurant
+  const { data: dishesData, isLoading: isDishesLoading } = useRestaurantDishes({
+    restaurantId: "d7e0fe63-d268-4ad9-bc8c-90dffe7004b4",
+    page: 0,
+    size: 4,
+    sortBy: 'name',
+    sortDirection: 'asc'
+  });
+
   const restaurants = restaurantsData?.content || [];
 
-  const dishes = [
-    {
-      id: 1,
-      image: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&h=600&fit=crop",
-      title: "Beef Pho: The Culinary Spirit of Hanoi",
-      description: "Our broth, simmered for 12 hours with beef bones and aromatic spices, creates a naturally sweet and savory flavor. Paired with soft rice noodles and tender slices of rare beef, each spoonful is a taste of a timeless culinary tradition.",
-      rating: 4,
-      reviewCount: 584,
-      price: 10.00
-    },
-    {
-      id: 2,
-      image: "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&h=600&fit=crop",
-      title: "Grilled Seafood Platter",
-      description: "Fresh catches from the East Sea, grilled to perfection with aromatic herbs and spices. Each bite delivers the ocean's bounty with a smoky, charred flavor that captures the essence of coastal Vietnamese cuisine.",
-      rating: 5,
-      reviewCount: 892,
-      price: 25.00
-    },
-    {
-      id: 3,
-      image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=800&h=600&fit=crop",
-      title: "Mi Quang: Central Vietnam's Pride",
-      description: "Turmeric-infused noodles topped with shrimp, pork, and fresh herbs, served with a small amount of rich broth. This iconic Quang Nam dish perfectly balances flavors and textures in every colorful bowl.",
-      rating: 5,
-      reviewCount: 1203,
-      price: 8.50
-    },
-    {
-      id: 4,
-      image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=800&h=600&fit=crop",
-      title: "Mi Quang: Central Vietnam's Pride",
-      description: "Turmeric-infused noodles topped with shrimp, pork, and fresh herbs, served with a small amount of rich broth. This iconic Quang Nam dish perfectly balances flavors and textures in every colorful bowl.",
-      rating: 5,
-      reviewCount: 1203,
-      price: 8.50
-    }
-
-  ];
+  // Map restaurant dishes to the Dish type expected by DishCard
+  const dishes = (dishesData?.content || []).map((dish) => ({
+    id: dish.dishId,
+    image: dish.images && dish.images.length > 0 ? dish.images[0] : "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop",
+    title: dish.name,
+    description: dish.description || "Món ăn đặc sản",
+    rating: 4.5,
+    reviewCount: 0,
+    price: dish.price / 1000 // Convert VND to display format
+  }));
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,18 +116,42 @@ export default function HomePage() {
           <CuisineFeatures />
         </div>
       </div>
+
+      {/* Dishes Carousel Section */}
+      <div className="max-w-7xl mx-auto px-4 mt-16 mb-16">
+        <div className="flex flex-col justify-center items-center mb-8 text-center">
+          <h2 className="font-volkhov font-bold sm:text-2xl md:text-3xl lg:text-[36px] text-[#44BACA]">
+            Món Ăn Đặc Sắc
+          </h2>
+          <p className="w-[60%] mt-2 font-mulish font-semibold sm:text-sm md:text-[15px] text-[#778088] whitespace-wrap">
+            Khám phá những món ăn đặc trưng và hấp dẫn nhất tại Đà Nẵng
+          </p>
+        </div>
+        <DishCarousel restaurantId="7219c3da-579b-41ea-8a5a-96137e1676ec" />
+      </div>
+
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold text-[#44BACA] text-center mb-12">
           {t('home.recommendedDishes')}
         </h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {dishes.map((dish) => (
-            <DishCard
-              key={dish.id}
-              dish={dish}
-            />
-          ))}
-        </div>
+        {isDishesLoading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#44BACA]"></div>
+          </div>
+        ) : dishes.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {dishes.map((dish) => (
+              <DishCard
+                key={dish.id}
+                dish={dish}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20">
+            <p className="text-gray-500 text-lg">Không có món ăn nào</p>
+          </div>
+        )}
       </div>
 
       {/* Banner Section */}
@@ -265,9 +270,10 @@ export default function HomePage() {
           // )}
             })
                     </div> */}
-              </div>
-         </div>
+        </div>
+      </div>
       <div className="mt-12">
       </div>
     </div>
-  );}
+  );
+}

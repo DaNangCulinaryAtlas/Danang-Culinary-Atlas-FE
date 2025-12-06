@@ -1,18 +1,14 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
-import { setLanguage } from '@/stores/auth';
 import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
 
 export default function SettingsTab() {
-    const dispatch = useAppDispatch();
-    const { ui } = useAppSelector((state) => state.auth);
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const currentLanguage = i18n.language || 'vi';
 
     const handleLanguageChange = (lang: 'vi' | 'en') => {
-        dispatch(setLanguage(lang));
         i18next.changeLanguage(lang);
         localStorage.setItem('language', lang);
     };
@@ -33,7 +29,7 @@ export default function SettingsTab() {
                             type="radio"
                             name="language"
                             value="vi"
-                            checked={ui.language === 'vi'}
+                            checked={currentLanguage === 'vi'}
                             onChange={() => handleLanguageChange('vi')}
                             className="w-5 h-5 text-[#69C3CF]"
                         />
@@ -48,7 +44,7 @@ export default function SettingsTab() {
                             type="radio"
                             name="language"
                             value="en"
-                            checked={ui.language === 'en'}
+                            checked={currentLanguage === 'en'}
                             onChange={() => handleLanguageChange('en')}
                             className="w-5 h-5 text-[#69C3CF]"
                         />

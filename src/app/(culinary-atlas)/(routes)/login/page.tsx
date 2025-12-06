@@ -18,8 +18,7 @@ import { useState } from 'react';
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  const { loading, error: reduxError, user } = useAppSelector((state) => state.auth);
-
+  const loginMutation = useLoginMutation();
   const {
     register,
     handleSubmit,
@@ -112,7 +111,7 @@ export default function Login() {
                     {...register('email')}
                     placeholder="Enter your email"
                     className="pl-10 h-12 border-[#69C3CF] font-poppins text-sm"
-                    disabled={loading}
+                    disabled={loginMutation.isPending}
                   />
                 </div>
                 {errors.email && (
@@ -132,7 +131,7 @@ export default function Login() {
                     {...register('password')}
                     placeholder="******"
                     className="pl-10 pr-10 h-12 border-[#69C3CF] font-poppins text-sm"
-                    disabled={loading}
+                    disabled={loginMutation.isPending}
                   />
                   <button
                     type="button"
@@ -164,10 +163,10 @@ export default function Login() {
               {/* Login Button */}
               <Button
                 type="submit"
-                disabled={loading}
+                disabled={loginMutation.isPending}
                 className="w-full h-11 bg-[#69C3CF] hover:bg-[#5AB3BF] text-white font-poppins text-sm font-medium rounded-md disabled:opacity-50"
               >
-                {loading ? 'ĐANG ĐĂNG NHẬP' : 'ĐĂNG NHẬP'}
+                {loginMutation.isPending ? 'ĐANG ĐĂNG NHẬP' : 'ĐĂNG NHẬP'}
               </Button>
             </form>
 

@@ -6,6 +6,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { store } from "@/stores";
 import { hydrateAuth } from "@/stores/auth";
 import { Provider } from "react-redux";
+import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
 
 // Component to hydrate auth state from localStorage on client mount
 function AuthHydration() {
@@ -35,5 +36,5 @@ export default function DashboardLayout({
         </ReactQueryProvider>
       </Provider>
     </>
- )
+  )
 }

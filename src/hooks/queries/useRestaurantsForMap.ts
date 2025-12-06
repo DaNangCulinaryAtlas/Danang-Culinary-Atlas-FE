@@ -50,7 +50,7 @@ export const useRestaurantsForMap = (params: UseRestaurantsForMapParams) => {
             totalReviews: item.totalReviews,
           };
         })
-        .filter((restaurant): restaurant is MapRestaurant => 
+        .filter((restaurant: MapRestaurant): restaurant is MapRestaurant => 
           restaurant.latitude !== null && restaurant.longitude !== null
         );
     },

@@ -73,6 +73,13 @@ export default function Header() {
               {t('navbar.aboutUs')}
             </Link>
             <Link
+              href="/dishes"
+              className="text-sm font-mulish font-semibold text-[#495560] hover:opacity-90 transition-opacity whitespace-nowrap"
+            >
+              <span className="hidden lg:inline">{t('navbar.popularDishes')}</span>
+              <span className="lg:hidden">{t('navbar.dishes')}</span>
+            </Link>
+            <Link
               href="/restaurants"
               className="text-sm font-mulish font-semibold text-[#495560] hover:opacity-90 transition-opacity whitespace-nowrap"
             >
