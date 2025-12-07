@@ -1,69 +1,69 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, Store, Clock, Flag, TrendingUp, TrendingDown } from "lucide-react"
+import { Users, Store, Clock, Flag, Loader2 } from "lucide-react"
 import { adminColors } from "@/configs/colors"
-
-// Mock data - sẽ được thay thế bằng API calls
-const metrics = [
-  {
-    title: "Tổng người dùng",
-    value: "12,543",
-    change: "+12.5%",
-    trend: "up",
-    icon: Users,
-    description: "User & Vendor",
-  },
-  {
-    title: "Tổng quán ăn",
-    value: "1,234",
-    change: "+8.2%",
-    trend: "up",
-    icon: Store,
-    description: "Đang hoạt động",
-  },
-  {
-    title: "Yêu cầu chờ duyệt",
-    value: "45",
-    change: "-5.3%",
-    trend: "down",
-    icon: Clock,
-    description: "Quán + Món ăn",
-  },
-  {
-    title: "Báo cáo vi phạm",
-    value: "23",
-    change: "+15.0%",
-    trend: "up",
-    icon: Flag,
-    description: "Chưa xử lý",
-  },
-]
+import { useAdminOverview } from "@/hooks/queries/useAdminOverview"
+import RestaurantDistributionChart from "@/components/admin/RestaurantDistributionChart"
 
 export default function AdminDashboard() {
+  const { data: overview, isLoading, error } = useAdminOverview()
+
+  // Tính tổng tài khoản
+  const totalAccounts = overview
+    ? overview.totalUserAccounts + overview.totalVendorAccounts
+    : 0
+
+  const metrics = [
+    {
+      title: "Tổng tài khoản",
+      value: isLoading ? "..." : totalAccounts.toLocaleString('vi-VN'),
+      icon: Users,
+      description: "User & Vendor",
+      detail: overview ? `${overview.totalUserAccounts} Users, ${overview.totalVendorAccounts} Vendors` : "",
+    },
+    {
+      title: "Quán ăn đã duyệt",
+      value: isLoading ? "..." : (overview?.totalApprovedRestaurants || 0).toLocaleString('vi-VN'),
+      icon: Store,
+      description: "Đang hoạt động",
+    },
+    {
+      title: "Quán chờ duyệt",
+      value: isLoading ? "..." : (overview?.totalPendingRestaurants || 0).toLocaleString('vi-VN'),
+      icon: Clock,
+      description: "Cần xét duyệt",
+    },
+    {
+      title: "Báo cáo vi phạm / Reports",
+      value: "23",
+      icon: Flag,
+      description: "Chưa xử lý / Pending",
+    },
+  ]
   const metricColors = [
-  {
+    {
       bg: adminColors.gradients.primary,
       iconBg: adminColors.gradients.primarySoft,
       value: adminColors.primary[600],
       border: adminColors.primary[200],
       text: adminColors.primary[700]
-  },
-  {
+    },
+    {
       bg: `linear-gradient(135deg, ${adminColors.accent.emerald}, #059669, #047857)`,
       iconBg: `linear-gradient(135deg, #34D399, ${adminColors.accent.emerald})`,
       value: '#047857',
       border: '#A7F3D0',
       text: adminColors.accent.emerald
-  },
-  {
+    },
+    {
       bg: `linear-gradient(135deg, ${adminColors.accent.amber}, #D97706, #B45309)`,
       iconBg: `linear-gradient(135deg, #FBBF24, ${adminColors.accent.amber})`,
       value: '#B45309',
       border: '#FDE68A',
       text: adminColors.accent.amber
-  },
-  {
+    },
+    {
       bg: `linear-gradient(135deg, ${adminColors.status.error}, #DC2626, #B91C1C)`,
       iconBg: `linear-gradient(135deg, #F87171, ${adminColors.status.error})`,
       value: '#B91C1C',
@@ -74,7 +74,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <div 
+      <div
         className="relative overflow-hidden rounded-2xl p-8 md:p-10 text-white shadow-2xl"
         style={{ background: adminColors.gradients.primary }}
       >
@@ -82,8 +82,13 @@ export default function AdminDashboard() {
         <div className="relative">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3 drop-shadow-sm">Tổng quan</h1>
           <p className="text-lg md:text-xl font-medium" style={{ color: adminColors.primary[200] }}>
-          Cái nhìn toàn cảnh về tình hình hoạt động của hệ thống
-        </p>
+            Cái nhìn toàn cảnh về tình hình hoạt động của hệ thống
+          </p>
+          {error && (
+            <div className="mt-4 px-4 py-2 bg-red-500/20 border border-red-300 rounded-lg">
+              <p className="text-sm">⚠️ Không thể tải dữ liệu tổng quan</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -91,11 +96,10 @@ export default function AdminDashboard() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {metrics.map((metric, index) => {
           const Icon = metric.icon
-          const TrendIcon = metric.trend === "up" ? TrendingUp : TrendingDown
           const colors = metricColors[index % metricColors.length]
-          
+
           return (
-            <Card 
+            <Card
               key={metric.title}
               className="overflow-hidden border-2 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] bg-white backdrop-blur-sm group"
               style={{ borderColor: colors.border }}
@@ -104,32 +108,29 @@ export default function AdminDashboard() {
                 <CardTitle className="text-xs font-bold text-gray-600 uppercase tracking-wider">
                   {metric.title}
                 </CardTitle>
-                <div 
+                <div
                   className="h-12 w-12 rounded-xl flex items-center justify-center shadow-xl ring-2 ring-white transition-transform group-hover:scale-110"
                   style={{ background: colors.iconBg }}
                 >
-                  <Icon className="h-6 w-6 text-white" />
+                  {isLoading ? (
+                    <Loader2 className="h-6 w-6 text-white animate-spin" />
+                  ) : (
+                    <Icon className="h-6 w-6 text-white" />
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="px-6 pb-6">
                 <div className="text-4xl md:text-5xl font-bold mb-2 tracking-tight" style={{ color: colors.value }}>
                   {metric.value}
                 </div>
-                <p className="text-xs text-gray-500 mb-4 font-semibold uppercase tracking-wide">
+                <p className="text-xs text-gray-500 mb-2 font-semibold uppercase tracking-wide">
                   {metric.description}
                 </p>
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-100">
-                  <TrendIcon
-                    className="h-4 w-4"
-                    style={{ color: metric.trend === "up" ? adminColors.status.success : adminColors.status.error }}
-                  />
-                  <span
-                    className="text-xs font-bold"
-                    style={{ color: metric.trend === "up" ? adminColors.status.success : adminColors.status.error }}
-                  >
-                    {metric.change} so với tháng trước
-                  </span>
-                </div>
+                {metric.detail && (
+                  <p className="text-xs text-gray-400 font-medium">
+                    {metric.detail}
+                  </p>
+                )}
               </CardContent>
             </Card>
           )
@@ -137,13 +138,13 @@ export default function AdminDashboard() {
       </div>
 
       {/* Chart Section - Phân bố loại hình quán ăn */}
-      <Card 
+      <Card
         className="border-2 shadow-xl hover:shadow-2xl transition-all duration-300 bg-white backdrop-blur-sm"
         style={{ borderColor: '#A7F3D0' }}
       >
-        <CardHeader 
+        <CardHeader
           className="border-b"
-          style={{ 
+          style={{
             background: 'linear-gradient(to right, #D1FAE5, rgba(209, 250, 229, 0.5), white)',
             borderColor: '#A7F3D0'
           }}
@@ -152,24 +153,11 @@ export default function AdminDashboard() {
             Phân bố loại hình quán ăn
           </CardTitle>
           <CardDescription className="font-semibold" style={{ color: adminColors.accent.emerald }}>
-              Biểu đồ tròn dựa trên RestaurantTag
-            </CardDescription>
-          </CardHeader>
+            Biểu đồ tròn dựa trên Loại món ăn
+          </CardDescription>
+        </CardHeader>
         <CardContent className="p-6">
-          <div 
-            className="h-[300px] flex items-center justify-center rounded-xl border-2 border-dashed transition-all hover:border-solid"
-            style={{
-              background: 'linear-gradient(135deg, rgba(209, 250, 229, 0.5), white, rgba(209, 250, 229, 0.3))',
-              borderColor: '#A7F3D0'
-            }}
-          >
-            <div className="text-center">
-              <div className="text-5xl mb-3">🥧</div>
-              <p className="text-sm font-semibold" style={{ color: adminColors.accent.emerald }}>
-                Biểu đồ tròn - Cần tích hợp thư viện chart
-              </p>
-            </div>
-      </div>
+          <RestaurantDistributionChart />
         </CardContent>
       </Card>
     </div>

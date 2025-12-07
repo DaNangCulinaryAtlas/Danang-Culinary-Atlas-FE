@@ -150,5 +150,29 @@
         "messageWithRole": "This page is only available for users with {{role}} role.",
         "backButton": "Go Back",
         "homeLink": "Go to Homepage"
+    },
+    "admin": {
+        "dashboard": {
+            "title": "Overview",
+            "subtitle": "A comprehensive view of the system's operational status",
+            "errorLoading": "Unable to load overview data",
+            "metrics": {
+                "totalAccounts": "Total Accounts",
+                "approvedRestaurants": "Approved Restaurants",
+                "pendingRestaurants": "Pending Restaurants",
+                "reports": "Violation Reports",
+                "userAndVendor": "User & Vendor",
+                "active": "Active",
+                "needsReview": "Needs Review",
+                "pending": "Pending",
+                "users": "Users",
+                "vendors": "Vendors"
+            },
+            "charts": {
+                "restaurantDistribution": "Restaurant Type Distribution",
+                "restaurantDistributionDesc": "Pie chart based on RestaurantTag",
+                "chartPlaceholder": "Pie chart - Chart library integration needed"
+            }
+        }
     }
 }

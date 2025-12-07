@@ -32,9 +32,8 @@ export const API_ENDPOINTS = {
   },
   ADMIN: {
     // Dashboard - Tổng quan hệ thống
-    // DASHBOARD_METRICS: '/admin/dashboard/metrics', // Lấy các chỉ số tổng quan (users, restaurants, pending, reports)
-    // DASHBOARD_CHARTS: '/admin/dashboard/charts', // Lấy dữ liệu cho biểu đồ (truy cập, đăng ký, phân bố quán ăn)
-    // DASHBOARD_ACTIVITIES: '/admin/dashboard/activities', // Lấy danh sách hoạt động gần đây
+    OVERVIEW: '/admin/overview', // Lấy tổng quan hệ thống (users, vendors, restaurants)
+    RESTAURANT_COUNT_BY_TAG: '/admin/restaurants/count-by-tag', // Lấy số lượng quán ăn theo tag
 
     // User Management - Quản lý người dùng
     VENDORS_LIST: '/admin/accounts/vendors', // Get list of vendors
@@ -81,8 +80,9 @@ export const API_ENDPOINTS = {
     DISH_TAGS_LIST: '/tags/dish', // Get all dishes tags
     // DISH_TAG_CREATE: '/tags/dish', // Create a new dish tag
 
-    // Permission Management - Quản trị phân quyền - dùng BASE_URL_2
-    PERMISSIONS_LIST: '/admin/permissions/roles/permissions', // Get all roles with their permissions
+    // Permission Management - Quản trị phân quyền
+    PERMISSIONS_LIST: '/admin/permissions/roles', // Get all roles (basic info)
+    ROLES_WITH_PERMISSIONS: '/admin/permissions/roles-with-permissions', // Get all roles with their permissions (detailed)
     PERMISSIONS_UPDATE: '/admin/permissions/roles/permissions', // Update roles permissions
     ROLES_LIST: '/admin/permissions/roles', // Get all roles
     PERMISSIONS_FOR_ROLE: (roleId: string) => `/admin/permissions/roles/${roleId}/permissions`, // Get permissions for a specific role

@@ -150,5 +150,29 @@
         "messageWithRole": "Trang này chỉ dành cho người dùng có vai trò {{role}}.",
         "backButton": "Quay lại",
         "homeLink": "Về trang chủ"
+    },
+    "admin": {
+        "dashboard": {
+            "title": "Tổng quan",
+            "subtitle": "Cái nhìn toàn cảnh về tình hình hoạt động của hệ thống",
+            "errorLoading": "Không thể tải dữ liệu tổng quan",
+            "metrics": {
+                "totalAccounts": "Tổng tài khoản",
+                "approvedRestaurants": "Quán ăn đã duyệt",
+                "pendingRestaurants": "Quán chờ duyệt",
+                "reports": "Báo cáo vi phạm",
+                "userAndVendor": "User & Vendor",
+                "active": "Đang hoạt động",
+                "needsReview": "Cần xét duyệt",
+                "pending": "Chưa xử lý",
+                "users": "Users",
+                "vendors": "Vendors"
+            },
+            "charts": {
+                "restaurantDistribution": "Phân bố loại hình quán ăn",
+                "restaurantDistributionDesc": "Biểu đồ tròn dựa trên RestaurantTag",
+                "chartPlaceholder": "Biểu đồ tròn - Cần tích hợp thư viện chart"
+            }
+        }
     }
 }

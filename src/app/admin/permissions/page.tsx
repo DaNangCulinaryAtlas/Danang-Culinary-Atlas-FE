@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Shield, Save, Loader2, CheckCircle2, XCircle } from "lucide-react"
 import { adminColors } from "@/configs/colors"
-import { usePermissions } from "./hooks/usePermissions"
+import { usePermissions } from "../../../services/permission-role"
 import Notification from "./components/Notification"
 import PermissionMatrix from "./components/PermissionMatrix"
+import RolesPermissionsDetail from "@/components/admin/RolesPermissionsDetail"
+import ConfirmUpdateModal from "@/components/admin/ConfirmUpdateModal"
 
 export default function PermissionsManagement() {
   const [notification, setNotification] = useState<{ type: "success" | "error" | null; message: string }>({
@@ -16,6 +18,7 @@ export default function PermissionsManagement() {
     message: "",
   })
   const [isSaving, setIsSaving] = useState(false)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
 
   const { roles, actions, permissionMatrix, isLoading, error, updatePermission, savePermissions } =
     usePermissions()
@@ -27,7 +30,17 @@ export default function PermissionsManagement() {
     }
   }, [error])
 
-  const handleSave = async () => {
+  const handleOpenConfirmModal = () => {
+    setShowConfirmModal(true)
+  }
+
+  const handleCloseConfirmModal = () => {
+    if (!isSaving) {
+      setShowConfirmModal(false)
+    }
+  }
+
+  const handleConfirmSave = async () => {
     setIsSaving(true)
     try {
       const result = await savePermissions()
@@ -36,6 +49,10 @@ export default function PermissionsManagement() {
         message: result.message,
       })
       setTimeout(() => setNotification({ type: null, message: "" }), 3000)
+
+      if (result.success) {
+        setShowConfirmModal(false)
+      }
     } catch (err: any) {
       setNotification({
         type: "error",
@@ -107,7 +124,7 @@ export default function PermissionsManagement() {
               </CardDescription>
             </div>
             <Button
-              onClick={handleSave}
+              onClick={handleOpenConfirmModal}
               disabled={isSaving}
               className="shadow-lg hover:shadow-xl transition-all"
               style={{
@@ -136,6 +153,30 @@ export default function PermissionsManagement() {
             permissionMatrix={permissionMatrix}
             onPermissionChange={updatePermission}
           />
+        </CardContent>
+      </Card>
+
+      {/* Roles & Permissions Detail Section */}
+      <Card
+        className="border-2 shadow-xl hover:shadow-2xl transition-all duration-300 bg-white"
+        style={{ borderColor: adminColors.accent.emerald }}
+      >
+        <CardHeader
+          className="border-b"
+          style={{
+            background: `linear-gradient(to right, #D1FAE5, rgba(209, 250, 229, 0.5), white)`,
+            borderColor: '#A7F3D0'
+          }}
+        >
+          <CardTitle className="font-bold text-lg" style={{ color: '#059669' }}>
+            Chi tiết Roles & Permissions
+          </CardTitle>
+          <CardDescription className="font-semibold" style={{ color: adminColors.accent.emerald }}>
+            Xem tổng quan phân quyền chi tiết cho từng role
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-6">
+          <RolesPermissionsDetail />
         </CardContent>
       </Card>
 
@@ -171,6 +212,17 @@ export default function PermissionsManagement() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Confirm Update Modal */}
+      <ConfirmUpdateModal
+        isOpen={showConfirmModal}
+        onClose={handleCloseConfirmModal}
+        onConfirm={handleConfirmSave}
+        isLoading={isSaving}
+        roles={roles}
+        permissionMatrix={permissionMatrix}
+        actions={actions}
+      />
     </div>
   )
 }
