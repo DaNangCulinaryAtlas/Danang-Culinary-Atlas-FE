@@ -25,6 +25,7 @@ const RestaurantMapCard: React.FC<RestaurantCardProps> = ({
             height={192}
             src={restaurant.images.photo}
             alt={restaurant.name}
+            unoptimized={restaurant.images.photo.includes('googleusercontent.com')}
             className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
           />
         ) : (

@@ -32,7 +32,7 @@ export const searchRestaurants = async (
   params: GetRestaurantsParams
 ): Promise<ApiResponse> => {
   try {
-    // Build query string manually to handle cuisineTypes array properly
+    // Build query string manually
     const queryParams = new URLSearchParams();
 
     if (params.page !== undefined) queryParams.append('page', params.page.toString());
@@ -43,10 +43,10 @@ export const searchRestaurants = async (
     if (params.maxRating !== undefined) queryParams.append('maxRating', params.maxRating.toString());
     if (params.search) queryParams.append('search', params.search);
 
-    // Add each cuisine type as a separate parameter
-    if (params.cuisineTypes && params.cuisineTypes.length > 0) {
-      params.cuisineTypes.forEach(cuisineType => {
-        queryParams.append('cuisineTypes', cuisineType);
+    // Add cuisineIDs parameters (multiple values)
+    if (params.cuisineIDs && params.cuisineIDs.length > 0) {
+      params.cuisineIDs.forEach(id => {
+        queryParams.append('cuisineID', id.toString());
       });
     }
 

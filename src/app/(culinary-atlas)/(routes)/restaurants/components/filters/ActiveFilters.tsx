@@ -1,9 +1,10 @@
 import { memo } from "react";
 import { FilterState } from "@/types/filter";
+import { CUISINE_TAGS } from "@/constants/cuisineTags";
 
 interface ActiveFiltersProps {
     filters: FilterState;
-    onRemoveCuisine: (cuisine: string) => void;
+    onRemoveCuisine: (cuisineId: number) => void;
     onRemoveMinRating: () => void;
     onRemoveMaxRating: () => void;
     onClearAll: () => void;
@@ -42,7 +43,7 @@ const ActiveFilters = memo(function ActiveFilters({
     onClearAll,
 }: ActiveFiltersProps) {
     const hasActiveFilters =
-        filters.cuisineTypes.length > 0 ||
+        filters.cuisineIds.length > 0 ||
         filters.minRating !== null ||
         filters.maxRating !== null;
 
@@ -66,13 +67,16 @@ const ActiveFilters = memo(function ActiveFilters({
 
             <div className="flex flex-wrap gap-2">
                 {/* Cuisine Type Tags */}
-                {filters.cuisineTypes.map((cuisine) => (
-                    <FilterTag
-                        key={cuisine}
-                        label={cuisine}
-                        onRemove={() => onRemoveCuisine(cuisine)}
-                    />
-                ))}
+                {filters.cuisineIds.map((cuisineId) => {
+                    const cuisine = CUISINE_TAGS.find(tag => tag.tagId === cuisineId);
+                    return cuisine ? (
+                        <FilterTag
+                            key={cuisine.tagId}
+                            label={cuisine.name}
+                            onRemove={() => onRemoveCuisine(cuisineId)}
+                        />
+                    ) : null;
+                })}
 
                 {/* Min Rating Tag */}
                 {filters.minRating !== null && (

@@ -16,7 +16,7 @@ export function filterRestaurantsByLocation(
       const wardIdsInDistrict = wards
         .filter((w) => w.districtId === districtId)
         .map((w) => w.wardId)
-      return restaurant.wardId !== null && wardIdsInDistrict.includes(restaurant.wardId)
+      return typeof restaurant.wardId === "number" && wardIdsInDistrict.includes(restaurant.wardId)
     }
     if (provinceId !== null) {
       const districtIdsInProvince = districts
@@ -25,7 +25,7 @@ export function filterRestaurantsByLocation(
       const wardIdsInProvince = wards
         .filter((w) => districtIdsInProvince.includes(w.districtId))
         .map((w) => w.wardId)
-      return restaurant.wardId !== null && wardIdsInProvince.includes(restaurant.wardId)
+      return typeof restaurant.wardId === "number" && wardIdsInProvince.includes(restaurant.wardId)
     }
     return true
   })

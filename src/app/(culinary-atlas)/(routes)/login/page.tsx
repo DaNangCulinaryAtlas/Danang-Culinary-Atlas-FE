@@ -35,16 +35,22 @@ export default function Login() {
 
   const onSubmit = (data: LoginFormData) => {
     loginMutation.mutate(data, {
-      onSuccess: () => {
-        router.push('/');
+      onSuccess: (data) => {
+        // Redirect based on role from mutation response
+        const roles = (data as any).roles || [];
+        if (roles.includes('ADMIN')) {
+          router.push('/admin');
+        } else if (roles.includes('VENDOR')) {
+          router.push('/vendor');
+        } else {
+          router.push('/');
+        }
       },
       onError: (error) => {
         console.error('Login failed:', error.message);
       },
     });
-  };
-
-  const handleSocialLogin = (provider: string) => {
+  }; const handleSocialLogin = (provider: string) => {
     console.log(`Login with ${provider}`);
   };
 

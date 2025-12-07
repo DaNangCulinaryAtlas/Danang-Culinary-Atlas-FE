@@ -143,5 +143,12 @@
             "passwordMismatch": "Passwords do not match",
             "tokenRequired": "Token is required"
         }
+    },
+    "accessDenied": {
+        "title": "Access Denied",
+        "message": "You do not have permission to access this page.",
+        "messageWithRole": "This page is only available for users with {{role}} role.",
+        "backButton": "Go Back",
+        "homeLink": "Go to Homepage"
     }
 }

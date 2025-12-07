@@ -28,20 +28,20 @@ function RestaurantSearchContent() {
   );
 
   const [filters, setFilters] = useState<FilterState>(() => ({
-    cuisineTypes: [],
+    cuisineIds: [],
     minRating: null,
     maxRating: null,
   }));
 
   // Prepare query params for React Query
-  const hasFilters = filters.cuisineTypes.length > 0 || filters.minRating !== null || filters.maxRating !== null;
+  const hasFilters = filters.cuisineIds.length > 0 || filters.minRating !== null || filters.maxRating !== null;
 
   const queryParams = {
     page: currentPage - 1,
     size: resultsPerPage,
-    sortBy: 'createdAt',
+    sortBy: 'average_rating',
     sortDirection: 'desc' as const,
-    ...(filters.cuisineTypes.length > 0 && { cuisineTypes: filters.cuisineTypes }),
+    ...(filters.cuisineIds.length > 0 && { cuisineIDs: filters.cuisineIds }),
     ...(filters.minRating !== null && { minRating: filters.minRating }),
     ...(filters.maxRating !== null && { maxRating: filters.maxRating })
   };
@@ -119,9 +119,9 @@ function RestaurantSearchContent() {
     params.set("page", currentPage.toString());
     params.set("size", resultsPerPage.toString());
 
-    if (filters.cuisineTypes.length > 0) {
-      filters.cuisineTypes.forEach(cuisine => {
-        params.append("cuisineTypes", cuisine);
+    if (filters.cuisineIds.length > 0) {
+      filters.cuisineIds.forEach(id => {
+        params.append("cuisineID", id.toString());
       });
     }
 
@@ -167,7 +167,7 @@ function RestaurantSearchContent() {
             </p>
             <button
               onClick={() => {
-                setFilters({ cuisineTypes: [], minRating: null, maxRating: null });
+                setFilters({ cuisineIds: [], minRating: null, maxRating: null });
                 setCurrentPage(1);
                 router.push('/restaurants');
               }}

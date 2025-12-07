@@ -140,8 +140,7 @@ export default function Sidebar() {
           <div 
             className="h-12 w-12 rounded-xl flex items-center justify-center shadow-xl ring-2 transition-transform hover:scale-105"
             style={{ 
-              background: adminColors.gradients.primarySoft,
-              ringColor: 'rgba(255,255,255,0.25)'
+              background: adminColors.gradients.primarySoft
             }}
           >
             <LayoutDashboard className="h-6 w-6 text-white" />

@@ -25,6 +25,7 @@ export default function RestaurantCard({
             alt={restaurant.name}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             fill
+            unoptimized={restaurant.images.photo.includes('googleusercontent.com')}
             className="object-cover hover:scale-105 transition-transform duration-500"
           />
         ) : (

@@ -1,8 +1,13 @@
 // Types
 interface FilterState {
-  cuisineTypes: string[];
+  cuisineIds: number[]; // Changed to array to support multiple selection
   minRating: number | null;
   maxRating: number | null;
+}
+
+interface CuisineTag {
+  tagId: number;
+  name: string;
 }
 
 interface FilterSideBarProps {

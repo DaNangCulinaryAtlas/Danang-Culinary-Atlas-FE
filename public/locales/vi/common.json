@@ -143,5 +143,12 @@
             "passwordMismatch": "Mật khẩu xác nhận không khớp",
             "tokenRequired": "Token là bắt buộc"
         }
+    },
+    "accessDenied": {
+        "title": "Truy cập bị từ chối",
+        "message": "Bạn không có quyền truy cập vào trang này.",
+        "messageWithRole": "Trang này chỉ dành cho người dùng có vai trò {{role}}.",
+        "backButton": "Quay lại",
+        "homeLink": "Về trang chủ"
     }
 }

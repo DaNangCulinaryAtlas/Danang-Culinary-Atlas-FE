@@ -2,6 +2,7 @@
 
 import Sidebar from "@/components/admin/Sidebar"
 import AdminHeader from "@/components/admin/Header"
+import AdminProtectedLayout from "@/components/admin/AdminProtectedLayout"
 import { AuthProvider } from "@/contexts/AuthContext"
 import { store } from "@/stores"
 import { Provider } from "react-redux"
@@ -15,20 +16,22 @@ export default function AdminLayout({
   return (
     <Provider store={store}>
       <AuthProvider>
-        <div className="flex h-screen overflow-hidden">
-          <Sidebar />
-          <div className="flex flex-1 flex-col overflow-hidden">
-            <AdminHeader />
-            <main 
-              className="flex-1 overflow-y-auto p-6 md:p-8"
-              style={{
-                background: adminColors.gradients.card
-              }}
-            >
-              {children}
-            </main>
+        <AdminProtectedLayout>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <div className="flex flex-1 flex-col overflow-hidden">
+              <AdminHeader />
+              <main
+                className="flex-1 overflow-y-auto p-6 md:p-8"
+                style={{
+                  background: adminColors.gradients.card
+                }}
+              >
+                {children}
+              </main>
+            </div>
           </div>
-        </div>
+        </AdminProtectedLayout>
       </AuthProvider>
     </Provider>
   )

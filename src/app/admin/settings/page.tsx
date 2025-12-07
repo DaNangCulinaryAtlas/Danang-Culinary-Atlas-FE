@@ -78,7 +78,7 @@ export default function SystemSettings() {
     ? districts.find((district) => district.id === selectedDistrict) || null
     : null
 
-  const getAuthHeaders = () => {
+  const getAuthHeaders = (): Record<string, string> => {
     if (typeof window === "undefined") return {}
     const token = window.localStorage.getItem("token")
     return token ? { Authorization: `Bearer ${token}` } : {}
@@ -310,9 +310,8 @@ export default function SystemSettings() {
                     return (
                       <div
                         key={province.id}
-                        className={`rounded-lg border p-3 transition hover:border-primary/60 hover:bg-primary/5 ${
-                          isActive ? "border-primary bg-primary/5" : "border-muted"
-                        }`}
+                        className={`rounded-lg border p-3 transition hover:border-primary/60 hover:bg-primary/5 ${isActive ? "border-primary bg-primary/5" : "border-muted"
+                          }`}
                       >
                         <div
                           role="button"
@@ -358,7 +357,7 @@ export default function SystemSettings() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                  <CardTitle>Quận/Huyện</CardTitle>
+                    <CardTitle>Quận/Huyện</CardTitle>
                     <CardDescription className="text-xs">
                       {currentProvince
                         ? `Thuộc tỉnh: ${currentProvince.name}`
@@ -413,9 +412,8 @@ export default function SystemSettings() {
                       return (
                         <div
                           key={district.id}
-                          className={`rounded-lg border p-3 transition hover:border-primary/60 hover:bg-primary/5 ${
-                            isActive ? "border-primary bg-primary/5" : "border-muted"
-                          }`}
+                          className={`rounded-lg border p-3 transition hover:border-primary/60 hover:bg-primary/5 ${isActive ? "border-primary bg-primary/5" : "border-muted"
+                            }`}
                         >
                           <div
                             role="button"
@@ -462,7 +460,7 @@ export default function SystemSettings() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                  <CardTitle>Phường/Xã</CardTitle>
+                    <CardTitle>Phường/Xã</CardTitle>
                     <CardDescription className="text-xs">
                       {currentDistrict
                         ? `Thuộc quận: ${currentDistrict.name}`
@@ -523,14 +521,14 @@ export default function SystemSettings() {
                             Thuộc {currentDistrict?.name}
                           </p>
                         </div>
-                          <div className="flex gap-2">
-                            <Button variant="ghost" size="icon">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+                        <div className="flex gap-2">
+                          <Button variant="ghost" size="icon">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>

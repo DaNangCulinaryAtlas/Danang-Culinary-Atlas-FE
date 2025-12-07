@@ -61,13 +61,14 @@ export interface GetRestaurantsParams {
   search?: string;
   minRating?: number;
   maxRating?: number;
-  cuisineTypes?: string[];
+  cuisineID?: number; // Changed from cuisineTypes to cuisineID
   priceRange?: [number, number];
   cuisine?: string[];
   location?: string;
   status?: string;
   wardId?: number;
   approvalStatus?: string;
+  cuisineIDs?: number[]; // Changed to array to support multiple cuisines
 }
 
 export interface getRestaurantsForMapParams {

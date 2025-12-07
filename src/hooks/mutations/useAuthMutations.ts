@@ -36,13 +36,17 @@ export function useLoginMutation() {
     const dispatch = useAppDispatch();
     const queryClient = useQueryClient();
 
-    return useMutation<ApiResponse, Error, TLoginAuth>({
+    return useMutation<ApiResponse & { roles?: string[] }, Error, TLoginAuth>({
         mutationFn: async (credentials: TLoginAuth) => {
             console.log('🔵 [useLoginMutation] Starting login request');
             const response = await loginAuth(credentials);
             console.log('📝 [useLoginMutation] Login response:', response.success ? 'Success' : 'Failed');
             if (!response.success) {
                 throw new Error(response.message || 'Login failed');
+            }
+            // Extract roles from response for use in component
+            if (response.data?.data?.roles) {
+                (response as any).roles = response.data.data.roles;
             }
             return response;
         },

@@ -28,7 +28,7 @@ export const updateReview = async (
 ): Promise<UpdateReviewResponse> => {
     try {
         const response = await instanceAxios.put(
-            API_ENDPOINTS.REVIEW.UPDATE(reviewId),
+            API_ENDPOINTS.ADMIN.REVIEW.UPDATE(reviewId),
             payload
         );
         return response.data;
@@ -44,7 +44,7 @@ export const updateReview = async (
  */
 export const deleteReview = async (reviewId: string): Promise<void> => {
     try {
-        await instanceAxios.delete(API_ENDPOINTS.REVIEW.DELETE(reviewId));
+        await instanceAxios.delete(API_ENDPOINTS.ADMIN.REVIEW.DELETE(reviewId));
     } catch (error) {
         console.error('Error deleting review:', error);
         throw error;
