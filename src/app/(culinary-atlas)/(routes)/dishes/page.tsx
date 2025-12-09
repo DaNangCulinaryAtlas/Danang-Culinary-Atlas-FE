@@ -1,6 +1,6 @@
 "use client";
-import { useState, useMemo } from "react";
-import { Search, Filter, Grid3x3, List, X, Loader2 } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Search, SlidersHorizontal, Grid3x3, List, X, Loader2, TrendingUp, CircleDollarSign, Layers2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDishes } from "@/hooks/queries/useDishes";
 import { CUISINE_TAGS } from "@/constants/cuisineTags";
@@ -24,6 +24,14 @@ export default function DishPage() {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
 
+  // When user types in search, clear other filters
+  useEffect(() => {
+    if (searchQuery) {
+      setSelectedTagId(undefined);
+      setSelectedPriceRange("");
+    }
+  }, [searchQuery]);
+
   // Get price range values
   const priceRange = useMemo(() => {
     if (!selectedPriceRange) return undefined;
@@ -32,15 +40,24 @@ export default function DishPage() {
   }, [selectedPriceRange]);
 
   // Fetch dishes with filters
-  const { data: dishesResponse, isLoading, error } = useDishes({
-    page: currentPage,
-    size: 20,
-    tagId: selectedTagId,
-    minPrice: priceRange?.min,
-    maxPrice: priceRange?.max,
-    sortBy,
-    sortOrder,
-  });
+  // When searching, only use search param and ignore other filters
+  const { data: dishesResponse, isLoading, error } = useDishes(
+    searchQuery
+      ? {
+        page: currentPage,
+        size: 20,
+        search: searchQuery,
+      }
+      : {
+        page: currentPage,
+        size: 20,
+        tagId: selectedTagId,
+        minPrice: priceRange?.min,
+        maxPrice: priceRange?.max,
+        sortBy,
+        sortOrder,
+      }
+  );
 
   // Filter dishes by search query locally
   const filteredDishes = useMemo(() => {
@@ -96,12 +113,23 @@ export default function DishPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#44BACA] to-[#69C3CF] text-white py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <h1 className="font-volkhov font-bold text-4xl md:text-5xl text-center mb-4">
+      <div
+        className="relative text-white py-24 overflow-hidden"
+        style={{
+          backgroundImage: "url('/images/bg-dish.png')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        {/* Overlay gradient for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#44BACA]/80 via-[#44BACA]/70 to-[#69C3CF]/80"></div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4">
+          <h1 className="font-volkhov font-bold text-4xl md:text-5xl text-center mb-6 drop-shadow-lg">
             Khám Phá Ẩm Thực Đà Nẵng
           </h1>
-          <p className="text-center text-lg mb-8 opacity-90">
+          <p className="text-center text-lg mb-8 opacity-95 drop-shadow">
             {totalElements > 0 ? `Hơn ${totalElements} món ăn đặc sắc từ các nhà hàng uy tín` : 'Khám phá ẩm thực phong phú'}
           </p>
 
@@ -129,8 +157,8 @@ export default function DishPage() {
                   setShowMobileFilters(false);
                 }}
                 className={`backdrop-blur-sm border rounded-full px-6 py-2 ${selectedTagId === tag.tagId
-                    ? 'bg-white text-[#44BACA] border-white'
-                    : 'bg-white/20 hover:bg-white/30 border-white/30'
+                  ? 'bg-white text-[#44BACA] border-white'
+                  : 'bg-white/20 hover:bg-white/30 border-white/30'
                   }`}
               >
                 {tag.name}
@@ -147,7 +175,7 @@ export default function DishPage() {
           <aside className="hidden lg:block">
             <div className="bg-white rounded-xl shadow-sm p-6 sticky top-4">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="font-bold text-lg">Bộ lọc</h3>
+                <h3 className="font-bold text-lg text-[#44BACA]">Bộ lọc</h3>
                 {hasActiveFilters && (
                   <Button
                     onClick={clearFilters}
@@ -162,7 +190,10 @@ export default function DishPage() {
 
               {/* Tags Filter */}
               <div className="mb-6">
-                <h4 className="font-semibold mb-3">🍽️ Loại ẩm thực</h4>
+                <div className="flex items-center gap-2 text-[#44BACA] mb-3">
+                  <Layers2 className="w-5 h-5" />
+                  <h4 className="font-semibold">Loại ẩm thực</h4>
+                </div>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {CUISINE_TAGS.map(tag => (
                     <label key={tag.tagId} className="flex items-center gap-2 cursor-pointer">
@@ -181,7 +212,10 @@ export default function DishPage() {
 
               {/* Price Range Filter */}
               <div className="mb-6">
-                <h4 className="font-semibold mb-3">💰 Khoảng giá</h4>
+                <div className="flex items-center gap-2 text-[#44BACA] mb-3">
+                  <CircleDollarSign className="w-5 h-5" />
+                  <h4 className="font-semibold">Khoảng giá</h4>
+                </div>
                 <div className="space-y-2">
                   {PRICE_RANGES.map(range => (
                     <label key={range.label} className="flex items-center gap-2 cursor-pointer">
@@ -200,7 +234,10 @@ export default function DishPage() {
 
               {/* Sort Filter */}
               <div>
-                <h4 className="font-semibold mb-3">📊 Sắp xếp</h4>
+                <div className="flex items-center gap-2 text-[#44BACA] mb-3">
+                  <TrendingUp className="w-5 h-5" />
+                  <h4 className="font-semibold">Sắp xếp</h4>
+                </div>
                 <div className="space-y-2">
                   {[
                     { value: "name-asc", label: "Tên A → Z" },
@@ -239,7 +276,7 @@ export default function DishPage() {
                     onClick={() => setShowMobileFilters(true)}
                     className="lg:hidden bg-[#44BACA] hover:bg-[#3aa3b3] text-white rounded-lg px-4 py-2"
                   >
-                    <Filter className="w-4 h-4 mr-2" />
+                    <SlidersHorizontal className="w-4 h-4 mr-2" />
                     Lọc
                   </Button>
 
@@ -335,8 +372,8 @@ export default function DishPage() {
                               {dish.price.toLocaleString('vi-VN')}₫
                             </span>
                             <span className={`px-2 py-1 rounded text-xs font-semibold ${dish.status === 'AVAILABLE'
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-gray-100 text-gray-700'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-gray-100 text-gray-700'
                               }`}>
                               {dish.status === 'AVAILABLE' ? 'Còn hàng' : 'Hết hàng'}
                             </span>
@@ -374,8 +411,8 @@ export default function DishPage() {
                             key={pageNum}
                             onClick={() => setCurrentPage(pageNum)}
                             className={`w-10 h-10 rounded-lg ${currentPage === pageNum
-                                ? 'bg-[#44BACA] text-white'
-                                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                              ? 'bg-[#44BACA] text-white'
+                              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                               }`}
                           >
                             {pageNum + 1}

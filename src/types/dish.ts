@@ -50,6 +50,7 @@ export interface DishListParams {
   sortBy?: 'name' | 'price' | 'createdAt' | 'approvedAt';
   sortOrder?: 'asc' | 'desc';
   sortDirection?: 'asc' | 'desc';
+  search?: string;
 }
 
 // Create Dish Request

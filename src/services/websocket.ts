@@ -72,16 +72,14 @@ class WebSocketService {
         };
 
         this.client.onStompError = (frame) => {
-            console.error('❌ STOMP Error:', frame);
             this.handleReconnect(token);
         };
 
         this.client.onWebSocketError = (error) => {
-            console.error('❌ WebSocket Error:', error);
+            
         };
 
         this.client.onDisconnect = () => {
-            console.log('🔌 WebSocket Disconnected');
         };
 
         this.client.activate();

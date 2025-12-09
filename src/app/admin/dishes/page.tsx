@@ -29,7 +29,7 @@ import DishApprovalModal from "@/components/admin/DishApprovalModal"
 import DishFormModal from "@/components/admin/DishFormModal"
 import DishDetailModal from "@/components/admin/DishDetailModal"
 import { DishApiResponse } from "@/types/dish"
-import { searchRestaurantsByDish } from "@/services/restaurant"
+import { searchAdminDishes } from "@/services/admin"
 
 export default function DishManagementPage() {
   const [activeTab, setActiveTab] = useState("pending")
@@ -174,7 +174,7 @@ export default function DishManagementPage() {
           all: 'APPROVED' as const,
         }
 
-        const response = await searchRestaurantsByDish({
+        const response = await searchAdminDishes({
           dishName: searchQuery,
           status: statusMap[activeTab as keyof typeof statusMap],
           page,

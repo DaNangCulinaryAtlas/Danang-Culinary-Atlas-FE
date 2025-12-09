@@ -153,3 +153,42 @@ export const updateRolePermissions = async (
         );
     }
 };
+
+// Dish Management Services
+export const searchAdminDishes = async (params: {
+    dishName?: string;
+    status?: 'PENDING' | 'REJECTED' | 'APPROVED';
+    page?: number;
+    size?: number;
+    sortBy?: string;
+    sortDirection?: 'asc' | 'desc';
+}): Promise<ApiResponse> => {
+    try {
+        const response: AxiosResponse = await instanceAxios.get(
+            API_ENDPOINTS.ADMIN.DISHES_LIST,
+            {
+                params: {
+                    ...(params.dishName && { search: params.dishName }),
+                    ...(params.status && { status: params.status }),
+                    page: params.page ?? 0,
+                    size: params.size ?? 10,
+                    sortBy: params.sortBy ?? 'name',
+                    sortDirection: params.sortDirection ?? 'desc',
+                }
+            }
+        );
+
+        return {
+            success: true,
+            data: response.data,
+            message: 'Dishes fetched successfully'
+        };
+    } catch (error) {
+        const axiosError = error as AxiosError<ApiResponse>;
+        return {
+            success: false,
+            message: axiosError.response?.data?.message || 'Failed to search dishes',
+            error: axiosError.message
+        };
+    }
+};

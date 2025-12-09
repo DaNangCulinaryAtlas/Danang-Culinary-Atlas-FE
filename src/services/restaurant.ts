@@ -149,21 +149,19 @@ export const searchRestaurantsByName = async (params: GetRestaurantsParams): Pro
 
 export const searchRestaurantsByDish = async (params: {
   dishName: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
   page?: number;
   size?: number;
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
 }): Promise<ApiResponse> => {
   try {
-    const { dishName, status, page = 0, size = 10, sortBy = 'createdAt', sortDirection = 'desc' } = params;
+    const { dishName, page = 0, size = 20, sortBy = 'createdAt', sortDirection = 'desc' } = params;
 
     const response: AxiosResponse = await instanceAxios.get(
       API_ENDPOINTS.RESTAURANT.SEARCH_BY_DISH,
       {
         params: {
           dishName,
-          status,
           page,
           size,
           sortBy,

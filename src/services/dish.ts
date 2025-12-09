@@ -23,6 +23,7 @@ export const getDishList = async (params?: DishListParams): Promise<ApiResponse<
                 ...(params?.maxPrice !== undefined && { maxPrice: params.maxPrice }),
                 ...(params?.sortBy && { sortBy: params.sortBy }),
                 ...(params?.sortOrder && { sortOrder: params.sortOrder }),
+                ...(params?.search && { search: params.search }),
             }
         });
         return {
