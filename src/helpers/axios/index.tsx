@@ -106,8 +106,6 @@ instanceAxios.interceptors.response.use(
           const refreshToken = localStorage.getItem('refreshToken');
 
           if (!refreshToken) {
-            console.error('❌ No refresh token available');
-
             // Define public routes that don't need authentication
             const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
             const isPublicRoute = publicRoutes.some(route => window.location.pathname.includes(route));
@@ -116,17 +114,12 @@ instanceAxios.interceptors.response.use(
               isRedirecting = true;
               localStorage.removeItem('token');
               localStorage.removeItem('userData');
-              console.log('🔄 Redirecting to login (no refresh token)...');
               window.location.href = '/login';
             }
             return Promise.reject(error);
           }
 
           try {
-            console.log('🔄 [Axios Interceptor] Attempting to refresh token...');
-            console.log('📝 [Axios Interceptor] Refresh URL:', `${BASE_URL}${API_ENDPOINTS.AUTH.REFRESH_TOKEN}`);
-            console.log('📝 [Axios Interceptor] RefreshToken:', refreshToken);
-
             // Use plain axios to avoid interceptor loop
             const response = await axios.post(`${BASE_URL}${API_ENDPOINTS.AUTH.REFRESH_TOKEN}`, {
               refreshToken,
@@ -146,9 +139,6 @@ instanceAxios.interceptors.response.use(
             if (!newToken) {
               throw new Error('No access token in refresh response');
             }
-
-            console.log('✅ [Axios Interceptor] Token refreshed successfully');
-
             // Update tokens in localStorage
             localStorage.setItem('token', newToken);
             if (newRefreshToken) {
@@ -178,7 +168,6 @@ instanceAxios.interceptors.response.use(
             // Retry original request with new token
             return instanceAxios(originalRequest);
           } catch (refreshError) {
-            console.error('❌ [Axios Interceptor] Failed to refresh token:', refreshError);
             processQueue(refreshError, null);
             isRefreshing = false;
 

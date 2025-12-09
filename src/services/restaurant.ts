@@ -102,20 +102,34 @@ export const getRestaurantsForMap = async (
   }
 }
 
-export const searchRestaurantsByName = async (
-  params: GetRestaurantsParams & { name: string }
-): Promise<ApiResponse> => {
+export const getRestaurantDetail = async (restaurantId: string): Promise<ApiResponse> => {
   try {
-    const queryParams = new URLSearchParams();
-
-    if (params.page !== undefined) queryParams.append('page', params.page.toString());
-    if (params.size !== undefined) queryParams.append('size', params.size.toString());
-    if (params.sortBy) queryParams.append('sortBy', params.sortBy);
-    if (params.sortDirection) queryParams.append('sortDirection', params.sortDirection);
-    if (params.name) queryParams.append('name', params.name);
-
     const response: AxiosResponse = await instanceAxios.get(
-      `${API_ENDPOINTS.RESTAURANT.SEARCH_BY_NAME}?${queryParams.toString()}`
+      API_ENDPOINTS.RESTAURANT.DETAIL(restaurantId)
+    );
+
+    return {
+      success: true,
+      data: response.data,
+      message: 'Fetched restaurant detail successfully'
+    };
+  } catch (error) {
+    const axiosError = error as AxiosError<ApiResponse>;
+    return {
+      success: false,
+      message: axiosError.response?.data?.message || 'Failed to fetch restaurant detail',
+      error: axiosError.message
+    };
+  }
+}
+
+export const searchRestaurantsByName = async (params: GetRestaurantsParams): Promise<ApiResponse> => {
+  try {
+    const response: AxiosResponse = await instanceAxios.get(
+      API_ENDPOINTS.RESTAURANT.SEARCH_BY_NAME,
+      {
+        params
+      }
     );
 
     return {
@@ -133,22 +147,41 @@ export const searchRestaurantsByName = async (
   }
 }
 
-export const getRestaurantDetail = async (restaurantId: string): Promise<ApiResponse> => {
+export const searchRestaurantsByDish = async (params: {
+  dishName: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  page?: number;
+  size?: number;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
+}): Promise<ApiResponse> => {
   try {
+    const { dishName, status, page = 0, size = 10, sortBy = 'createdAt', sortDirection = 'desc' } = params;
+
     const response: AxiosResponse = await instanceAxios.get(
-      API_ENDPOINTS.RESTAURANT.DETAIL(restaurantId)
+      API_ENDPOINTS.RESTAURANT.SEARCH_BY_DISH,
+      {
+        params: {
+          dishName,
+          status,
+          page,
+          size,
+          sortBy,
+          sortDirection,
+        }
+      }
     );
 
     return {
       success: true,
       data: response.data,
-      message: 'Fetched restaurant detail successfully'
+      message: 'Searched restaurants by dish successfully'
     };
   } catch (error) {
     const axiosError = error as AxiosError<ApiResponse>;
     return {
       success: false,
-      message: axiosError.response?.data?.message || 'Failed to fetch restaurant detail',
+      message: axiosError.response?.data?.message || 'Failed to search restaurants by dish',
       error: axiosError.message
     };
   }

@@ -78,7 +78,39 @@ export const getReviewById = async (reviewId: string): Promise<Review> => {
         console.log('✅ [getReviewById] Review fetched:', response.data);
         return response.data;
     } catch (error) {
-        console.error('❌ [getReviewById] Error fetching review:', error);
+        throw error;
+    }
+};
+
+export const getReviewsByRatingRange = async (
+    minRating: number,
+    maxRating: number,
+    page: number = 0,
+    size: number = 10,
+    sortBy: string = 'createdAt',
+    sortDirection: string = 'desc'
+): Promise<ReviewsResponse> => {
+    try {
+        const response = await instanceAxios.get(API_ENDPOINTS.REVIEW.BY_RATING_RANGE, {
+            params: {
+                minRating,
+                maxRating,
+                page,
+                size,
+                sortBy,
+                sortDirection,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const deleteReview = async (reviewId: string): Promise<void> => {
+    try {
+        await instanceAxios.delete(API_ENDPOINTS.REVIEW.DELETE(reviewId));
+    } catch (error) {
         throw error;
     }
 };

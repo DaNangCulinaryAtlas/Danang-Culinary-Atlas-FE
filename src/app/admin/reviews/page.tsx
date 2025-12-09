@@ -1,10 +1,12 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import React, { useState } from 'react';
+import { useReviewsByRatingRange } from '@/hooks/queries/useReviews';
+import { useDeleteReview } from '@/hooks/mutations/useReviewMutations';
+import { ReviewDetailModal } from '@/components/admin/ReviewDetailModal';
+import { DeleteReviewModal } from '@/components/admin/DeleteReviewModal';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -12,223 +14,410 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from '@/components/ui/table';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Eye, EyeOff, Check, X } from "lucide-react"
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, Star, Eye, Trash2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { format } from 'date-fns';
 
-// Mock data
-const reviews = [
-  {
-    id: 1,
-    user: "User A",
-    restaurant: "Quán Bún Bò",
-    rating: 5,
-    comment: "Quán rất ngon, phục vụ tốt!",
-    date: "2024-03-15",
-    status: "Approved",
-  },
-  {
-    id: 2,
-    user: "User B",
-    restaurant: "Nhà hàng Hải Sản",
-    rating: 4,
-    comment: "Đồ ăn ngon nhưng hơi đắt",
-    date: "2024-03-14",
-    status: "Pending",
-  },
-  {
-    id: 3,
-    user: "User C",
-    restaurant: "Cafe Sáng",
-    rating: 1,
-    comment: "Chất lượng kém, không đúng như quảng cáo",
-    date: "2024-03-13",
-    status: "Pending",
-  },
-]
+export default function ReviewManagementPage() {
+  const [page, setPage] = useState(0);
+  const [size, setSize] = useState(10);
+  const [minRating, setMinRating] = useState(1);
+  const [maxRating, setMaxRating] = useState(5);
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
-export default function ReviewModeration() {
-  const handleApprove = (id: number) => {
-    // TODO: API call to approve review
-    console.log("Approve review:", id)
-  }
+  const [selectedReviewId, setSelectedReviewId] = useState<string | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [reviewToDelete, setReviewToDelete] = useState<string | null>(null);
 
-  const handleReject = (id: number) => {
-    // TODO: API call to reject review
-    console.log("Reject review:", id)
-  }
+  const { data: reviewsData, isLoading, refetch } = useReviewsByRatingRange(
+    minRating,
+    maxRating,
+    page,
+    size,
+    sortBy,
+    sortDirection
+  );
 
-  const [hiddenReviews, setHiddenReviews] = useState<number[]>([])
+  const deleteReviewMutation = useDeleteReview();
 
-  const toggleVisibility = (id: number) => {
-    setHiddenReviews((prev) =>
-      prev.includes(id) ? prev.filter((reviewId) => reviewId !== id) : [...prev, id]
-    )
-  }
+  const handleViewDetails = (reviewId: string) => {
+    setSelectedReviewId(reviewId);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleDeleteClick = (reviewId: string) => {
+    setReviewToDelete(reviewId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (reviewToDelete) {
+      deleteReviewMutation.mutate(reviewToDelete, {
+        onSuccess: () => {
+          setIsDeleteModalOpen(false);
+          setReviewToDelete(null);
+          refetch();
+        },
+      });
+    }
+  };
+
+  const renderStars = (rating: number) => {
+    return (
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`w-4 h-4 ${star <= rating
+                ? 'fill-yellow-400 text-yellow-400'
+                : 'text-gray-300'
+              }`}
+          />
+        ))}
+      </div>
+    );
+  };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Kiểm duyệt Đánh giá</h1>
-        <p className="text-muted-foreground">
-          Quản lý và kiểm duyệt các đánh giá từ người dùng
-        </p>
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Review Management</h1>
       </div>
 
+      {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Danh sách Đánh giá</CardTitle>
-          <CardDescription>
-            Tổng số: {reviews.length} đánh giá
-          </CardDescription>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Search className="w-5 h-5" />
+            Filters
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2.5">
-              {reviews.map((review) => (
-            <div
-              key={review.id}
-              className={`flex flex-col gap-2 rounded-lg border bg-gradient-to-r from-[rgba(12,81,111,0.07)] via-white to-white p-3 shadow-sm transition hover:border-primary/40 hover:shadow-md ${
-                hiddenReviews.includes(review.id) ? "opacity-70" : ""
-              }`}
-            >
-              <div className="flex flex-wrap items-center gap-3 text-xs md:text-sm">
-                <Badge variant="outline" className="text-[10px]">
-                  #{review.id}
-                </Badge>
-                <span className="font-semibold text-primary-foreground">{review.user}</span>
-                <span className="text-muted-foreground">đánh giá</span>
-                <span className="font-medium text-primary">{review.restaurant}</span>
-                <div className="flex items-center gap-1 text-amber-500">
-                      {"★".repeat(review.rating)}
-                  <span className="text-muted-foreground">{review.rating}/5</span>
-                </div>
-                <span className="text-muted-foreground text-xs">{review.date}</span>
-                {hiddenReviews.includes(review.id) && (
-                  <Badge variant="secondary" className="text-[10px]">
-                    Đang ẩn
-                  </Badge>
-                )}
-                    </div>
-              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                <p className="flex-1 truncate text-sm text-muted-foreground">
-                    {review.comment}
-                </p>
-                <div className="flex flex-wrap items-center gap-2">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                      <Button
-                        size="sm"
-                        className="h-8 border-none bg-gradient-to-r from-[#0C516F] via-[#127697] to-[#2AA6C3] text-white shadow-sm hover:opacity-90"
-                      >
-                        <Eye className="mr-2 h-4 w-4" />
-                        Xem chi tiết
-                          </Button>
-                        </DialogTrigger>
-                    <DialogContent className="max-w-xl">
-                          <DialogHeader>
-                        <DialogTitle>Chi tiết Đánh giá #{review.id}</DialogTitle>
-                        <DialogDescription>
-                          Người dùng {review.user} đánh giá {review.restaurant}
-                        </DialogDescription>
-                          </DialogHeader>
-                      <div className="space-y-4 text-sm">
-                        <div className="flex justify-between">
-                          <span className="font-medium">Người dùng:</span>
-                          <span>{review.user}</span>
-                            </div>
-                        <div className="flex justify-between">
-                          <span className="font-medium">Quán ăn:</span>
-                          <span>{review.restaurant}</span>
-                            </div>
-                        <div className="flex justify-between">
-                          <span className="font-medium">Đánh giá:</span>
-                          <div className="flex items-center gap-1 text-amber-500">
-                              {"★".repeat(review.rating)}
-                            <span className="text-xs text-muted-foreground">
-                              {review.rating}/5
-                            </span>
-                          </div>
-                            </div>
-                            <div>
-                              <span className="font-medium">Bình luận:</span>
-                          <p className="mt-2 rounded-md bg-muted p-3 text-sm leading-relaxed">
-                                {review.comment}
-                              </p>
-                            </div>
-                        <div className="flex justify-between text-muted-foreground">
-                          <span>Ngày gửi:</span>
-                          <span>{review.date}</span>
-                            </div>
-                          </div>
-                      <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-between">
-                              <Button
-                          variant="secondary"
-                          onClick={() => toggleVisibility(review.id)}
-                          className="flex-1"
-                        >
-                          {hiddenReviews.includes(review.id) ? (
-                            <>
-                              <Eye className="mr-2 h-4 w-4" />
-                              Hiện đánh giá
-                            </>
-                          ) : (
-                            <>
-                              <EyeOff className="mr-2 h-4 w-4" />
-                              Ẩn đánh giá
-                            </>
-                          )}
-                        </Button>
-                        <div className="flex flex-1 gap-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => handleReject(review.id)}
-                            className="flex-1"
-                          >
-                            <X className="mr-2 h-4 w-4" />
-                            Từ chối
-                          </Button>
-                          <Button
-                            onClick={() => handleApprove(review.id)}
-                            className="flex-1 bg-green-600 hover:bg-green-700"
-                          >
-                            <Check className="mr-2 h-4 w-4" />
-                            Duyệt
-                          </Button>
-                        </div>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                  <Button
-                    size="sm"
-                    onClick={() => toggleVisibility(review.id)}
-                    className="h-8 border-none bg-gradient-to-r from-[#0C516F0D] to-[#2AA6C30D] text-primary transition hover:from-[#0C516F22] hover:to-[#2AA6C322]"
-                  >
-                    {hiddenReviews.includes(review.id) ? (
-                      <>
-                        <Eye className="mr-2 h-4 w-4" />
-                        Hiện đánh giá
-                      </>
-                    ) : (
-                      <>
-                        <EyeOff className="mr-2 h-4 w-4" />
-                        Ẩn đánh giá
-                        </>
-                      )}
-                  </Button>
-                </div>
-              </div>
-                    </div>
-              ))}
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Min Rating</label>
+              <Select
+                value={minRating.toString()}
+                onValueChange={(value) => setMinRating(Number(value))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 4, 5].map((rating) => (
+                    <SelectItem key={rating} value={rating.toString()}>
+                      {rating} Star{rating > 1 ? 's' : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Max Rating</label>
+              <Select
+                value={maxRating.toString()}
+                onValueChange={(value) => setMaxRating(Number(value))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 4, 5].map((rating) => (
+                    <SelectItem key={rating} value={rating.toString()}>
+                      {rating} Star{rating > 1 ? 's' : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Sort By</label>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="createdAt">Created Date</SelectItem>
+                  <SelectItem value="rating">Rating</SelectItem>
+                  <SelectItem value="reviewerUsername">Reviewer</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Sort Direction</label>
+              <Select value={sortDirection} onValueChange={(value: 'asc' | 'desc') => setSortDirection(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="desc">Descending</SelectItem>
+                  <SelectItem value="asc">Ascending</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </CardContent>
       </Card>
+
+      {/* Reviews Table */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Reviews</CardTitle>
+            {reviewsData && (
+              <div className="text-sm text-muted-foreground">
+                Total: {reviewsData.totalElements} reviews
+              </div>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : reviewsData && reviewsData.content.length > 0 ? (
+            <>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Reviewer</TableHead>
+                      <TableHead>Rating</TableHead>
+                      <TableHead>Comment</TableHead>
+                      <TableHead>Created At</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {reviewsData.content.map((review) => (
+                      <TableRow key={review.reviewId}>
+                        <TableCell>
+                          <div className="space-y-1">
+                            <p className="font-medium">
+                              {review.reviewerUsername}
+                            </p>
+                            <p className="text-xs text-muted-foreground font-mono">
+                              {review.reviewerAccountId.substring(0, 8)}...
+                            </p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {renderStars(review.rating)}
+                        </TableCell>
+                        <TableCell>
+                          <p className="max-w-md truncate">
+                            {review.comment}
+                          </p>
+                        </TableCell>
+                        <TableCell>
+                          {format(
+                            new Date(review.createdAt),
+                            'MMM dd, yyyy HH:mm'
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            {review.hasOpenReport && (
+                              <Badge variant="destructive" className="w-fit">
+                                Has Report
+                              </Badge>
+                            )}
+                            {review.vendorReply && (
+                              <Badge variant="secondary" className="w-fit">
+                                Replied
+                              </Badge>
+                            )}
+                            {review.images && review.images.length > 0 && review.images[0] !== 'string' && (
+                              <Badge variant="outline" className="w-fit">
+                                {review.images.length} Image{review.images.length > 1 ? 's' : ''}
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() =>
+                                handleViewDetails(review.reviewId)
+                              }
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() =>
+                                handleDeleteClick(review.reviewId)
+                              }
+                              disabled={review.hasOpenReport}
+                              title={review.hasOpenReport ? "Cannot delete review with open reports" : "Delete review"}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              No reviews found
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Pagination */}
+      <div className="flex flex-col gap-3 rounded-xl border bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-3">
+          <Select
+            value={String(size)}
+            onValueChange={(value) => {
+              setSize(Number(value))
+              setPage(0)
+            }}
+          >
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Số dòng" />
+            </SelectTrigger>
+            <SelectContent>
+              {[10, 20, 50].map((sizeOption) => (
+                <SelectItem key={sizeOption} value={String(sizeOption)}>
+                  {sizeOption} / trang
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {reviewsData && (
+            <div className="text-sm text-muted-foreground">
+              Hiển thị {page * size + 1}-
+              {Math.min((page + 1) * size, reviewsData.totalElements)} trong tổng {reviewsData.totalElements}
+            </div>
+          )}
+        </div>
+
+        {/* Pagination */}
+        {reviewsData && reviewsData.totalPages > 0 && (
+          <div className="flex items-center justify-center md:justify-end">
+            <div className="flex items-center gap-2">
+              {/* Previous button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(Math.max(0, page - 1))}
+                disabled={page === 0 || isLoading}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+
+              {/* First page button */}
+              {page > 2 && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(0)}
+                  >
+                    1
+                  </Button>
+                  {page > 3 && (
+                    <span className="flex items-center px-2">...</span>
+                  )}
+                </>
+              )}
+
+              {/* Page numbers around current page */}
+              {Array.from({ length: reviewsData.totalPages }, (_, i) => i)
+                .filter(
+                  (pageNum) =>
+                    pageNum === page ||
+                    pageNum === page - 1 ||
+                    pageNum === page - 2 ||
+                    pageNum === page + 1 ||
+                    pageNum === page + 2
+                )
+                .map((pageNum) => (
+                  <Button
+                    key={pageNum}
+                    variant={page === pageNum ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setPage(pageNum)}
+                  >
+                    {pageNum + 1}
+                  </Button>
+                ))}
+
+              {/* Last page button */}
+              {page < reviewsData.totalPages - 3 && (
+                <>
+                  {page < reviewsData.totalPages - 4 && (
+                    <span className="flex items-center px-2">...</span>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage(reviewsData.totalPages - 1)}
+                  >
+                    {reviewsData.totalPages}
+                  </Button>
+                </>
+              )}
+
+              {/* Next button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(Math.min(reviewsData.totalPages - 1, page + 1))}
+                disabled={page >= reviewsData.totalPages - 1 || isLoading}
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Modals */}
+      <ReviewDetailModal
+        reviewId={selectedReviewId}
+        isOpen={isDetailModalOpen}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setSelectedReviewId(null);
+        }}
+      />
+
+      <DeleteReviewModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setReviewToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        isLoading={deleteReviewMutation.isPending}
+        reviewId={reviewToDelete || undefined}
+      />
     </div>
-  )
+  );
 }
 

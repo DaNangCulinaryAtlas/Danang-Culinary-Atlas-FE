@@ -29,7 +29,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Search, Eye, Lock, Unlock, Mail, Loader2 } from "lucide-react"
+import { Search, Eye, Lock, Unlock, Mail, Loader2, ChevronLeft, ChevronRight } from "lucide-react"
 import Image from "next/image"
 import { useAccounts } from "./hooks/useAccounts"
 import { useAccountActions } from "./hooks/useAccountActions"
@@ -174,9 +174,8 @@ export default function UserVendorManagement() {
           <CardDescription className="font-semibold" style={{ color: adminColors.primary[200] }}>
             {error
               ? error
-              : `Tổng: ${totalAccounts} tài khoản${
-                  searchQuery.trim() ? ` · Kết quả phù hợp: ${filteredAccounts.length}` : ""
-                }`}
+              : `Tổng: ${totalAccounts} tài khoản${searchQuery.trim() ? ` · Kết quả phù hợp: ${filteredAccounts.length}` : ""
+              }`}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
@@ -314,10 +313,6 @@ export default function UserVendorManagement() {
       </Card>
 
       <div className="flex flex-col gap-3 rounded-xl border bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between">
-        <div className="text-sm text-muted-foreground">
-          Trang {page} / {totalPages} — Hiển thị {(page - 1) * pageSize + 1}-
-          {Math.min(page * pageSize, filteredAccounts.length)} trong tổng {filteredAccounts.length}
-        </div>
         <div className="flex items-center gap-3">
           <Select
             value={String(pageSize)}
@@ -337,22 +332,86 @@ export default function UserVendorManagement() {
               ))}
             </SelectContent>
           </Select>
+          <div className="text-sm text-muted-foreground">
+            Hiển thị {(page - 1) * pageSize + 1}-
+            {Math.min(page * pageSize, filteredAccounts.length)} trong tổng {filteredAccounts.length}
+          </div>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-center md:justify-end">
           <div className="flex items-center gap-2">
+            {/* Previous button */}
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+              onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page === 1 || isLoading}
             >
-              Trước
+              <ChevronLeft className="w-4 h-4" />
             </Button>
+
+            {/* First page button */}
+            {page > 3 && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(1)}
+                >
+                  1
+                </Button>
+                {page > 4 && (
+                  <span className="flex items-center px-2">...</span>
+                )}
+              </>
+            )}
+
+            {/* Page numbers around current page */}
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(
+                (pageNum) =>
+                  pageNum === page ||
+                  pageNum === page - 1 ||
+                  pageNum === page - 2 ||
+                  pageNum === page + 1 ||
+                  pageNum === page + 2
+              )
+              .map((pageNum) => (
+                <Button
+                  key={pageNum}
+                  variant={page === pageNum ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setPage(pageNum)}
+                >
+                  {pageNum}
+                </Button>
+              ))}
+
+            {/* Last page button */}
+            {page < totalPages - 2 && (
+              <>
+                {page < totalPages - 3 && (
+                  <span className="flex items-center px-2">...</span>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(totalPages)}
+                >
+                  {totalPages}
+                </Button>
+              </>
+            )}
+
+            {/* Next button */}
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
-              disabled={page === totalPages || isLoading}
+              onClick={() => setPage(Math.min(totalPages, page + 1))}
+              disabled={page >= totalPages || isLoading}
             >
-              Sau
+              <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
         </div>

@@ -42,32 +42,6 @@ export default function AdminHeader() {
       style={{ borderColor: adminColors.primary[100] }}
     >
       <div className="flex items-center gap-2">
-        {/* Notifications */}
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="relative transition-all duration-200 rounded-lg hover:scale-105"
-          style={{ color: adminColors.neutral[500] }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = adminColors.primary[50]
-            e.currentTarget.style.color = adminColors.primary[600]
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'transparent'
-            e.currentTarget.style.color = adminColors.neutral[500]
-          }}
-        >
-          <Bell className="h-5 w-5" />
-          {notifications > 0 && (
-            <Badge
-              className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs text-white shadow-lg animate-pulse font-bold"
-              style={{ background: `linear-gradient(135deg, ${adminColors.status.error}, #F87171)` }}
-            >
-              {notifications}
-            </Badge>
-          )}
-        </Button>
-
         {/* Profile */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

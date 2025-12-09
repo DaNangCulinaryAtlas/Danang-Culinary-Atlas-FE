@@ -130,15 +130,11 @@ export default function Sidebar() {
       
       {/* Logo */}
       <div 
-        className="relative flex h-20 items-center border-b px-6 backdrop-blur-md"
-        style={{ 
-          borderColor: 'rgba(255,255,255,0.15)', 
-          background: `linear-gradient(135deg, ${adminColors.primary[700]}, ${adminColors.primary[800]})`
-        }}
+        className="relative flex h-20 items-center px-6 backdrop-blur-md"
       >
         <div className="flex items-center gap-3">
           <div 
-            className="h-12 w-12 rounded-xl flex items-center justify-center shadow-xl ring-2 transition-transform hover:scale-105"
+            className="h-12 w-12 rounded-xl flex items-center justify-center shadow-xl transition-transform hover:scale-105"
             style={{ 
               background: adminColors.gradients.primarySoft
             }}
@@ -218,10 +214,6 @@ export default function Sidebar() {
       {/* Logout Button */}
       <div 
         className="relative border-t p-4 backdrop-blur-sm"
-        style={{ 
-          borderColor: 'rgba(255,255,255,0.15)', 
-          background: `linear-gradient(135deg, ${adminColors.primary[800]}, ${adminColors.primary[900]})`
-        }}
       >
         <Button
           variant="ghost"

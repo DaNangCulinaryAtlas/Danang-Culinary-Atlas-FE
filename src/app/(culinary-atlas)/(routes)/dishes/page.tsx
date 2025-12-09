@@ -1,283 +1,97 @@
 "use client";
 import { useState, useMemo } from "react";
-import { Search, Filter, Grid3x3, List, MapPin, Heart, Star, X, ChevronDown } from "lucide-react";
-import DishCard from "@/components/dish";
+import { Search, Filter, Grid3x3, List, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { Dish } from "@/types/dish";
+import { useDishes } from "@/hooks/queries/useDishes";
+import { CUISINE_TAGS } from "@/constants/cuisineTags";
+import Link from "next/link";
 
-// Mock data
-const MOCK_DISHES: (Dish & {
-  id: number;
-  restaurant: string;
-  address: string;
-  distance: number;
-  tags: string[];
-  district: string;
-  isFavorite?: boolean;
-  badge?: string;
-})[] = [
-    {
-      id: 1,
-      image: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&h=600&fit=crop",
-      title: "Bún Chả Hà Nội",
-      description: "Bún chả truyền thống Hà Nội với nước chấm đặc biệt, thịt nướng thơm phức",
-      rating: 4.8,
-      reviewCount: 156,
-      price: 45.00,
-      restaurant: "Quán Bún Chả Sơn Trà",
-      address: "123 Lê Duẩn, Hải Châu",
-      distance: 1.2,
-      tags: ["Món nướng", "Đặc sản", "Bún/Phở"],
-      district: "Hải Châu",
-      badge: "Bán chạy"
-    },
-    {
-      id: 2,
-      image: "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&h=600&fit=crop",
-      title: "Hải Sản Nướng BBQ",
-      description: "Hải sản tươi sống được nướng trên than hoa, kèm theo các loại rau củ",
-      rating: 4.6,
-      reviewCount: 89,
-      price: 120.00,
-      restaurant: "Nhà Hàng Hải Sản Biển Đông",
-      address: "45 Võ Nguyên Giáp, Sơn Trà",
-      distance: 3.5,
-      tags: ["Hải sản", "Món nướng", "Món Á"],
-      district: "Sơn Trà"
-    },
-    {
-      id: 3,
-      image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=800&h=600&fit=crop",
-      title: "Mì Quảng Đặc Biệt",
-      description: "Mì Quảng truyền thống với tôm, thịt, trứng cút và bánh tráng giòn",
-      rating: 4.9,
-      reviewCount: 234,
-      price: 35.00,
-      restaurant: "Mì Quảng Bà Mua",
-      address: "78 Hải Phòng, Thanh Khê",
-      distance: 2.1,
-      tags: ["Bún/Phở", "Đặc sản", "Món Việt"],
-      district: "Thanh Khê",
-      badge: "Bán chạy"
-    },
-    {
-      id: 4,
-      image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&h=600&fit=crop",
-      title: "Pizza Hải Sản Ý",
-      description: "Pizza đế mỏng với hải sản tươi và phô mai Mozzarella cao cấp",
-      rating: 4.4,
-      reviewCount: 67,
-      price: 180.00,
-      restaurant: "Ristorante Italiano",
-      address: "234 Trần Phú, Hải Châu",
-      distance: 1.8,
-      tags: ["Món Âu", "Hải sản"],
-      district: "Hải Châu"
-    },
-    {
-      id: 5,
-      image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop",
-      title: "Bánh Flan Caramen",
-      description: "Bánh flan mềm mịn với lớp caramen đắng ngọt hài hòa",
-      rating: 4.7,
-      reviewCount: 112,
-      price: 15.00,
-      restaurant: "Tiệm Bánh Ngọt Hương Sen",
-      address: "56 Lê Lợi, Thanh Khê",
-      distance: 2.8,
-      tags: ["Tráng miệng", "Bánh"],
-      district: "Thanh Khê"
-    },
-    {
-      id: 6,
-      image: "https://images.unsplash.com/photo-1580959375944-1506b1122ed2?w=800&h=600&fit=crop",
-      title: "Cơm Chay Dinh Dưỡng",
-      description: "Cơm chay với đầy đủ rau củ, đậu phụ và nấm các loại",
-      rating: 4.5,
-      reviewCount: 78,
-      price: 40.00,
-      restaurant: "Quán Chay An Nhiên",
-      address: "167 Nguyễn Văn Linh, Hải Châu",
-      distance: 2.3,
-      tags: ["Món chay", "Món Việt"],
-      district: "Hải Châu"
-    },
-    {
-      id: 7,
-      image: "https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=800&h=600&fit=crop",
-      title: "Phở Bò Tái Nạm",
-      description: "Phở bò với nước dùng ninh từ xương 12 tiếng đồng hồ",
-      rating: 4.8,
-      reviewCount: 198,
-      price: 50.00,
-      restaurant: "Phở Gia Truyền",
-      address: "89 Hoàng Diệu, Hải Châu",
-      distance: 1.5,
-      tags: ["Bún/Phở", "Món Việt", "Đặc sản"],
-      district: "Hải Châu",
-      badge: "Bán chạy"
-    },
-    {
-      id: 8,
-      image: "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&h=600&fit=crop",
-      title: "Bánh Xèo Miền Trung",
-      description: "Bánh xèo giòn tan với nhân tôm, thịt, giá đỗ",
-      rating: 4.6,
-      reviewCount: 145,
-      price: 30.00,
-      restaurant: "Bánh Xèo Bà Dưỡng",
-      address: "45 Phan Châu Trinh, Hải Châu",
-      distance: 1.9,
-      tags: ["Bánh", "Món Việt", "Đặc sản"],
-      district: "Hải Châu"
-    },
-    {
-      id: 9,
-      image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&h=600&fit=crop",
-      title: "Lẩu Thái Hải Sản",
-      description: "Lẩu Thái chua cay với hải sản tươi sống và rau củ",
-      rating: 4.7,
-      reviewCount: 167,
-      price: 250.00,
-      restaurant: "Nhà Hàng Thái Lan",
-      address: "123 Nguyễn Tất Thành, Liên Chiểu",
-      distance: 4.2,
-      tags: ["Hải sản", "Món Á"],
-      district: "Liên Chiểu"
-    },
-    {
-      id: 10,
-      image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&h=600&fit=crop",
-      title: "Steak Bò Úc",
-      description: "Steak bò Úc cao cấp nướng medium rare với khoai tây nghiền",
-      rating: 4.9,
-      reviewCount: 89,
-      price: 350.00,
-      restaurant: "The Steakhouse",
-      address: "78 An Thượng, Ngũ Hành Sơn",
-      distance: 5.8,
-      tags: ["Món Âu", "Món nướng"],
-      district: "Ngũ Hành Sơn"
-    },
-    {
-      id: 11,
-      image: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=800&h=600&fit=crop",
-      title: "Bánh Tráng Cuốn Thịt Heo",
-      description: "Bánh tráng cuốn thịt heo luộc với rau sống và nước chấm đặc biệt",
-      rating: 4.5,
-      reviewCount: 123,
-      price: 25.00,
-      restaurant: "Quán Hòa",
-      address: "234 Hùng Vương, Hải Châu",
-      distance: 2.0,
-      tags: ["Món Việt", "Đặc sản"],
-      district: "Hải Châu"
-    },
-    {
-      id: 12,
-      image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&h=600&fit=crop",
-      title: "Tiramisu Ý",
-      description: "Tiramisu truyền thống Ý với cà phê espresso và mascarpone",
-      rating: 4.8,
-      reviewCount: 76,
-      price: 55.00,
-      restaurant: "Cafe Italia",
-      address: "56 Bạch Đằng, Hải Châu",
-      distance: 1.7,
-      tags: ["Tráng miệng", "Món Âu"],
-      district: "Hải Châu"
-    }
-  ];
-
-const DISTRICTS = ["Hải Châu", "Thanh Khê", "Sơn Trà", "Ngũ Hành Sơn", "Liên Chiểu", "Cẩm Lệ"];
-const DISH_TAGS = ["Món nướng", "Món chay", "Bún/Phở", "Bánh", "Hải sản", "Món Á", "Món Âu", "Tráng miệng", "Món Việt", "Đặc sản"];
 const PRICE_RANGES = [
-  { label: "Dưới 30k", min: 0, max: 30 },
-  { label: "30k - 50k", min: 30, max: 50 },
-  { label: "50k - 100k", min: 50, max: 100 },
-  { label: "Trên 100k", min: 100, max: Infinity }
+  { label: "Dưới 30k", min: 0, max: 30000 },
+  { label: "30k - 50k", min: 30000, max: 50000 },
+  { label: "50k - 100k", min: 50000, max: 100000 },
+  { label: "100k - 200k", min: 100000, max: 200000 },
+  { label: "Trên 200k", min: 200000, max: 10000000 }
 ];
 
 export default function DishPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedTagId, setSelectedTagId] = useState<number | undefined>(undefined);
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>("");
-  const [minRating, setMinRating] = useState<number>(0);
-  const [sortBy, setSortBy] = useState("popular");
+  const [sortBy, setSortBy] = useState<"name" | "price">("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
 
-  // Filter and sort logic
+  // Get price range values
+  const priceRange = useMemo(() => {
+    if (!selectedPriceRange) return undefined;
+    const range = PRICE_RANGES.find(r => r.label === selectedPriceRange);
+    return range ? { min: range.min, max: range.max } : undefined;
+  }, [selectedPriceRange]);
+
+  // Fetch dishes with filters
+  const { data: dishesResponse, isLoading, error } = useDishes({
+    page: currentPage,
+    size: 20,
+    tagId: selectedTagId,
+    minPrice: priceRange?.min,
+    maxPrice: priceRange?.max,
+    sortBy,
+    sortOrder,
+  });
+
+  // Filter dishes by search query locally
   const filteredDishes = useMemo(() => {
-    let result = MOCK_DISHES.filter(dish => {
-      // Search filter
-      const matchesSearch = dish.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        dish.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        dish.restaurant.toLowerCase().includes(searchQuery.toLowerCase());
+    if (!dishesResponse?.data?.content) return [];
 
-      // District filter
-      const matchesDistrict = selectedDistricts.length === 0 || selectedDistricts.includes(dish.district);
+    if (!searchQuery) return dishesResponse.data.content;
 
-      // Tags filter
-      const matchesTags = selectedTags.length === 0 || selectedTags.some(tag => dish.tags.includes(tag));
-
-      // Price filter
-      let matchesPrice = true;
-      if (selectedPriceRange) {
-        const range = PRICE_RANGES.find(r => r.label === selectedPriceRange);
-        if (range) {
-          matchesPrice = dish.price >= range.min && dish.price < range.max;
-        }
-      }
-
-      // Rating filter
-      const matchesRating = dish.rating >= minRating;
-
-      return matchesSearch && matchesDistrict && matchesTags && matchesPrice && matchesRating;
-    });
-
-    // Sorting
-    switch (sortBy) {
-      case "price-asc":
-        result.sort((a, b) => a.price - b.price);
-        break;
-      case "price-desc":
-        result.sort((a, b) => b.price - a.price);
-        break;
-      case "rating":
-        result.sort((a, b) => b.rating - a.rating);
-        break;
-      case "popular":
-      default:
-        result.sort((a, b) => b.reviewCount - a.reviewCount);
-        break;
-    }
-
-    return result;
-  }, [searchQuery, selectedDistricts, selectedTags, selectedPriceRange, minRating, sortBy]);
-
-  const toggleDistrict = (district: string) => {
-    setSelectedDistricts(prev =>
-      prev.includes(district) ? prev.filter(d => d !== district) : [...prev, district]
+    return dishesResponse.data.content.filter(dish =>
+      dish.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      dish.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  };
+  }, [dishesResponse, searchQuery]);
 
-  const toggleTag = (tag: string) => {
-    setSelectedTags(prev =>
-      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
-    );
+  const totalPages = dishesResponse?.data?.totalPages || 0;
+  const totalElements = dishesResponse?.data?.totalElements || 0;
+
+  const toggleTag = (tagId: number) => {
+    setSelectedTagId(prev => prev === tagId ? undefined : tagId);
+    setCurrentPage(0); // Reset to first page when filter changes
   };
 
   const clearFilters = () => {
     setSearchQuery("");
-    setSelectedDistricts([]);
-    setSelectedTags([]);
+    setSelectedTagId(undefined);
     setSelectedPriceRange("");
-    setMinRating(0);
+    setCurrentPage(0);
   };
 
-  const hasActiveFilters = selectedDistricts.length > 0 || selectedTags.length > 0 || selectedPriceRange || minRating > 0;
+  const handleSortChange = (value: string) => {
+    switch (value) {
+      case "name-asc":
+        setSortBy("name");
+        setSortOrder("asc");
+        break;
+      case "name-desc":
+        setSortBy("name");
+        setSortOrder("desc");
+        break;
+      case "price-asc":
+        setSortBy("price");
+        setSortOrder("asc");
+        break;
+      case "price-desc":
+        setSortBy("price");
+        setSortOrder("desc");
+        break;
+    }
+    setCurrentPage(0);
+  };
+
+  const hasActiveFilters = selectedTagId !== undefined || selectedPriceRange !== "";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -288,7 +102,7 @@ export default function DishPage() {
             Khám Phá Ẩm Thực Đà Nẵng
           </h1>
           <p className="text-center text-lg mb-8 opacity-90">
-            Hơn {MOCK_DISHES.length} món ăn đặc sắc từ các nhà hàng uy tín
+            {totalElements > 0 ? `Hơn ${totalElements} món ăn đặc sắc từ các nhà hàng uy tín` : 'Khám phá ẩm thực phong phú'}
           </p>
 
           {/* Search Bar */}
@@ -307,30 +121,21 @@ export default function DishPage() {
 
           {/* Quick Filters */}
           <div className="flex flex-wrap justify-center gap-3 mt-6">
-            <Button
-              onClick={() => setSelectedTags(["Món Việt"])}
-              className="bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 rounded-full px-6 py-2"
-            >
-              🍜 Món Việt
-            </Button>
-            <Button
-              onClick={() => setSelectedTags(["Món Âu"])}
-              className="bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 rounded-full px-6 py-2"
-            >
-              🍕 Món Âu
-            </Button>
-            <Button
-              onClick={() => setSelectedTags(["Tráng miệng"])}
-              className="bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 rounded-full px-6 py-2"
-            >
-              🍰 Tráng miệng
-            </Button>
-            <Button
-              onClick={() => setSelectedTags(["Hải sản"])}
-              className="bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 rounded-full px-6 py-2"
-            >
-              🦐 Hải sản
-            </Button>
+            {CUISINE_TAGS.slice(0, 6).map((tag) => (
+              <Button
+                key={tag.tagId}
+                onClick={() => {
+                  toggleTag(tag.tagId);
+                  setShowMobileFilters(false);
+                }}
+                className={`backdrop-blur-sm border rounded-full px-6 py-2 ${selectedTagId === tag.tagId
+                    ? 'bg-white text-[#44BACA] border-white'
+                    : 'bg-white/20 hover:bg-white/30 border-white/30'
+                  }`}
+              >
+                {tag.name}
+              </Button>
+            ))}
           </div>
         </div>
       </div>
@@ -355,40 +160,20 @@ export default function DishPage() {
                 )}
               </div>
 
-              {/* Districts Filter */}
-              <div className="mb-6">
-                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  Khu vực
-                </h4>
-                <div className="space-y-2">
-                  {DISTRICTS.map(district => (
-                    <label key={district} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={selectedDistricts.includes(district)}
-                        onChange={() => toggleDistrict(district)}
-                        className="rounded border-gray-300 text-[#44BACA] focus:ring-[#44BACA]"
-                      />
-                      <span className="text-sm">{district}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
               {/* Tags Filter */}
               <div className="mb-6">
-                <h4 className="font-semibold mb-3">🍽️ Loại món</h4>
-                <div className="space-y-2">
-                  {DISH_TAGS.map(tag => (
-                    <label key={tag} className="flex items-center gap-2 cursor-pointer">
+                <h4 className="font-semibold mb-3">🍽️ Loại ẩm thực</h4>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {CUISINE_TAGS.map(tag => (
+                    <label key={tag.tagId} className="flex items-center gap-2 cursor-pointer">
                       <input
-                        type="checkbox"
-                        checked={selectedTags.includes(tag)}
-                        onChange={() => toggleTag(tag)}
-                        className="rounded border-gray-300 text-[#44BACA] focus:ring-[#44BACA]"
+                        type="radio"
+                        name="cuisineTag"
+                        checked={selectedTagId === tag.tagId}
+                        onChange={() => toggleTag(tag.tagId)}
+                        className="border-gray-300 text-[#44BACA] focus:ring-[#44BACA]"
                       />
-                      <span className="text-sm">{tag}</span>
+                      <span className="text-sm">{tag.name}</span>
                     </label>
                   ))}
                 </div>
@@ -413,40 +198,22 @@ export default function DishPage() {
                 </div>
               </div>
 
-              {/* Rating Filter */}
-              <div className="mb-6">
-                <h4 className="font-semibold mb-3">⭐ Đánh giá</h4>
-                <div className="space-y-2">
-                  {[4, 3, 2].map(rating => (
-                    <label key={rating} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={minRating === rating}
-                        onChange={() => setMinRating(minRating === rating ? 0 : rating)}
-                        className="rounded border-gray-300 text-[#44BACA] focus:ring-[#44BACA]"
-                      />
-                      <span className="text-sm">{rating}+ sao</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
               {/* Sort Filter */}
               <div>
                 <h4 className="font-semibold mb-3">📊 Sắp xếp</h4>
                 <div className="space-y-2">
                   {[
-                    { value: "popular", label: "Phổ biến nhất" },
+                    { value: "name-asc", label: "Tên A → Z" },
+                    { value: "name-desc", label: "Tên Z → A" },
                     { value: "price-asc", label: "Giá thấp → cao" },
-                    { value: "price-desc", label: "Giá cao → thấp" },
-                    { value: "rating", label: "Đánh giá cao nhất" }
+                    { value: "price-desc", label: "Giá cao → thấp" }
                   ].map(option => (
                     <label key={option.value} className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="radio"
                         name="sortBy"
-                        checked={sortBy === option.value}
-                        onChange={() => setSortBy(option.value)}
+                        checked={sortBy === option.value.split('-')[0] && sortOrder === option.value.split('-')[1]}
+                        onChange={() => handleSortChange(option.value)}
                         className="border-gray-300 text-[#44BACA] focus:ring-[#44BACA]"
                       />
                       <span className="text-sm">{option.label}</span>
@@ -494,14 +261,14 @@ export default function DishPage() {
 
                   {/* Mobile Sort */}
                   <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
+                    value={`${sortBy}-${sortOrder}`}
+                    onChange={(e) => handleSortChange(e.target.value)}
                     className="lg:hidden border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="popular">Phổ biến nhất</option>
+                    <option value="name-asc">Tên A → Z</option>
+                    <option value="name-desc">Tên Z → A</option>
                     <option value="price-asc">Giá thấp → cao</option>
                     <option value="price-desc">Giá cao → thấp</option>
-                    <option value="rating">Đánh giá cao nhất</option>
                   </select>
                 </div>
               </div>
@@ -509,34 +276,18 @@ export default function DishPage() {
               {/* Active Filters */}
               {hasActiveFilters && (
                 <div className="flex flex-wrap gap-2 mt-4">
-                  {selectedDistricts.map(district => (
-                    <span key={district} className="inline-flex items-center gap-1 bg-[#44BACA]/10 text-[#44BACA] px-3 py-1 rounded-full text-sm">
-                      {district}
-                      <button onClick={() => toggleDistrict(district)}>
-                        <X className="w-3 h-3" />
-                      </button>
-                    </span>
-                  ))}
-                  {selectedTags.map(tag => (
-                    <span key={tag} className="inline-flex items-center gap-1 bg-[#44BACA]/10 text-[#44BACA] px-3 py-1 rounded-full text-sm">
-                      {tag}
-                      <button onClick={() => toggleTag(tag)}>
-                        <X className="w-3 h-3" />
-                      </button>
-                    </span>
-                  ))}
-                  {selectedPriceRange && (
+                  {selectedTagId && (
                     <span className="inline-flex items-center gap-1 bg-[#44BACA]/10 text-[#44BACA] px-3 py-1 rounded-full text-sm">
-                      {selectedPriceRange}
-                      <button onClick={() => setSelectedPriceRange("")}>
+                      {CUISINE_TAGS.find(t => t.tagId === selectedTagId)?.name}
+                      <button onClick={() => setSelectedTagId(undefined)}>
                         <X className="w-3 h-3" />
                       </button>
                     </span>
                   )}
-                  {minRating > 0 && (
+                  {selectedPriceRange && (
                     <span className="inline-flex items-center gap-1 bg-[#44BACA]/10 text-[#44BACA] px-3 py-1 rounded-full text-sm">
-                      {minRating}+ sao
-                      <button onClick={() => setMinRating(0)}>
+                      {selectedPriceRange}
+                      <button onClick={() => setSelectedPriceRange("")}>
                         <X className="w-3 h-3" />
                       </button>
                     </span>
@@ -546,15 +297,102 @@ export default function DishPage() {
             </div>
 
             {/* Dishes Grid */}
-            {filteredDishes.length > 0 ? (
-              <div className={`grid gap-6 ${viewMode === "grid"
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-20">
+                <Loader2 className="w-12 h-12 text-[#44BACA] animate-spin mb-4" />
+                <p className="text-gray-600">Đang tải món ăn...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-16 bg-white rounded-xl">
+                <div className="w-16 h-16 mx-auto mb-4 text-red-400">
+                  <X className="w-full h-full" />
+                </div>
+                <h3 className="font-bold text-xl mb-2">Có lỗi xảy ra</h3>
+                <p className="text-gray-600 mb-6">Không thể tải danh sách món ăn. Vui lòng thử lại sau.</p>
+              </div>
+            ) : filteredDishes.length > 0 ? (
+              <>
+                <div className={`grid gap-6 ${viewMode === "grid"
                   ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
                   : "grid-cols-1"
-                }`}>
-                {filteredDishes.map(dish => (
-                  <DishCard key={dish.id} dish={dish} />
-                ))}
-              </div>
+                  }`}>
+                  {filteredDishes.map(dish => (
+                    <Link key={dish.dishId} href={`/dishes/${dish.dishId}`}>
+                      <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden cursor-pointer h-full">
+                        <div className="aspect-[4/3] relative overflow-hidden">
+                          <img
+                            src={dish.images?.[0] || '/images/default-dish.png'}
+                            alt={dish.name}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          />
+
+                        </div>
+                        <div className="p-4">
+                          <h3 className="font-bold text-lg mb-2 line-clamp-2">{dish.name}</h3>
+                          <p className="text-gray-600 text-sm mb-3 line-clamp-2">{dish.description}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-[#44BACA] font-bold text-xl">
+                              {dish.price.toLocaleString('vi-VN')}₫
+                            </span>
+                            <span className={`px-2 py-1 rounded text-xs font-semibold ${dish.status === 'AVAILABLE'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-gray-100 text-gray-700'
+                              }`}>
+                              {dish.status === 'AVAILABLE' ? 'Còn hàng' : 'Hết hàng'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-8">
+                    <Button
+                      onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+                      disabled={currentPage === 0}
+                      className="px-4 py-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Trước
+                    </Button>
+                    <div className="flex gap-2">
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        let pageNum;
+                        if (totalPages <= 5) {
+                          pageNum = i;
+                        } else if (currentPage < 3) {
+                          pageNum = i;
+                        } else if (currentPage > totalPages - 3) {
+                          pageNum = totalPages - 5 + i;
+                        } else {
+                          pageNum = currentPage - 2 + i;
+                        }
+                        return (
+                          <Button
+                            key={pageNum}
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`w-10 h-10 rounded-lg ${currentPage === pageNum
+                                ? 'bg-[#44BACA] text-white'
+                                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                              }`}
+                          >
+                            {pageNum + 1}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                    <Button
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
+                      disabled={currentPage === totalPages - 1}
+                      className="px-4 py-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Sau
+                    </Button>
+                  </div>
+                )}
+              </>
             ) : (
               /* Empty State */
               <div className="text-center py-16 bg-white rounded-xl">
@@ -603,40 +441,20 @@ export default function DishPage() {
 
             {/* Same filters as desktop */}
             <div className="space-y-6">
-              {/* Districts */}
-              <div>
-                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  Khu vực
-                </h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {DISTRICTS.map(district => (
-                    <label key={district} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={selectedDistricts.includes(district)}
-                        onChange={() => toggleDistrict(district)}
-                        className="rounded border-gray-300 text-[#44BACA] focus:ring-[#44BACA]"
-                      />
-                      <span className="text-sm">{district}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
               {/* Tags */}
               <div>
-                <h4 className="font-semibold mb-3">🍽️ Loại món</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {DISH_TAGS.map(tag => (
-                    <label key={tag} className="flex items-center gap-2 cursor-pointer">
+                <h4 className="font-semibold mb-3">🍽️ Loại ẩm thực</h4>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {CUISINE_TAGS.map(tag => (
+                    <label key={tag.tagId} className="flex items-center gap-2 cursor-pointer">
                       <input
-                        type="checkbox"
-                        checked={selectedTags.includes(tag)}
-                        onChange={() => toggleTag(tag)}
-                        className="rounded border-gray-300 text-[#44BACA] focus:ring-[#44BACA]"
+                        type="radio"
+                        name="mobileCuisineTag"
+                        checked={selectedTagId === tag.tagId}
+                        onChange={() => toggleTag(tag.tagId)}
+                        className="border-gray-300 text-[#44BACA] focus:ring-[#44BACA]"
                       />
-                      <span className="text-sm">{tag}</span>
+                      <span className="text-sm">{tag.name}</span>
                     </label>
                   ))}
                 </div>

@@ -28,7 +28,16 @@ export const API_ENDPOINTS = {
     DETAIL: (id: string) => `/restaurants/${id}`,
     SEARCH: '/restaurants/search',
     SEARCH_BY_NAME: '/restaurants/name',
+    SEARCH_BY_DISH: '/restaurants/by-dish',
     MAP_VIEW: '/restaurants/map-view',
+  },
+  DISH: {
+    LIST: '/dishes',
+    DETAIL: (id: string) => `/dishes/${id}`,
+    CREATE: '/dishes',
+    UPDATE: (id: string) => `/dishes/${id}`,
+    UPDATE_STATUS: (id: string) => `/dishes/${id}/status`,
+    MANAGEMENT_DETAIL: (id: string) => `/dishes/${id}/management`,
   },
   ADMIN: {
     // Dashboard - Tổng quan hệ thống
@@ -43,7 +52,7 @@ export const API_ENDPOINTS = {
     GET_ACCOUNT_DETAIL: (id: string) => `/admin/accounts/${id}`, // Get account detail
 
     // Restaurant Management - Quản lý và kiểm duyệt quán ăn
-    RESTAURANTS_LIST: '/restaurants/admin', // Danh sách quán ăn (any STATUS: ALL, PENDING, APPROVED, REJECTED)
+    RESTAURANTS_LIST: '/admin/restaurants', // Danh sách quán ăn (any STATUS: ALL, PENDING, APPROVED, REJECTED)
     RESTAURANT_DETAIL: (id: string) => `/restaurants/${id}`, // Chi tiết quán ăn 
     RESTAURANT_DELETE: (id: string) => `/restaurants/${id}`, // Xóa quán ăn
     RESTAURANT_UPDATE: (id: string) => `/restaurants/${id}`, // Cập nhật thông tin quán ăn - PATCH
@@ -55,7 +64,11 @@ export const API_ENDPOINTS = {
     DISH_DETAIL: (id: string) => `/admin/dishes/${id}`, // Chi tiết món ăn
     DISH_APPROVE: (id: string) => `/admin/dishes/${id}/approve`, // Duyệt món ăn
     DISH_REJECT: (id: string) => `/admin/dishes/${id}/reject`, // Từ chối món ăn
-    DISHES_BULK_APPROVE: '/admin/dishes/bulk-approve', // Duyệt nhiều món ăn cùng lúc -> note 
+    DISHES_BULK_APPROVE: '/admin/dishes/bulk-approve', // Duyệt nhiều món ăn cùng lúc -> note
+    DISH_APPROVAL: (id: string) => `/admin/dishes/${id}/approval`, // Approve or reject dish
+    DISHES_REJECTED: '/admin/dishes/rejected', // Get all rejected dishes
+    DISHES_PENDING: '/admin/dishes/pending', // Get all pending dishes
+    RESTAURANT_VENDOR_DISHES: (restaurantId: string) => `/restaurants/${restaurantId}/vendor-dishes`, // Get all dishes of a restaurant for vendor 
 
     // Review Moderation - Kiểm duyệt đánh giá
     REVIEWS_LIST: '/reports/admin', // Danh sách đánh giá (có filter theo status)
@@ -64,7 +77,9 @@ export const API_ENDPOINTS = {
     REVIEW_REJECT: (id: string) => `/admin/reviews/${id}/reject`, // Từ chối đánh giá
 
     // Report Handling - Xử lý báo cáo vi phạm
-    REPORTS_LIST: '/reports/admin', // Danh sách báo cáo (bao gồm lý do, status, timestamps)
+    REPORTS_LIST: '/admin/reports', // Danh sách báo cáo (bao gồm lý do, status, timestamps)
+    REPORTS_STATISTICS: '/admin/reports/statistics', // Thống kê báo cáo
+    REPORT_UPDATE_STATUS: (reportId: string) => `/admin/reports/${reportId}/status`, // Cập nhật trạng thái báo cáo
 
 
     // System Settings - Cài đặt hệ thống
@@ -93,5 +108,10 @@ export const API_ENDPOINTS = {
       UPDATE: (id: string) => `/reviews/${id}`,
       DELETE: (id: string) => `/reviews/${id}`,
     },
+  },
+  REVIEW: {
+    BY_RATING_RANGE: '/reviews/rating-range',
+    DETAIL: (id: string) => `/reviews/${id}`,
+    DELETE: (id: string) => `/reviews/${id}`,
   },
 };
