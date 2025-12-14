@@ -2,12 +2,13 @@
 import { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter, useParams } from 'next/navigation';
-import { ChevronLeft, MapPin, Loader2 } from 'lucide-react';
+import { ChevronLeft, MapPin, Loader2, Flag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import StarRating from '@/components/restaurants/StarRating';
 import RestaurantMap from '@/components/restaurants/RestaurantMap';
 import ReviewList from '@/components/restaurants/ReviewList';
 import ReviewForm from '@/components/restaurants/ReviewForm';
+import { ReportRestaurantModal } from '@/components/restaurants/ReportRestaurantModal';
 import { useRestaurantDetail } from '@/hooks/queries/useRestaurantDetail';
 import { useRestaurantReviews } from '@/hooks/queries/useRestaurantReviews';
 import { useQueryClient } from '@tanstack/react-query';
@@ -15,6 +16,7 @@ import { toast } from 'react-toastify';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { Notification } from '@/services/notification';
 import { Review } from '@/services/review';
+import { useReportRestaurant } from '@/hooks/mutations/useReportRestaurant';
 
 export default function RestaurantDetail() {
   const router = useRouter();
@@ -23,6 +25,7 @@ export default function RestaurantDetail() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [sortBy, setSortBy] = useState('relevant');
   const [imageError, setImageError] = useState<{ [key: string]: boolean }>({});
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const queryClient = useQueryClient();
 
   // Fetch restaurant data
@@ -86,7 +89,7 @@ export default function RestaurantDetail() {
             queryClient.invalidateQueries({ queryKey: ['reviews', restaurantId] });
 
             // Also invalidate restaurant detail to update rating
-            queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId] });
+            queryClient.invalidateQueries({ queryKey: ['restaurantDetail', restaurantId] });
           } else {
             console.log('⏭️ [RestaurantDetail] Review is for different restaurant, skipping UI update');
           }
@@ -102,14 +105,33 @@ export default function RestaurantDetail() {
   // Connect to WebSocket for notifications (including review notifications)
   const { isConnected } = useWebSocket(handleNotification);
   console.log('🔌 [RestaurantDetail] WebSocket connected:', isConnected());
+
+  // Report restaurant mutation
+  const reportMutation = useReportRestaurant();
+
+  // Handle report submission
+  const handleReportSubmit = (reason: string) => {
+    reportMutation.mutate(
+      {
+        restaurantId,
+        reason,
+      },
+      {
+        onSuccess: () => {
+          setIsReportModalOpen(false);
+        },
+      }
+    );
+  };
   useEffect(() => {
     if (!restaurantId) return;
 
     console.log('🔄 [RestaurantDetail] Setting up polling for reviews (30s interval)');
 
     const intervalId = setInterval(() => {
-      console.log('🔄 [RestaurantDetail] Auto-refreshing reviews...');
+      console.log('🔄 [RestaurantDetail] Auto-refreshing reviews and restaurant data...');
       queryClient.invalidateQueries({ queryKey: ['reviews', restaurantId] });
+      queryClient.invalidateQueries({ queryKey: ['restaurantDetail', restaurantId] });
     }, 15000); // 15 seconds
 
     return () => {
@@ -148,12 +170,21 @@ export default function RestaurantDetail() {
         <div className="mb-8">
           <div className="flex items-start justify-between gap-4 mb-3">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900">{restaurant.name}</h1>
-            <button
-              onClick={() => router.back()}
-              className="shrink-0 bg-gray-100 hover:bg-gray-200 rounded-full p-2 transition-all duration-300"
-            >
-              <ChevronLeft className="w-6 h-6 text-gray-700" />
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => setIsReportModalOpen(true)}
+                className="bg-red-100 hover:bg-red-200 rounded-full p-2 transition-all duration-300"
+                title="Báo cáo nhà hàng"
+              >
+                <Flag className="w-5 h-5 text-red-600" />
+              </button>
+              <button
+                onClick={() => router.back()}
+                className="bg-gray-100 hover:bg-gray-200 rounded-full p-2 transition-all duration-300"
+              >
+                <ChevronLeft className="w-6 h-6 text-gray-700" />
+              </button>
+            </div>
           </div>
 
           {/* Info Line */}
@@ -313,6 +344,15 @@ export default function RestaurantDetail() {
           />
         </section>
       </div>
+
+      {/* Report Restaurant Modal */}
+      <ReportRestaurantModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        onConfirm={handleReportSubmit}
+        isLoading={reportMutation.isPending}
+        restaurantName={restaurant.name}
+      />
     </div>
   );
 }

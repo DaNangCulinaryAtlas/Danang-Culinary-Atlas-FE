@@ -56,7 +56,7 @@ export const API_ENDPOINTS = {
     RESTAURANT_DETAIL: (id: string) => `/restaurants/${id}`, // Chi tiết quán ăn 
     RESTAURANT_DELETE: (id: string) => `/restaurants/${id}`, // Xóa quán ăn
     RESTAURANT_UPDATE: (id: string) => `/restaurants/${id}`, // Cập nhật thông tin quán ăn - PATCH
-    RESTAURANT_APPROVE: (id: string) => `/restaurants/admin/${id}/approval`, // Duyệt quán ăn
+    RESTAURANT_APPROVE: (id: string) => `/admin/restaurants/${id}/approval`, // Duyệt quán ăn
     RESTAURANT_BY_VENDOR_ID: (vendorId: string) => `/vendors/${vendorId}/restaurants`, // Lấy quán ăn theo vendorId
 
     // Dish Management - Quản lý và kiểm duyệt món ăn
@@ -80,6 +80,7 @@ export const API_ENDPOINTS = {
     REPORTS_LIST: '/admin/reports', // Danh sách báo cáo (bao gồm lý do, status, timestamps)
     REPORTS_STATISTICS: '/admin/reports/statistics', // Thống kê báo cáo
     REPORT_UPDATE_STATUS: (reportId: string) => `/admin/reports/${reportId}/status`, // Cập nhật trạng thái báo cáo
+    REPORT_CREATE: '/reports', // Tạo báo cáo mới
 
 
     // System Settings - Cài đặt hệ thống
@@ -115,6 +116,9 @@ export const API_ENDPOINTS = {
     DELETE: (id: string) => `/reviews/${id}`,
   },
   VENDOR: {
+    // Overview - Tổng quan vendor
+    OVERVIEW: '/profile/vendor/overview', // Lấy thông tin tổng quan vendor
+
     // Restaurant Management - Quản lý quán ăn của vendor
     RESTAURANTS_LIST: (vendorId: string) => `/vendors/${vendorId}/restaurants`, // Lấy danh sách quán ăn của vendor
     RESTAURANT_CREATE: '/restaurants', // Tạo quán ăn mới

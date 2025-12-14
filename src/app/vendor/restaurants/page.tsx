@@ -21,10 +21,12 @@ import { useVendorRestaurants } from "../../../hooks/queries/useVendorRestaurant
 import MiniMap from "./components/MiniMap"
 import type { Restaurant } from "./types"
 import { useAppSelector } from "@/hooks/useRedux"
+import { VendorRestaurantFormModal } from "@/components/vendor/VendorRestaurantFormModal"
 
 export default function VendorRestaurantsPage() {
     const { user } = useAppSelector((state) => state.auth)
     const vendorId = user?.accountId || null
+    const [isRestaurantModalOpen, setIsRestaurantModalOpen] = useState(false)
 
     // Fetch all restaurants
     const { restaurants, isLoading, error, refetch } = useVendorRestaurants({
@@ -269,6 +271,7 @@ export default function VendorRestaurantsPage() {
                         </p>
                     </div>
                     <Button
+                        onClick={() => setIsRestaurantModalOpen(true)}
                         className="font-semibold"
                         style={{
                             background: 'white',
@@ -432,6 +435,12 @@ export default function VendorRestaurantsPage() {
                     </Card>
                 </TabsContent>
             </Tabs>
+
+            {/* Restaurant Form Modal */}
+            <VendorRestaurantFormModal
+                open={isRestaurantModalOpen}
+                onOpenChange={setIsRestaurantModalOpen}
+            />
         </div>
     )
 }

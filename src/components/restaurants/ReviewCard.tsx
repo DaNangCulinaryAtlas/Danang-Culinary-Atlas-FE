@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Star, MoreVertical, Edit2, Trash2, X } from 'lucide-react';
+import { Star, MoreVertical, Edit2, Trash2, X, Flag } from 'lucide-react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useAppSelector } from '@/hooks/useRedux';
 import { Review } from '@/services/review';
 import { useUpdateReview } from '@/hooks/mutations/useUpdateReview';
 import { useDeleteReview } from '@/hooks/mutations/useDeleteReview';
+import { ReportReviewModal } from '@/components/restaurants/ReportReviewModal';
+import { useReportReview } from '@/hooks/mutations/useReportReview';
 
 interface ReviewCardProps {
     review: Review;
@@ -18,10 +20,12 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
     const [showMenu, setShowMenu] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showReportModal, setShowReportModal] = useState(false);
     const [editRating, setEditRating] = useState(review.rating);
     const [editComment, setEditComment] = useState(review.comment);
     const { mutate: updateReview, isPending: isUpdating } = useUpdateReview({ restaurantId });
     const { mutate: deleteReview, isPending: isDeleting } = useDeleteReview({ restaurantId });
+    const reportMutation = useReportReview();
 
     // Get current user from Redux
     const { user } = useAppSelector((state) => state.auth);
@@ -149,6 +153,20 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
         });
     };
 
+    const handleReportSubmit = (reason: string) => {
+        reportMutation.mutate(
+            {
+                reviewId: review.reviewId,
+                reason,
+            },
+            {
+                onSuccess: () => {
+                    setShowReportModal(false);
+                },
+            }
+        );
+    };
+
     return (
         <div className="pb-6 border-b border-gray-200 last:border-b-0">
             <div className="flex items-start gap-4">
@@ -162,7 +180,7 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                             <p className="text-sm text-gray-500">{formatDate(review.createdAt)}</p>
                         </div>
                         {/* Menu Button */}
-                        {isOwner && (
+                        {currentUserId && (
                             <div className="relative">
                                 <button
                                     onClick={() => setShowMenu(!showMenu)}
@@ -174,27 +192,42 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
 
                                 {/* Dropdown Menu */}
                                 {showMenu && (
-                                    <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                                        <button
-                                            onClick={() => {
-                                                setShowEditModal(true);
-                                                setShowMenu(false);
-                                            }}
-                                            className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 border-b border-gray-200"
-                                        >
-                                            <Edit2 size={14} />
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                setShowDeleteModal(true);
-                                                setShowMenu(false);
-                                            }}
-                                            className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                                        >
-                                            <Trash2 size={14} />
-                                            Delete
-                                        </button>
+                                    <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[120px]">
+                                        {isOwner ? (
+                                            <>
+                                                <button
+                                                    onClick={() => {
+                                                        setShowEditModal(true);
+                                                        setShowMenu(false);
+                                                    }}
+                                                    className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 border-b border-gray-200"
+                                                >
+                                                    <Edit2 size={14} />
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setShowDeleteModal(true);
+                                                        setShowMenu(false);
+                                                    }}
+                                                    className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                                >
+                                                    <Trash2 size={14} />
+                                                    Delete
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <button
+                                                onClick={() => {
+                                                    setShowReportModal(true);
+                                                    setShowMenu(false);
+                                                }}
+                                                className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                            >
+                                                <Flag size={14} />
+                                                Report
+                                            </button>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -361,6 +394,15 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                     </div>
                 </div>
             )}
+
+            {/* Report Review Modal */}
+            <ReportReviewModal
+                isOpen={showReportModal}
+                onClose={() => setShowReportModal(false)}
+                onConfirm={handleReportSubmit}
+                isLoading={reportMutation.isPending}
+                reviewerName={review.reviewerUsername}
+            />
         </div>
     );
 }

@@ -26,3 +26,18 @@ export interface UpdateReportStatusResponse {
     createdAt: string;
     processedAt: string;
 }
+
+export interface CreateReportRequest {
+    restaurantId?: string;
+    reviewId?: string;
+    reason: string;
+}
+
+export interface CreateReportResponse {
+    reportId: string;
+    restaurantId?: string;
+    reviewId?: string;
+    reason: string;
+    status: ReportStatus;
+    createdAt: string;
+}

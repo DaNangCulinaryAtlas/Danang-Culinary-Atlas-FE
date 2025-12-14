@@ -1,6 +1,6 @@
 import instanceAxios from '@/helpers/axios';
 import { API_ENDPOINTS } from '@/configs/api';
-import type { Report, ReportStatistics, UpdateReportStatusRequest, UpdateReportStatusResponse } from '@/types/report';
+import type { Report, ReportStatistics, UpdateReportStatusRequest, UpdateReportStatusResponse, CreateReportRequest, CreateReportResponse } from '@/types/report';
 
 /**
  * Get report statistics
@@ -25,9 +25,25 @@ export const updateReportStatus = async (
     reportId: string,
     data: UpdateReportStatusRequest
 ): Promise<UpdateReportStatusResponse> => {
-    const response = await instanceAxios.put<UpdateReportStatusResponse>(
+    const response = await instanceAxios.patch<UpdateReportStatusResponse>(
         API_ENDPOINTS.ADMIN.REPORT_UPDATE_STATUS(reportId),
         data
     );
     return response.data;
 };
+
+/**
+ * Create a new report for a restaurant or review
+ */
+export const createReport = async (
+    data: CreateReportRequest
+): Promise<CreateReportResponse> => {
+    const response = await instanceAxios.post<CreateReportResponse>(
+        API_ENDPOINTS.ADMIN.REPORT_CREATE,
+        data
+    );
+    return response.data;
+};
+
+// Backward compatibility
+export const createRestaurantReport = createReport;

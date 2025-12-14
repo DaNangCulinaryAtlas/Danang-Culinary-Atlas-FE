@@ -14,6 +14,8 @@ export const useCreateReview = (options: UseCreateReviewOptions): UseMutationRes
     onSuccess: () => {
       // Refetch reviews to get the newly posted review from server
       queryClient.invalidateQueries({ queryKey: ['reviews', restaurantId] });
+      // Refetch restaurant detail to update averageRating and totalReviews
+      queryClient.invalidateQueries({ queryKey: ['restaurantDetail', restaurantId] });
     },
   });
 };
