@@ -114,4 +114,15 @@ export const API_ENDPOINTS = {
     DETAIL: (id: string) => `/reviews/${id}`,
     DELETE: (id: string) => `/reviews/${id}`,
   },
+  VENDOR: {
+    // Restaurant Management - Quản lý quán ăn của vendor
+    RESTAURANTS_LIST: (vendorId: string) => `/vendors/${vendorId}/restaurants`, // Lấy danh sách quán ăn của vendor
+    RESTAURANT_CREATE: '/restaurants', // Tạo quán ăn mới
+    RESTAURANT_UPDATE: (restaurantId: string) => `/restaurants/${restaurantId}`, // Cập nhật quán ăn
+    RESTAURANT_DELETE: (restaurantId: string) => `/restaurants/${restaurantId}`, // Xóa quán ăn
+
+    // Dish Management - Quản lý món ăn của vendor
+    RESTAURANT_VENDOR_DISHES: (restaurantId: string) => `/restaurants/${restaurantId}/vendor-dishes`, // Get all dishes (including pending/rejected)
+    RESTAURANT_DISHES: (restaurantId: string) => `/restaurants/${restaurantId}/dishes`, // Get approved dishes only
+  },
 };

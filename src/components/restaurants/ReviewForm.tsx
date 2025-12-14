@@ -1,21 +1,30 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Star, Send, AlertCircle, ImagePlus, X } from 'lucide-react';
+import { Star, Send, AlertCircle, ImagePlus, X, Loader2 } from 'lucide-react';
 import { useCreateReview } from '@/hooks/mutations/useCreateReview';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import { uploadImageToCloudinary } from '@/services/upload-image';
 import axios from 'axios';
 
 interface ReviewFormProps {
   restaurantId: string;
 }
 
+interface ImagePreview {
+  file: File;
+  preview: string;
+  cloudinaryUrl?: string;
+  isUploading?: boolean;
+  uploadError?: string;
+}
+
 export default function ReviewForm({ restaurantId }: ReviewFormProps) {
   const router = useRouter();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<ImagePreview[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(true);
   const { mutate: createReview, isPending } = useCreateReview({ restaurantId });
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -27,18 +36,54 @@ export default function ReviewForm({ restaurantId }: ReviewFormProps) {
     }
   }, []);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const base64 = event.target?.result as string;
-        setImages((prev) => [...prev, base64]);
-      };
-      reader.readAsDataURL(file);
-    });
+    const fileArray = Array.from(files);
+
+    // Create preview objects for each file
+    const newImages: ImagePreview[] = fileArray.map(file => ({
+      file,
+      preview: URL.createObjectURL(file),
+      isUploading: true,
+    }));
+
+    setImages(prev => [...prev, ...newImages]);
+
+    // Upload each image to Cloudinary
+    for (let i = 0; i < fileArray.length; i++) {
+      const file = fileArray[i];
+      const imageIndex = images.length + i;
+
+      try {
+        const result = await uploadImageToCloudinary(file);
+
+        if (result.success && result.data) {
+          // Update the image with Cloudinary URL
+          setImages(prev => prev.map((img, idx) =>
+            idx === imageIndex
+              ? { ...img, cloudinaryUrl: result.data, isUploading: false }
+              : img
+          ));
+        } else {
+          // Update with error
+          setImages(prev => prev.map((img, idx) =>
+            idx === imageIndex
+              ? { ...img, isUploading: false, uploadError: result.message || 'Upload failed' }
+              : img
+          ));
+          toast.error(`Failed to upload image: ${result.message}`);
+        }
+      } catch (error) {
+        setImages(prev => prev.map((img, idx) =>
+          idx === imageIndex
+            ? { ...img, isUploading: false, uploadError: 'Upload failed' }
+            : img
+        ));
+        toast.error('Failed to upload image');
+      }
+    }
 
     // Reset input so same file can be selected again
     if (fileInputRef.current) {
@@ -47,7 +92,12 @@ export default function ReviewForm({ restaurantId }: ReviewFormProps) {
   };
 
   const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
+    setImages(prev => {
+      const newImages = prev.filter((_, i) => i !== index);
+      // Revoke the object URL to free memory
+      URL.revokeObjectURL(prev[index].preview);
+      return newImages;
+    });
   };
 
   const validateForm = (): boolean => {
@@ -78,15 +128,37 @@ export default function ReviewForm({ restaurantId }: ReviewFormProps) {
 
     if (!validateForm()) return;
 
+    // Check if any images are still uploading
+    const isAnyImageUploading = images.some(img => img.isUploading);
+    if (isAnyImageUploading) {
+      toast.warning('Please wait for all images to finish uploading');
+      return;
+    }
+
+    // Check if any images failed to upload
+    const failedImages = images.filter(img => img.uploadError);
+    if (failedImages.length > 0) {
+      toast.error('Some images failed to upload. Please remove them or try again.');
+      return;
+    }
+
+    // Get only successfully uploaded Cloudinary URLs
+    const cloudinaryUrls = images
+      .filter(img => img.cloudinaryUrl)
+      .map(img => img.cloudinaryUrl as string);
+
     createReview(
       {
         restaurantId,
         rating,
         comment: comment.trim(),
-        images,
+        images: cloudinaryUrls,
       },
       {
         onSuccess: () => {
+          // Clean up object URLs
+          images.forEach(img => URL.revokeObjectURL(img.preview));
+
           // Reset form
           setRating(0);
           setComment('');
@@ -119,6 +191,9 @@ export default function ReviewForm({ restaurantId }: ReviewFormProps) {
   };
 
   const handleCancel = () => {
+    // Clean up object URLs
+    images.forEach(img => URL.revokeObjectURL(img.preview));
+
     setComment('');
     setImages([]);
     setRating(0);
@@ -158,11 +233,10 @@ export default function ReviewForm({ restaurantId }: ReviewFormProps) {
             >
               <Star
                 size={18}
-                className={`transition-colors ${
-                  value <= rating
+                className={`transition-colors ${value <= rating
                     ? 'fill-[#44BACA] text-[#44BACA]'
                     : 'text-gray-300 hover:text-gray-400'
-                }`}
+                  }`}
               />
             </button>
           ))}
@@ -207,11 +281,11 @@ export default function ReviewForm({ restaurantId }: ReviewFormProps) {
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={isPending || !rating || !comment.trim()}
+          disabled={isPending || !rating || !comment.trim() || images.some(img => img.isUploading)}
           className="p-2 shrink-0 rounded-full bg-[#44BACA] text-white hover:bg-[#2B7A8E] disabled:bg-gray-300 disabled:cursor-not-allowed transition-all hover:scale-110 active:scale-95"
           title="Send review"
         >
-          <Send size={18} />
+          {isPending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
         </button>
       </div>
 
@@ -220,11 +294,28 @@ export default function ReviewForm({ restaurantId }: ReviewFormProps) {
         <div className="mt-3 ml-4 flex flex-wrap gap-2">
           {images.map((image, index) => (
             <div key={index} className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200">
-              <img src={image} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+              <img src={image.preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+
+              {/* Upload Status Overlay */}
+              {image.isUploading && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <Loader2 size={20} className="text-white animate-spin" />
+                </div>
+              )}
+
+              {/* Upload Error Overlay */}
+              {image.uploadError && (
+                <div className="absolute inset-0 bg-red-500/70 flex items-center justify-center">
+                  <AlertCircle size={16} className="text-white" />
+                </div>
+              )}
+
+              {/* Remove Button */}
               <button
                 type="button"
                 onClick={() => removeImage(index)}
-                className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 transition-colors shadow-md"
+                disabled={image.isUploading}
+                className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 transition-colors shadow-md disabled:opacity-50"
               >
                 <X size={12} />
               </button>

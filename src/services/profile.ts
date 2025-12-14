@@ -58,7 +58,7 @@ export const updateProfile = async (
 ): Promise<ApiResponse<TUserProfile>> => {
     try {
         const endpoint = getUpdateProfileEndpoint(role);
-        const response: AxiosResponse = await instanceAxios.put(endpoint, data);
+        const response: AxiosResponse = await instanceAxios.patch(endpoint, data);
 
         return {
             success: true,

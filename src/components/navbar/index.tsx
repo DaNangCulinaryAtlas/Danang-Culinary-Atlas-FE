@@ -10,7 +10,6 @@ import NotificationPanel from '@/components/notification/NotificationPanel';
 import { useAppSelector } from '@/hooks/useRedux';
 import { useTranslation } from 'react-i18next';
 import { CircleUser, Bell } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
 import { useNotifications } from '@/hooks/queries/useNotifications';
 
 export default function Header() {

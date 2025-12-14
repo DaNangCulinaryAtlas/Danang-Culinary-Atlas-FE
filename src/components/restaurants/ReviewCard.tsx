@@ -242,6 +242,28 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                             )}
                         </div>
                     )}
+
+                    {/* Vendor Reply */}
+                    {review.vendorReply && (
+                        <div className="mt-4 p-4 bg-gradient-to-r from-cyan-50 to-blue-50 border-l-4 border-[#44BACA] rounded-xl shadow-sm">
+                            <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#44BACA] to-[#2B7A8E] flex items-center justify-center text-white font-bold shrink-0 shadow-md">
+                                    V
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <p className="font-semibold text-[#44BACA] text-sm">Vendor Response</p>
+                                        {review.repliedAt && (
+                                            <span className="text-xs text-gray-400">
+                                                • {formatDate(review.repliedAt)}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className="text-sm text-gray-700 leading-relaxed">{review.vendorReply}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

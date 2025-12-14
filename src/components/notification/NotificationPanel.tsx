@@ -123,9 +123,7 @@ export default function NotificationPanel({ isOpen, onClose }: NotificationPanel
         if (!notification.isRead) {
             markAsRead(notification.notificationId);
         }
-        if (notification.targetUrl) {
-            window.location.href = notification.targetUrl;
-        }
+        // Removed navigation - only mark as read
     };
 
     const getNotificationIcon = (type: Notification['type']) => {

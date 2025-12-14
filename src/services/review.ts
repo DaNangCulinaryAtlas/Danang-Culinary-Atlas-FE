@@ -114,3 +114,49 @@ export const deleteReview = async (reviewId: string): Promise<void> => {
         throw error;
     }
 };
+
+export const getRestaurantReviewsByRatingRange = async (
+    restaurantId: string,
+    minRating: number,
+    maxRating: number,
+    page: number = 0,
+    size: number = 10,
+    sortBy: string = 'createdAt',
+    sortDirection: string = 'desc'
+): Promise<ReviewsResponse> => {
+    try {
+        const response = await instanceAxios.get(
+            `/restaurants/${restaurantId}/reviews/rating-range`,
+            {
+                params: {
+                    minRating,
+                    maxRating,
+                    page,
+                    size,
+                    sortBy,
+                    sortDirection,
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching restaurant reviews by rating range:', error);
+        throw error;
+    }
+};
+
+export const replyToReview = async (
+    reviewId: string,
+    vendorReply: string
+): Promise<Review> => {
+    try {
+        const response = await instanceAxios.post(
+            `/reviews/${reviewId}/reply`,
+            { vendorReply }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error replying to review:', error);
+        throw error;
+    }
+};

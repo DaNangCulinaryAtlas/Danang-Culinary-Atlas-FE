@@ -27,6 +27,11 @@ export default function ProfileTab({ user }: ProfileTabProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [errors, setErrors] = useState<{
+        fullName?: string;
+        dob?: string;
+        gender?: string;
+    }>({});
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [formData, setFormData] = useState({
         fullName: user?.fullName || '',
@@ -62,6 +67,13 @@ export default function ProfileTab({ user }: ProfileTabProps) {
             ...prev,
             [name]: value,
         }));
+        // Clear error for this field when user starts typing
+        if (errors[name as keyof typeof errors]) {
+            setErrors((prev) => ({
+                ...prev,
+                [name]: undefined,
+            }));
+        }
     };
 
     const handleAvatarClick = () => {
@@ -97,8 +109,48 @@ export default function ProfileTab({ user }: ProfileTabProps) {
         }
     };
 
+    const validateForm = (): boolean => {
+        const newErrors: typeof errors = {};
+
+        // Validate fullName
+        if (formData.fullName && formData.fullName.trim().length < 2) {
+            newErrors.fullName = 'Tên phải có ít nhất 2 ký tự';
+        }
+
+        // Validate dob (must be in the past)
+        if (formData.dob) {
+            const dobDate = new Date(formData.dob);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (dobDate >= today) {
+                newErrors.dob = 'Ngày sinh phải là ngày trong quá khứ';
+            }
+
+            // Check if age is reasonable (at least 5 years old, max 150 years)
+            const age = today.getFullYear() - dobDate.getFullYear();
+            if (age < 5) {
+                newErrors.dob = 'Tuổi phải từ 5 tuổi trở lên';
+            } else if (age > 150) {
+                newErrors.dob = 'Ngày sinh không hợp lệ';
+            }
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSave = async () => {
         if (!user?.roles || user.roles.length === 0) return;
+
+        // Validate form before submitting
+        if (!validateForm()) {
+            toast.error('Vui lòng kiểm tra lại thông tin', {
+                position: 'top-right',
+                autoClose: 3000,
+            });
+            return;
+        }
 
         setIsSaving(true);
         const primaryRole = user.roles[0];
@@ -118,8 +170,33 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                 autoClose: 2500,
             });
             setIsEditing(false);
-        } catch (error) {
+            setErrors({});
+        } catch (error: any) {
             console.error('Failed to update profile:', error);
+
+            // Handle 400 errors from server
+            if (error?.response?.status === 400 || error?.status === 400) {
+                const errorMessage = error?.response?.data?.message || error?.message || 'Thông tin không hợp lệ';
+
+                // Try to parse specific field errors
+                if (errorMessage.includes('Ngày sinh')) {
+                    setErrors(prev => ({ ...prev, dob: errorMessage }));
+                } else if (errorMessage.includes('Tên') || errorMessage.includes('fullName')) {
+                    setErrors(prev => ({ ...prev, fullName: errorMessage }));
+                } else if (errorMessage.includes('gender') || errorMessage.includes('giới tính')) {
+                    setErrors(prev => ({ ...prev, gender: errorMessage }));
+                }
+
+                toast.error(errorMessage, {
+                    position: 'top-right',
+                    autoClose: 4000,
+                });
+            } else {
+                toast.error('Cập nhật thất bại. Vui lòng thử lại sau.', {
+                    position: 'top-right',
+                    autoClose: 3000,
+                });
+            }
         } finally {
             setIsSaving(false);
         }
@@ -133,6 +210,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
             gender: user?.gender || '',
             avatarUrl: user?.avatarUrl || '',
         });
+        setErrors({});
         setIsEditing(false);
     };
 
@@ -263,9 +341,12 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                         value={formData.fullName}
                         onChange={handleInputChange}
                         disabled={!isEditing}
-                        className={!isEditing ? 'bg-gray-100' : ''}
+                        className={!isEditing ? 'bg-gray-100' : errors.fullName ? 'border-red-500' : ''}
                         placeholder="Enter your full name"
                     />
+                    {errors.fullName && (
+                        <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>
+                    )}
                 </div>
 
                 <div>
@@ -279,8 +360,11 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                         value={formData.dob}
                         onChange={handleInputChange}
                         disabled={!isEditing}
-                        className={!isEditing ? 'bg-gray-100' : ''}
+                        className={!isEditing ? 'bg-gray-100' : errors.dob ? 'border-red-500' : ''}
                     />
+                    {errors.dob && (
+                        <p className="text-red-500 text-sm mt-1">{errors.dob}</p>
+                    )}
                 </div>
 
                 <div>
@@ -293,7 +377,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                         value={formData.gender}
                         onChange={handleInputChange}
                         disabled={!isEditing}
-                        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#69C3CF] ${!isEditing ? 'bg-gray-100' : ''
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#69C3CF] ${!isEditing ? 'bg-gray-100' : errors.gender ? 'border-red-500' : 'border-gray-300'
                             }`}
                     >
                         <option value="">Select gender</option>
@@ -301,6 +385,9 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                         <option value="FEMALE">Female</option>
                         <option value="OTHER">Other</option>
                     </select>
+                    {errors.gender && (
+                        <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
+                    )}
                 </div>
 
                 {user?.status && (

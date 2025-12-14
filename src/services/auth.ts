@@ -97,7 +97,7 @@ export const resetPasswordAuth = async (data: TResetPasswordAuth): Promise<ApiRe
 
 export const changePasswordAuth = async (data: TChangePassword): Promise<ApiResponse> => {
   try {
-    const response: AxiosResponse = await instanceAxios.put(
+    const response: AxiosResponse = await instanceAxios.patch(
       API_ENDPOINTS.AUTH.CHANGE_PASSWORD,
       data
     );
@@ -118,13 +118,10 @@ export const changePasswordAuth = async (data: TChangePassword): Promise<ApiResp
 
 export const refreshTokenAuth = async (refreshToken: string): Promise<ApiResponse> => {
   try {
-    console.log('🔄 [refreshTokenAuth] Attempting to refresh token...');
     const response: AxiosResponse = await instanceAxios.post(
       API_ENDPOINTS.AUTH.REFRESH_TOKEN,
       { refreshToken }
     );
-    console.log('✅ [refreshTokenAuth] Token refreshed successfully');
-    console.log('📝 [refreshTokenAuth] Response:', response.data);
 
     // Backend returns: { data: { accessToken, refreshToken } }
     const responseData = response.data.data || response.data;
@@ -139,7 +136,6 @@ export const refreshTokenAuth = async (refreshToken: string): Promise<ApiRespons
     };
   } catch (error) {
     const axiosError = error as AxiosError<ApiResponse>;
-    console.error('❌ [refreshTokenAuth] Failed to refresh token:', axiosError.message);
     return {
       success: false,
       message: axiosError.response?.data?.message || 'Failed to refresh token',
