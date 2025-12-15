@@ -1,19 +1,19 @@
 import { AxiosError, AxiosResponse } from 'axios';
 import instanceAxios from '@/helpers/axios';
 import { API_ENDPOINTS } from '@/configs/api';
-import { 
-  TLoginAuth, 
-  TSignUpAuth, 
-  TForgotPasswordAuth, 
-  TResetPasswordAuth, 
-  TChangePassword 
+import {
+  TLoginAuth,
+  TSignUpAuth,
+  TForgotPasswordAuth,
+  TResetPasswordAuth,
+  TChangePassword
 } from '@/types/auth';
 import { ApiResponse } from '@/types/response';
 
 export const loginAuth = async (data: TLoginAuth): Promise<ApiResponse> => {
   try {
     const response: AxiosResponse = await instanceAxios.post(
-      API_ENDPOINTS.AUTH.LOGIN, 
+      API_ENDPOINTS.AUTH.LOGIN,
       data
     );
 
@@ -97,7 +97,7 @@ export const resetPasswordAuth = async (data: TResetPasswordAuth): Promise<ApiRe
 
 export const changePasswordAuth = async (data: TChangePassword): Promise<ApiResponse> => {
   try {
-    const response: AxiosResponse = await instanceAxios.put(
+    const response: AxiosResponse = await instanceAxios.patch(
       API_ENDPOINTS.AUTH.CHANGE_PASSWORD,
       data
     );
@@ -111,6 +111,34 @@ export const changePasswordAuth = async (data: TChangePassword): Promise<ApiResp
     return {
       success: false,
       message: axiosError.response?.data?.message || 'Failed to change password',
+      error: axiosError.message
+    };
+  }
+};
+
+export const refreshTokenAuth = async (refreshToken: string): Promise<ApiResponse> => {
+  try {
+    const response: AxiosResponse = await instanceAxios.post(
+      API_ENDPOINTS.AUTH.REFRESH_TOKEN,
+      { refreshToken }
+    );
+
+    // Backend returns: { data: { accessToken, refreshToken } }
+    const responseData = response.data.data || response.data;
+    return {
+      success: true,
+      data: {
+        token: responseData.accessToken || responseData.token,
+        refreshToken: responseData.refreshToken,
+        ...responseData
+      },
+      message: 'Token refreshed successfully'
+    };
+  } catch (error) {
+    const axiosError = error as AxiosError<ApiResponse>;
+    return {
+      success: false,
+      message: axiosError.response?.data?.message || 'Failed to refresh token',
       error: axiosError.message
     };
   }

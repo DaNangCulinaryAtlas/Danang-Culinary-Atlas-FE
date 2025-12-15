@@ -1,11 +1,9 @@
-import { createAsyncThunk } from '@reduxjs/toolkit'
-import { AxiosResponse } from 'axios'
-
-import { loginAuth } from '@/services/auth'
-
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { loginUser, registerUser, fetchUserProfile, updateUserProfile, uploadAvatar } from './action';
-
+interface UIState {
+    sidebarOpen: boolean;
+    theme: 'light' | 'dark';
+    language: 'vi' | 'en';
+}
 interface UserDataType {
     accountId?: string;
     email: string;
@@ -20,36 +18,25 @@ interface UserDataType {
 interface AuthState {
     user: UserDataType | null;
     token: string | null;
-    loading: boolean;
-    error: string | null;
+    refreshToken: string | null;
+    isAuthenticated: boolean;
+    accountId: string | null;
+    ui: UIState;
 }
 
-// Initialize state from localStorage if available
+// Initialize with a consistent state for both server and client
 const getInitialState = (): AuthState => {
-    if (typeof window !== 'undefined') {
-        const token = window.localStorage.getItem('token');
-        const userData = window.localStorage.getItem('userData');
-
-        if (token && userData) {
-            try {
-                const parsedUser = JSON.parse(userData);
-                return {
-                    user: parsedUser,
-                    token: token,
-                    loading: false,
-                    error: null,
-                };
-            } catch (error) {
-                console.error('Failed to parse stored user data:', error);
-            }
-        }
-    }
-
     return {
         user: null,
         token: null,
-        loading: false,
-        error: null,
+        refreshToken: null,
+        isAuthenticated: false,
+        accountId: null,
+        ui: {
+            sidebarOpen: false,
+            theme: 'light',
+            language: 'vi',
+        },
     };
 };
 
@@ -59,34 +46,96 @@ const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-        setUser: (state, action: PayloadAction<UserDataType>) => {
-            state.user = action.payload;
+        // Set user data after successful login/register (called by React Query)
+        setAuthData: (state, action: PayloadAction<{ user: UserDataType; token: string; refreshToken?: string }>) => {
+            state.user = action.payload.user;
+            state.token = action.payload.token;
+            state.refreshToken = action.payload.refreshToken || null;
+            state.isAuthenticated = true;
+            state.accountId = action.payload.user.accountId || null;
+
+            // Persist to localStorage
+            if (typeof window !== 'undefined') {
+                window.localStorage.setItem('token', action.payload.token);
+                window.localStorage.setItem('userData', JSON.stringify(action.payload.user));
+                if (action.payload.refreshToken) {
+                    window.localStorage.setItem('refreshToken', action.payload.refreshToken);
+                }
+            }
         },
-        setToken: (state, action: PayloadAction<string>) => {
-            state.token = action.payload;
+
+        // Update user profile (called after profile mutations)
+        updateUser: (state, action: PayloadAction<Partial<UserDataType>>) => {
+            if (state.user) {
+                state.user = { ...state.user, ...action.payload };
+
+                // Update localStorage
+                if (typeof window !== 'undefined') {
+                    window.localStorage.setItem('userData', JSON.stringify(state.user));
+                }
+            }
         },
+
+        // Update tokens (used after refresh token)
+        updateTokens: (state, action: PayloadAction<{ token: string; refreshToken?: string }>) => {
+            state.token = action.payload.token;
+            if (action.payload.refreshToken) {
+                state.refreshToken = action.payload.refreshToken;
+            }
+
+            // Update localStorage
+            if (typeof window !== 'undefined') {
+                window.localStorage.setItem('token', action.payload.token);
+                if (action.payload.refreshToken) {
+                    window.localStorage.setItem('refreshToken', action.payload.refreshToken);
+                }
+            }
+        },
+
+        // Logout
         logout: (state) => {
             state.user = null;
             state.token = null;
-            state.error = null;
+            state.refreshToken = null;
+            state.isAuthenticated = false;
+            state.accountId = null;
+
             if (typeof window !== 'undefined') {
                 window.localStorage.removeItem('token');
+                window.localStorage.removeItem('refreshToken');
                 window.localStorage.removeItem('userData');
+                window.localStorage.removeItem('accountId');
             }
         },
-        clearError: (state) => {
-            state.error = null;
+
+        // UI State Management
+        toggleSidebar: (state) => {
+            state.ui.sidebarOpen = !state.ui.sidebarOpen;
         },
+
+        setTheme: (state, action: PayloadAction<'light' | 'dark'>) => {
+            state.ui.theme = action.payload;
+        },
+
+        setLanguage: (state, action: PayloadAction<'vi' | 'en'>) => {
+            state.ui.language = action.payload;
+        },
+
+        // Hydrate auth state (useful for SSR or page refresh)
         hydrateAuth: (state) => {
-            // Manual hydration action if needed
             if (typeof window !== 'undefined') {
                 const token = window.localStorage.getItem('token');
+                const refreshToken = window.localStorage.getItem('refreshToken');
                 const userData = window.localStorage.getItem('userData');
+                const accountId = window.localStorage.getItem('accountId');
 
                 if (token && userData) {
                     try {
                         state.user = JSON.parse(userData);
                         state.token = token;
+                        state.refreshToken = refreshToken;
+                        state.isAuthenticated = true;
+                        state.accountId = accountId;
                     } catch (error) {
                         console.error('Failed to hydrate auth state:', error);
                     }
@@ -94,134 +143,17 @@ const authSlice = createSlice({
             }
         },
     },
-    extraReducers: (builder) => {
-        // Login
-        builder.addCase(loginUser.pending, (state) => {
-            state.loading = true;
-            state.error = null;
-        });
-        builder.addCase(loginUser.fulfilled, (state, action) => {
-            state.loading = false;
-            const { token, email, fullName, avatarUrl, roles } = action.payload.data;
-            state.user = { email, fullName, avatarUrl, roles };
-            state.token = token;
-            state.error = null;
-
-            if (typeof window !== 'undefined') {
-                window.localStorage.setItem('token', token);
-                window.localStorage.setItem('userData', JSON.stringify({ email, fullName, avatarUrl, roles }));
-            }
-        });
-        builder.addCase(loginUser.rejected, (state, action) => {
-            state.loading = false;
-            state.error = action.payload as string;
-        });
-
-        // Register
-        builder.addCase(registerUser.pending, (state) => {
-            state.loading = true;
-            state.error = null;
-        });
-        builder.addCase(registerUser.fulfilled, (state, action) => {
-            state.loading = false;
-            state.error = null;
-            // Optionally auto-login after registration
-            if (action.payload.data?.token) {
-                const { token, email, fullName, avatarUrl, roles } = action.payload.data;
-                state.user = { email, fullName, avatarUrl, roles };
-                state.token = token;
-
-                if (typeof window !== 'undefined') {
-                    window.localStorage.setItem('token', token);
-                    window.localStorage.setItem('userData', JSON.stringify({ email, fullName, avatarUrl, roles }));
-                }
-            }
-        });
-        builder.addCase(registerUser.rejected, (state, action) => {
-            state.loading = false;
-            state.error = action.payload as string;
-        });
-
-        // Fetch Profile
-        builder.addCase(fetchUserProfile.pending, (state) => {
-            state.loading = true;
-            state.error = null;
-        });
-        builder.addCase(fetchUserProfile.fulfilled, (state, action) => {
-            state.loading = false;
-            const { accountId, email, fullName, avatarUrl, status, dob, gender } = action.payload;
-
-            // Merge the profile data with existing user data (keep roles from login)
-            state.user = {
-                ...state.user,
-                accountId,
-                email,
-                fullName,
-                avatarUrl: avatarUrl ?? undefined,
-                status,
-                dob,
-                gender,
-                roles: state.user?.roles || []
-            };
-
-            // Update localStorage
-            if (typeof window !== 'undefined') {
-                window.localStorage.setItem('userData', JSON.stringify(state.user));
-            }
-        });
-        builder.addCase(fetchUserProfile.rejected, (state, action) => {
-            state.loading = false;
-            state.error = action.payload as string;
-        });
-
-        // Update Profile
-        builder.addCase(updateUserProfile.pending, (state) => {
-            state.loading = true;
-            state.error = null;
-        });
-        builder.addCase(updateUserProfile.fulfilled, (state, action) => {
-            state.loading = false;
-            const { accountId, email, fullName, avatarUrl, status, dob, gender } = action.payload;
-
-            // Update user data with new profile information
-            state.user = {
-                ...state.user,
-                accountId,
-                email,
-                fullName,
-                avatarUrl: avatarUrl ?? undefined,
-                status,
-                dob,
-                gender,
-                roles: state.user?.roles || []
-            };
-
-            // Update localStorage
-            if (typeof window !== 'undefined') {
-                window.localStorage.setItem('userData', JSON.stringify(state.user));
-            }
-        });
-        builder.addCase(updateUserProfile.rejected, (state, action) => {
-            state.loading = false;
-            state.error = action.payload as string;
-        });
-
-        // Upload Avatar
-        builder.addCase(uploadAvatar.pending, (state) => {
-            state.loading = true;
-            state.error = null;
-        });
-        builder.addCase(uploadAvatar.fulfilled, (state, action) => {
-            state.loading = false;
-            // Don't update user state here, just return the URL
-            // The component will handle updating the form data
-        });
-        builder.addCase(uploadAvatar.rejected, (state, action) => {
-            state.loading = false;
-            state.error = action.payload as string;
-        });
-    },
 });
 
-export const { setUser, setToken, logout, clearError, hydrateAuth } = authSlice.actions;
+export const {
+    setAuthData,
+    updateUser,
+    updateTokens,
+    logout,
+    toggleSidebar,
+    setTheme,
+    setLanguage,
+    hydrateAuth,
+} = authSlice.actions;
+
 export default authSlice.reducer;

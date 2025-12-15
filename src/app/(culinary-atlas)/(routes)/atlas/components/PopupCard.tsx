@@ -1,14 +1,29 @@
 import StarRating from '@/components/restaurants/StarRating';
 import { Button } from '@/components/ui/button';
-import type { Restaurant } from '@/types/restaurant';
+import type { MapRestaurant } from '@/types/restaurant';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { Navigation } from 'lucide-react';
 
 interface PopupCardProps {
-  restaurant: Restaurant;
+  restaurant: MapRestaurant;
   onClose: () => void;
 }
 
 export default function PopupCard({ restaurant, onClose }: PopupCardProps) {
+  const router = useRouter();
+
+  const handleViewDetails = () => {
+    router.push(`/restaurants/${restaurant.restaurantId}`);
+    onClose();
+  };
+
+  const handleGetDirections = () => {
+    // Call the getDirections function from the map component
+    if ((window as any).getDirectionsToRestaurant) {
+      (window as any).getDirectionsToRestaurant(restaurant);
+    }
+  };
 
   return (
     <div>
@@ -17,7 +32,7 @@ export default function PopupCard({ restaurant, onClose }: PopupCardProps) {
         <Image
           width={320}
           height={160}
-          src={restaurant.images.photo || '/images/danang-find-restaurant.jpg'}
+          src={restaurant.photo || '/images/danang-find-restaurant.jpg'}
           alt={restaurant.name}
           className="w-full h-full object-cover"
         />
@@ -37,7 +52,7 @@ export default function PopupCard({ restaurant, onClose }: PopupCardProps) {
         <h3 className="font-bold text-lg mb-2 text-gray-900">
           {restaurant.name}
         </h3>
-        
+
         <p className="text-sm text-gray-600 mb-3 line-clamp-2">
           {restaurant.address}
         </p>
@@ -54,10 +69,22 @@ export default function PopupCard({ restaurant, onClose }: PopupCardProps) {
             </div>
           )}
         </div>
-        {/* View Details Button */}
-        <Button variant="ghost" className="w-full bg-[#44BACA] text-white font-medium py-2 rounded-lg">
-          Xem chi tiết
-        </Button>
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <Button
+            onClick={handleGetDirections}
+            className="flex-1 bg-blue-600 text-white font-medium py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2"
+          >
+            <Navigation className="w-4 h-4" />
+            Chỉ đường
+          </Button>
+          <Button
+            onClick={handleViewDetails}
+            className="flex-1 bg-[#44BACA] text-white font-medium py-2 rounded-lg hover:bg-[#3a9ba8]"
+          >
+            Chi tiết
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -1,82 +1,59 @@
-import { Restaurant } from '@/types/restaurant/index';
-import { getRestaurantsForMapAsync } from './action';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import type { MapRestaurant, Restaurant } from '@/types/restaurant';
 
-export interface MapBounds {
-    minLat: number;
-    maxLat: number;
-    minLng: number;
-    maxLng: number;
-}
-
-export interface ViewState {
-    longitude: number;
+interface ViewState {
     latitude: number;
+    longitude: number;
     zoom: number;
 }
 
 interface AtlasState {
-    restaurants: Restaurant[];
-    loading: boolean;
-    error: string | null;
-    mapBounds: MapBounds | null;
     viewState: ViewState;
-    lastFetchTime: number | null;
+    searchQuery: string;
+    searchResults: Restaurant[];
+    selectedRestaurant: MapRestaurant | null;
 }
 
-// Default view state centered on Hải Châu District, Đà Nẵng
 const initialState: AtlasState = {
-    restaurants: [],
-    loading: false,
-    error: null,
-    mapBounds: null,
     viewState: {
-        longitude: 108.2022, // Hải Châu, Đà Nẵng
         latitude: 16.0544,
-        zoom: 13
+        longitude: 108.2022,
+        zoom: 15,
     },
-    lastFetchTime: null,
+    searchQuery: '',
+    searchResults: [],
+    selectedRestaurant: null,
 };
 
 const atlasSlice = createSlice({
     name: 'atlas',
     initialState,
     reducers: {
-        setMapBounds: (state, action: PayloadAction<MapBounds>) => {
-            state.mapBounds = action.payload;
-        },
         setViewState: (state, action: PayloadAction<ViewState>) => {
             state.viewState = action.payload;
         },
-        clearError: (state) => {
-            state.error = null;
+        setSearchQuery: (state, action: PayloadAction<string>) => {
+            state.searchQuery = action.payload;
         },
-        resetAtlas: (state) => {
-            state.restaurants = [];
-            state.mapBounds = null;
-            state.error = null;
+        setSearchResults: (state, action: PayloadAction<Restaurant[]>) => {
+            state.searchResults = action.payload;
         },
-        syncSearchResultsToMap: (state, action: PayloadAction<Restaurant[]>) => {
-            state.restaurants = action.payload;
-        }
+        setSelectedRestaurant: (state, action: PayloadAction<MapRestaurant | null>) => {
+            state.selectedRestaurant = action.payload;
+        },
+        clearSearch: (state) => {
+            state.searchQuery = '';
+            state.searchResults = [];
+        },
     },
-    extraReducers: (builder) => {
-        builder
-            .addCase(getRestaurantsForMapAsync.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(getRestaurantsForMapAsync.fulfilled, (state, action) => {
-                state.loading = false;
-                state.restaurants = action.payload?.data || [];
-                state.lastFetchTime = Date.now();
-            })
-            .addCase(getRestaurantsForMapAsync.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.error.message || 'Failed to fetch restaurants for map';
-            });
-    }
 });
 
-export const { setMapBounds, setViewState, clearError, resetAtlas, syncSearchResultsToMap } = atlasSlice.actions;
+export const {
+    setViewState,
+    setSearchQuery,
+    setSearchResults,
+    setSelectedRestaurant,
+    clearSearch,
+} = atlasSlice.actions;
+
 export default atlasSlice.reducer;

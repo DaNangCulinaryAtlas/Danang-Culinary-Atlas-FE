@@ -34,7 +34,9 @@ export const getProfile = async (role: string): Promise<ApiResponse<TUserProfile
     try {
         const endpoint = getProfileEndpoint(role);
         const response: AxiosResponse = await instanceAxios.get(endpoint);
-
+        // const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+        // userData.accountId = response.data.data.accountId;
+        // localStorage.setItem('userData', JSON.stringify(userData));
         return {
             success: true,
             data: response.data.data,
@@ -56,7 +58,7 @@ export const updateProfile = async (
 ): Promise<ApiResponse<TUserProfile>> => {
     try {
         const endpoint = getUpdateProfileEndpoint(role);
-        const response: AxiosResponse = await instanceAxios.put(endpoint, data);
+        const response: AxiosResponse = await instanceAxios.patch(endpoint, data);
 
         return {
             success: true,

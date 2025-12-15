@@ -1,0 +1,178 @@
+{
+    "navbar": {
+        "atlas": "Bản đồ ẩm thực",
+        "aboutUs": "Về chúng tôi",
+        "dishes": "Món ăn",
+        "popularDishes": "Món ăn nổi tiếng",
+        "restaurants": "Nhà hàng",
+        "popularRestaurants": "Nhà hàng nổi tiếng",
+        "packages": "Gói dịch vụ",
+        "ourPackages": "Gói dịch vụ của chúng tôi",
+        "login": "Đăng nhập"
+    },
+    "profile": {
+        "title": "Hồ sơ cá nhân",
+        "fullName": "Họ và tên",
+        "email": "Email",
+        "dateOfBirth": "Ngày sinh",
+        "gender": "Giới tính",
+        "avatar": "Ảnh đại diện",
+        "edit": "Chỉnh sửa",
+        "save": "Lưu",
+        "cancel": "Hủy",
+        "settings": "Cài đặt",
+        "changePassword": "Đổi mật khẩu",
+        "logout": "Đăng xuất"
+    },
+    "language": {
+        "title": "Ngôn ngữ",
+        "vietnamese": "Tiếng Việt",
+        "english": "English"
+    },
+    "home": {
+        "heroTitle": "Khám phá ẩm thực tinh túy Đà Nẵng",
+        "heroDescription": "Ẩm thực Đà Nẵng - sự hòa quyện tinh tế của hương vị miền Trung. Từ tô mì Quảng đậm đà, bánh xèo giòn tan đến những món hải sản tươi ngon bậc nhất. Một hành trình vị giác đầy phóng khoáng và đáng nhớ.",
+        "watchVideo": "Xem Video",
+        "search": "Tìm kiếm",
+        "searchPlaceholder": "Tìm kiếm món ăn, quán ăn...",
+        "cuisineTitle": "Ẩm thực Đà Nẵng",
+        "cuisineDescription": "Khám phá ẩm thực Đà Nẵng với hương vị đặc trưng miền Trung, nơi hội tụ món ngon từ núi đến biển, mang đến trải nghiệm ẩm thực độc đáo và phong phú.",
+        "recommendedDishes": "Món Ăn Đề Xuất",
+        "recommendedRestaurants": "Nhà Hàng Đề Xuất",
+        "trendingNow": "Xu hướng hiện nay",
+        "bannerTitle": "Ẩm thực Đà Nẵng",
+        "bannerDescription": "Khám phá ẩm thực Đà Nẵng với hương vị đặc trưng miền Trung, nơi hội tụ món ngon từ núi đến biển, mang đến trải nghiệm ẩm thực độc đáo và phong phú.",
+        "exploreNow": "Khám phá ngay",
+        "vietnam": "Việt Nam",
+        "reviews": "đánh giá",
+        "noRestaurants": "Không có nhà hàng nào có sẵn tại thời điểm này.",
+        "tryAgain": "Thử lại",
+        "cuisineFeatures": {
+            "feature1Title": "Thiên Đường Ẩm Thực Đường Phố",
+            "feature1Description": "Một thành phố nơi mỗi góc phố đều tràn ngập những hương vị nức mũi—từ những món ăn chợ đêm đến những quán nướng bên biển.",
+            "feature2Title": "Di Sản Trong Mỗi Bát",
+            "feature2Description": "Những công thức nấu ăn truyền thống suốt nhiều thế hệ giữ gìn linh hồn của Miền Trung Việt Nam trong mỗi sợi mì và nước dùng.",
+            "feature3Title": "Hải Sản Tươi Từ Biển Đông",
+            "feature3Description": "Những con cá mới bắt hàng ngày từ Biển Đông mang lại sự tươi mới không thể sánh được cho những món hải sản biểu tượng.",
+            "feature4Title": "Hương Vị Đông-Tây",
+            "feature4Description": "Hương vị Việt Nam cổ điển gặp gỡ ảnh hưởng toàn cầu, tạo nên những trải nghiệm độc đáo và lạ mắt."
+        }
+    },
+    "ourStory": {
+        "title": "Câu chuyện về",
+        "subtitle": "Một hành trình bắt đầu từ niềm đam mê với ẩm thực địa phương và khát vọng thay đổi cách mọi người khám phá vị ngon của Đà Nẵng.",
+        "problemTitle": "Vấn đề bắt đầu",
+        "problemDescription1": "Đà Nẵng – thành phố du lịch sôi động với vô vàn quán ăn, cơm tấm, quán nướng, phở, bánh mì... Nhưng làm sao để tìm được những quán thực sự ngon? Thông tin lặt vặt trên mạng, review trái chiều, địa chỉ sai lệch, hay những khuyến nghị từ người quen không phải lúc nào cũng chính xác.",
+        "problemDescription2": "Du khách lạc lối tìm kiếm. Người dân muốn khám phá những quán quanh mình. Chủ quán giỏi lại bị lãng quên. Thông tin ẩm thực phân tán, khó tìm, và thiếu sự tập trung đáng tin cậy.",
+        "missionTitle": "Sứ mệnh của chúng tôi",
+        "missionDescription1": "Chúng tôi – một nhóm sinh viên từ Đại học Bách Khoa Đà Nẵng – quyết định xây dựng một nền tảng khác biệt.",
+        "missionDescription1Part2": "không chỉ là một ứng dụng, mà là một bản đồ ẩm thực thông minh – nơi tập trung hóa thông tin ẩm thực chính xác, đáng tin cậy, và luôn cập nhật.",
+        "missionDescription2": "Chúng tôi muốn hỗ trợ ba nhóm đối tượng: du khách tìm được những trải nghiệm ẩm thực thực sự, người dân địa phương khám phá những viên ngọc quanh mình, và các chủ quán được nhìn thấy và được yêu quý xứng đáng.",
+        "valuesTitle": "Những giá trị cốt lõi",
+        "values": {
+            "value1": {
+                "title": "Bản đồ tương tác",
+                "description": "Khám phá nhà hàng trên bản đồ thực tế, biết chính xác vị trí và khoảng cách từ bạn."
+            },
+            "value2": {
+                "title": "Tìm kiếm thông minh",
+                "description": "Lọc theo loại hình, giá cả, đánh giá, hoặc những đặc biệt riêng của từng quán."
+            },
+            "value3": {
+                "title": "Đánh giá cộng đồng",
+                "description": "Bình luận, hình ảnh, và nhận xét từ cộng đồng người dùng thực sự."
+            },
+            "value4": {
+                "title": "Gợi ý cá nhân hóa",
+                "description": "Hệ thống học hỏi sở thích của bạn và gợi ý những quán phù hợp nhất."
+            }
+        },
+        "journeyTitle": "Hành trình xây dựng",
+        "journeyDescription1": "Từ những ý tưởng ban đầu, buổi brainstorm sôi nổi, đến những đêm thức khuya viết code – Danang Culinary Atlas được sinh ra từ tình yêu ẩm thực và công nghệ. Chúng tôi lấy dữ liệu từ các nguồn đáng tin cậy, kiểm chứng thông tin chi tiết, và xây dựng một nền tảng tuyệt vời.",
+        "journeyDescription2": "Ngày hôm nay, khi bạn sử dụng ứng dụng này, bạn không chỉ tìm được quán ngon – bạn đang tham gia vào một cộng đồng những người yêu thích và tôn trọng ẩm thực địa phương.",
+        "ctaTitle": "Bạn đã sẵn sàng?",
+        "ctaDescription": "Khám phá vị ngon của Đà Nẵng theo cách thông minh hơn. Mỗi quán ăn là một câu chuyện, mỗi món ăn là một trải nghiệm.",
+        "ctaButton": "Bắt đầu khám phá ngay",
+        "footerMessage": "Với Danang Culinary Atlas, ẩm thực không chỉ là thức ăn – đó là một hành trình khám phá."
+    },
+    "auth": {
+        "forgotPassword": {
+            "title": "Quên mật khẩu?",
+            "subtitle": "Nhập email để nhận link đặt lại mật khẩu",
+            "emailLabel": "Email",
+            "emailPlaceholder": "Nhập địa chỉ email của bạn",
+            "submitButton": "Gửi link đặt lại mật khẩu",
+            "submitting": "Đang gửi...",
+            "backToLogin": "Quay lại đăng nhập",
+            "successTitle": "Kiểm tra email!",
+            "successMessage": "Chúng tôi đã gửi link đặt lại mật khẩu đến",
+            "successNote": "Vui lòng kiểm tra email và làm theo hướng dẫn. Nếu không thấy email, hãy kiểm tra thư mục spam.",
+            "resendButton": "Gửi lại email",
+            "description": "Đừng lo lắng! Chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu đến email của bạn."
+        },
+        "resetPassword": {
+            "title": "Đặt lại mật khẩu",
+            "subtitle": "Nhập mật khẩu mới của bạn",
+            "newPasswordLabel": "Mật khẩu mới",
+            "newPasswordPlaceholder": "Nhập mật khẩu mới",
+            "confirmPasswordLabel": "Xác nhận mật khẩu",
+            "confirmPasswordPlaceholder": "Nhập lại mật khẩu mới",
+            "submitButton": "Đặt lại mật khẩu",
+            "submitting": "Đang xử lý...",
+            "rememberPassword": "Nhớ mật khẩu?",
+            "loginNow": "Đăng nhập ngay",
+            "successMessage": "Đặt lại mật khẩu thành công! Đang chuyển đến trang đăng nhập...",
+            "description": "Tạo mật khẩu mới để bảo vệ tài khoản của bạn.",
+            "requirements": {
+                "title": "Mật khẩu phải có:",
+                "minLength": "Ít nhất 6 ký tự",
+                "uppercase": "Ít nhất 1 chữ hoa (A-Z)",
+                "lowercase": "Ít nhất 1 chữ thường (a-z)",
+                "number": "Ít nhất 1 chữ số (0-9)"
+            }
+        },
+        "validation": {
+            "emailRequired": "Email là bắt buộc",
+            "emailInvalid": "Email không hợp lệ",
+            "passwordRequired": "Mật khẩu là bắt buộc",
+            "passwordMinLength": "Mật khẩu phải có ít nhất 6 ký tự",
+            "passwordUppercase": "Mật khẩu phải có ít nhất 1 chữ hoa",
+            "passwordLowercase": "Mật khẩu phải có ít nhất 1 chữ thường",
+            "passwordNumber": "Mật khẩu phải có ít nhất 1 chữ số",
+            "confirmPasswordRequired": "Xác nhận mật khẩu là bắt buộc",
+            "passwordMismatch": "Mật khẩu xác nhận không khớp",
+            "tokenRequired": "Token là bắt buộc"
+        }
+    },
+    "accessDenied": {
+        "title": "Truy cập bị từ chối",
+        "message": "Bạn không có quyền truy cập vào trang này.",
+        "messageWithRole": "Trang này chỉ dành cho người dùng có vai trò {{role}}.",
+        "backButton": "Quay lại",
+        "homeLink": "Về trang chủ"
+    },
+    "admin": {
+        "dashboard": {
+            "title": "Tổng quan",
+            "subtitle": "Cái nhìn toàn cảnh về tình hình hoạt động của hệ thống",
+            "errorLoading": "Không thể tải dữ liệu tổng quan",
+            "metrics": {
+                "totalAccounts": "Tổng tài khoản",
+                "approvedRestaurants": "Quán ăn đã duyệt",
+                "pendingRestaurants": "Quán chờ duyệt",
+                "reports": "Báo cáo vi phạm",
+                "userAndVendor": "User & Vendor",
+                "active": "Đang hoạt động",
+                "needsReview": "Cần xét duyệt",
+                "pending": "Chưa xử lý",
+                "users": "Users",
+                "vendors": "Vendors"
+            },
+            "charts": {
+                "restaurantDistribution": "Phân bố loại hình quán ăn",
+                "restaurantDistributionDesc": "Biểu đồ tròn dựa trên RestaurantTag",
+                "chartPlaceholder": "Biểu đồ tròn - Cần tích hợp thư viện chart"
+            }
+        }
+    }
+}

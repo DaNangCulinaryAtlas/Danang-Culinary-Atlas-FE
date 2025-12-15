@@ -9,16 +9,37 @@ import { logout } from '@/stores/auth';
 import ProfileTab from './ProfileTab';
 import ChangePasswordTab from './ChangePasswordTab';
 import SettingsTab from './SettingsTab';
+import { useTranslation } from 'react-i18next';
 
 interface ProfileModalProps {
     isOpen: boolean;
     onClose: () => void;
+    colorScheme?: {
+        primary: string;
+        primaryBorder: string;
+        primaryBg: string;
+        footerBg: string;
+    };
+    title?: string;
+    redirectAfterLogout?: string;
 }
 
-export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
+export default function ProfileModal({
+    isOpen,
+    onClose,
+    colorScheme = {
+        primary: '#69C3CF',
+        primaryBorder: '#69C3CF',
+        primaryBg: '#e0f2f4',
+        footerBg: '#f9fafb'
+    },
+    title,
+    redirectAfterLogout = '/login'
+}: ProfileModalProps) {
     const dispatch = useAppDispatch();
     const router = useRouter();
     const { user } = useAppSelector((state) => state.auth);
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState<'profile' | 'password' | 'settings'>('profile');
 
     if (!isOpen) return null;
@@ -26,8 +47,10 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     const handleLogout = () => {
         dispatch(logout());
         onClose();
-        router.push('/login');
+        router.push(redirectAfterLogout);
     };
+
+    const displayTitle = title || t('profile.title');
 
     return (
         <div
@@ -39,8 +62,13 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b flex-shrink-0">
-                    <h2 className="text-2xl font-bold text-gray-800">Profile</h2>
+                <div
+                    className="flex items-center justify-between p-6 border-b flex-shrink-0"
+                    style={{ borderColor: colorScheme.primaryBg }}
+                >
+                    <h2 className="text-2xl font-bold" style={{ color: colorScheme.primary }}>
+                        {displayTitle}
+                    </h2>
                     <button
                         onClick={onClose}
                         className="text-gray-500 hover:text-gray-700 transition-colors"
@@ -50,36 +78,51 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b flex-shrink-0">
+                <div className="flex border-b flex-shrink-0" style={{ borderColor: colorScheme.primaryBg }}>
                     <button
                         onClick={() => setActiveTab('profile')}
                         className={`flex-1 py-3 px-4 text-sm font-semibold transition-colors ${activeTab === 'profile'
-                            ? 'text-[#69C3CF] border-b-2 border-[#69C3CF]'
-                            : 'text-gray-500 hover:text-gray-700'
+                                ? 'border-b-2'
+                                : 'text-gray-500 hover:text-gray-700'
                             }`}
+                        style={
+                            activeTab === 'profile'
+                                ? { color: colorScheme.primary, borderColor: colorScheme.primaryBorder }
+                                : {}
+                        }
                     >
                         <User className="inline-block mr-2" size={18} />
-                        Profile
+                        {t('profile.title')}
                     </button>
                     <button
                         onClick={() => setActiveTab('password')}
                         className={`flex-1 py-3 px-4 text-sm font-semibold transition-colors ${activeTab === 'password'
-                            ? 'text-[#69C3CF] border-b-2 border-[#69C3CF]'
-                            : 'text-gray-500 hover:text-gray-700'
+                                ? 'border-b-2'
+                                : 'text-gray-500 hover:text-gray-700'
                             }`}
+                        style={
+                            activeTab === 'password'
+                                ? { color: colorScheme.primary, borderColor: colorScheme.primaryBorder }
+                                : {}
+                        }
                     >
                         <Lock className="inline-block mr-2" size={18} />
-                        Password
+                        {t('profile.changePassword')}
                     </button>
                     <button
                         onClick={() => setActiveTab('settings')}
                         className={`flex-1 py-3 px-4 text-sm font-semibold transition-colors ${activeTab === 'settings'
-                            ? 'text-[#69C3CF] border-b-2 border-[#69C3CF]'
-                            : 'text-gray-500 hover:text-gray-700'
+                                ? 'border-b-2'
+                                : 'text-gray-500 hover:text-gray-700'
                             }`}
+                        style={
+                            activeTab === 'settings'
+                                ? { color: colorScheme.primary, borderColor: colorScheme.primaryBorder }
+                                : {}
+                        }
                     >
                         <Settings className="inline-block mr-2" size={18} />
-                        Settings
+                        {t('profile.settings')}
                     </button>
                 </div>
 
@@ -91,17 +134,23 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-between p-6 border-t bg-gray-50 flex-shrink-0">
+                <div
+                    className="flex items-center justify-between p-6 border-t flex-shrink-0"
+                    style={{
+                        borderColor: colorScheme.primaryBg,
+                        background: colorScheme.footerBg
+                    }}
+                >
                     <Button
                         onClick={handleLogout}
                         variant="destructive"
                         className="flex items-center gap-2"
                     >
                         <LogOut size={18} />
-                        Logout
+                        {t('profile.logout')}
                     </Button>
                     <Button onClick={onClose} variant="outline">
-                        Close
+                        {t('profile.cancel')}
                     </Button>
                 </div>
             </div>

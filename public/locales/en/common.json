@@ -1,0 +1,178 @@
+{
+    "navbar": {
+        "atlas": "Atlas",
+        "aboutUs": "About us",
+        "dishes": "Dishes",
+        "popularDishes": "Popular Dishes",
+        "restaurants": "Restaurants",
+        "popularRestaurants": "Popular Restaurants",
+        "packages": "Packages",
+        "ourPackages": "Our Packages",
+        "login": "Login"
+    },
+    "profile": {
+        "title": "Profile",
+        "fullName": "Full Name",
+        "email": "Email",
+        "dateOfBirth": "Date of Birth",
+        "gender": "Gender",
+        "avatar": "Avatar",
+        "edit": "Edit",
+        "save": "Save",
+        "cancel": "Cancel",
+        "settings": "Settings",
+        "changePassword": "Change Password",
+        "logout": "Logout"
+    },
+    "language": {
+        "title": "Language",
+        "vietnamese": "Tiếng Việt",
+        "english": "English"
+    },
+    "home": {
+        "heroTitle": "Discover the Essence of Da Nang Culinary",
+        "heroDescription": "Da Nang cuisine - a sophisticated blend of Central Vietnam's flavors. From hearty Mi Quang noodles and crispy Banh Xeo to the freshest seafood. A vibrant and unforgettable culinary journey.",
+        "watchVideo": "Watch Video",
+        "search": "Search",
+        "searchPlaceholder": "Search for dishes, restaurants...",
+        "cuisineTitle": "Da Nang Cuisine",
+        "cuisineDescription": "Explore Da Nang's cuisine with distinctive Central Vietnamese flavors, where delicious dishes from mountains to sea converge, offering a unique and diverse culinary experience.",
+        "recommendedDishes": "Recommended Dishes",
+        "recommendedRestaurants": "Recommended Restaurants",
+        "trendingNow": "Trending now",
+        "bannerTitle": "Da Nang Cuisine",
+        "bannerDescription": "Explore Da Nang's cuisine with distinctive Central Vietnamese flavors, where delicious dishes from mountains to sea converge, offering a unique and diverse culinary experience.",
+        "exploreNow": "Explore Now",
+        "vietnam": "Vietnam",
+        "reviews": "reviews",
+        "noRestaurants": "No restaurants available at the moment.",
+        "tryAgain": "Try Again",
+        "cuisineFeatures": {
+            "feature1Title": "Street-Food Paradise",
+            "feature1Description": "A city where every corner bursts with sizzling flavors—from night-market bites to seaside grills.",
+            "feature2Title": "Heritage in Every Bowl",
+            "feature2Description": "Generations-old recipes keep the soul of Central Vietnam alive in every noodle and broth.",
+            "feature3Title": "Sea-to-Table Freshness",
+            "feature3Description": "Daily catches from the East Sea bring unmatched freshness to iconic seafood dishes.",
+            "feature4Title": "Flavors of East-West",
+            "feature4Description": "Classic Vietnamese taste meets global influence, crafting bold and unique experiences."
+        }
+    },
+    "ourStory": {
+        "title": "The Story of",
+        "subtitle": "A journey born from passion for local cuisine and the desire to transform how people discover Da Nang's delicious flavors.",
+        "problemTitle": "The Challenge",
+        "problemDescription1": "Da Nang – a vibrant tourist city with countless restaurants, street food stalls, and local eateries. But how do you find the truly great ones? Information scattered across the internet, conflicting reviews, incorrect addresses, and recommendations from friends aren't always reliable.",
+        "problemDescription2": "Travelers get lost searching. Locals want to discover hidden gems nearby. Great restaurant owners go unnoticed. Culinary information is fragmented, hard to find, and lacks trustworthy centralization.",
+        "missionTitle": "Our Mission",
+        "missionDescription1": "We – a group of students from Da Nang University of Technology – decided to build something different.",
+        "missionDescription1Part2": "isn't just an app; it's an intelligent culinary map that centralizes accurate, trustworthy, and constantly updated food information.",
+        "missionDescription2": "We want to support three groups: travelers finding real culinary experiences, locals discovering hidden treasures in their own city, and restaurant owners being recognized and valued as they deserve.",
+        "valuesTitle": "Our Core Values",
+        "values": {
+            "value1": {
+                "title": "Interactive Map",
+                "description": "Discover restaurants on a real map, knowing exactly where they are and how far from you."
+            },
+            "value2": {
+                "title": "Smart Search",
+                "description": "Filter by cuisine type, price range, ratings, or unique specialties of each restaurant."
+            },
+            "value3": {
+                "title": "Community Reviews",
+                "description": "Comments, photos, and feedback from real users who've actually dined there."
+            },
+            "value4": {
+                "title": "Personalized Recommendations",
+                "description": "Our system learns your preferences and suggests restaurants perfectly suited to you."
+            }
+        },
+        "journeyTitle": "Our Building Journey",
+        "journeyDescription1": "From initial ideas, brainstorming sessions, to late-night coding sessions – Danang Culinary Atlas was born from a love of food and technology. We source data from trustworthy locations, verify details meticulously, and built an amazing platform.",
+        "journeyDescription2": "Today, when you use this app, you're not just finding a great restaurant – you're joining a community of people who love and respect local cuisine.",
+        "ctaTitle": "Ready to Explore?",
+        "ctaDescription": "Discover Da Nang's delicious flavors in a smarter way. Every restaurant tells a story, every dish is an experience.",
+        "ctaButton": "Start Exploring Now",
+        "footerMessage": "With Danang Culinary Atlas, food is more than just a meal – it's a journey of discovery."
+    },
+    "auth": {
+        "forgotPassword": {
+            "title": "Forgot Password?",
+            "subtitle": "Enter your email to receive password reset link",
+            "emailLabel": "Email",
+            "emailPlaceholder": "Enter your email address",
+            "submitButton": "Send Reset Link",
+            "submitting": "Sending...",
+            "backToLogin": "Back to Login",
+            "successTitle": "Check Your Email!",
+            "successMessage": "We've sent a password reset link to",
+            "successNote": "Please check your email and follow the instructions. If you don't see the email, check your spam folder.",
+            "resendButton": "Resend Email",
+            "description": "Don't worry! We'll send instructions to reset your password to your email."
+        },
+        "resetPassword": {
+            "title": "Reset Password",
+            "subtitle": "Enter your new password",
+            "newPasswordLabel": "New Password",
+            "newPasswordPlaceholder": "Enter new password",
+            "confirmPasswordLabel": "Confirm Password",
+            "confirmPasswordPlaceholder": "Re-enter new password",
+            "submitButton": "Reset Password",
+            "submitting": "Processing...",
+            "rememberPassword": "Remember your password?",
+            "loginNow": "Login now",
+            "successMessage": "Password reset successful! Redirecting to login page...",
+            "description": "Create a new password to protect your account.",
+            "requirements": {
+                "title": "Password must have:",
+                "minLength": "At least 6 characters",
+                "uppercase": "At least 1 uppercase letter (A-Z)",
+                "lowercase": "At least 1 lowercase letter (a-z)",
+                "number": "At least 1 number (0-9)"
+            }
+        },
+        "validation": {
+            "emailRequired": "Email is required",
+            "emailInvalid": "Invalid email address",
+            "passwordRequired": "Password is required",
+            "passwordMinLength": "Password must be at least 6 characters",
+            "passwordUppercase": "Password must have at least 1 uppercase letter",
+            "passwordLowercase": "Password must have at least 1 lowercase letter",
+            "passwordNumber": "Password must have at least 1 number",
+            "confirmPasswordRequired": "Confirm password is required",
+            "passwordMismatch": "Passwords do not match",
+            "tokenRequired": "Token is required"
+        }
+    },
+    "accessDenied": {
+        "title": "Access Denied",
+        "message": "You do not have permission to access this page.",
+        "messageWithRole": "This page is only available for users with {{role}} role.",
+        "backButton": "Go Back",
+        "homeLink": "Go to Homepage"
+    },
+    "admin": {
+        "dashboard": {
+            "title": "Overview",
+            "subtitle": "A comprehensive view of the system's operational status",
+            "errorLoading": "Unable to load overview data",
+            "metrics": {
+                "totalAccounts": "Total Accounts",
+                "approvedRestaurants": "Approved Restaurants",
+                "pendingRestaurants": "Pending Restaurants",
+                "reports": "Violation Reports",
+                "userAndVendor": "User & Vendor",
+                "active": "Active",
+                "needsReview": "Needs Review",
+                "pending": "Pending",
+                "users": "Users",
+                "vendors": "Vendors"
+            },
+            "charts": {
+                "restaurantDistribution": "Restaurant Type Distribution",
+                "restaurantDistributionDesc": "Pie chart based on RestaurantTag",
+                "chartPlaceholder": "Pie chart - Chart library integration needed"
+            }
+        }
+    }
+}

@@ -32,7 +32,7 @@ export const searchRestaurants = async (
   params: GetRestaurantsParams
 ): Promise<ApiResponse> => {
   try {
-    // Build query string manually to handle cuisineTypes array properly
+    // Build query string manually
     const queryParams = new URLSearchParams();
 
     if (params.page !== undefined) queryParams.append('page', params.page.toString());
@@ -43,10 +43,10 @@ export const searchRestaurants = async (
     if (params.maxRating !== undefined) queryParams.append('maxRating', params.maxRating.toString());
     if (params.search) queryParams.append('search', params.search);
 
-    // Add each cuisine type as a separate parameter
-    if (params.cuisineTypes && params.cuisineTypes.length > 0) {
-      params.cuisineTypes.forEach(cuisineType => {
-        queryParams.append('cuisineTypes', cuisineType);
+    // Add cuisineIDs parameters (multiple values)
+    if (params.cuisineIDs && params.cuisineIDs.length > 0) {
+      params.cuisineIDs.forEach(id => {
+        queryParams.append('cuisineID', id.toString());
       });
     }
 
@@ -69,20 +69,67 @@ export const searchRestaurants = async (
   }
 }
 
-export const searchRestaurantsByName = async (
-  params: GetRestaurantsParams & { name: string }
+export const getRestaurantsForMap = async (
+  params: getRestaurantsForMapParams
 ): Promise<ApiResponse> => {
   try {
-    const queryParams = new URLSearchParams();
+    const { zoomLevel, minLat, maxLat, minLng, maxLng } = params;
 
-    if (params.page !== undefined) queryParams.append('page', params.page.toString());
-    if (params.size !== undefined) queryParams.append('size', params.size.toString());
-    if (params.sortBy) queryParams.append('sortBy', params.sortBy);
-    if (params.sortDirection) queryParams.append('sortDirection', params.sortDirection);
-    if (params.name) queryParams.append('name', params.name);
+    const queryParams = new URLSearchParams({
+      zoomLevel: zoomLevel.toString(),
+      minLat: minLat.toString(),
+      maxLat: maxLat.toString(),
+      minLng: minLng.toString(),
+      maxLng: maxLng.toString(),
+    });
 
     const response: AxiosResponse = await instanceAxios.get(
-      `${API_ENDPOINTS.RESTAURANT.SEARCH_BY_NAME}?${queryParams.toString()}`
+      `${API_ENDPOINTS.RESTAURANT.MAP_VIEW}?${queryParams.toString()}`
+    );
+
+    return {
+      success: true,
+      data: response.data,
+      message: 'Fetched restaurants for map successfully'
+    };
+  } catch (error) {
+    const axiosError = error as AxiosError<ApiResponse>;
+    return {
+      success: false,
+      message: axiosError.response?.data?.message || 'Failed to fetch restaurants for map',
+      error: axiosError.message
+    };
+  }
+}
+
+export const getRestaurantDetail = async (restaurantId: string): Promise<ApiResponse> => {
+  try {
+    const response: AxiosResponse = await instanceAxios.get(
+      API_ENDPOINTS.RESTAURANT.DETAIL(restaurantId)
+    );
+
+    return {
+      success: true,
+      data: response.data,
+      message: 'Fetched restaurant detail successfully'
+    };
+  } catch (error) {
+    const axiosError = error as AxiosError<ApiResponse>;
+    return {
+      success: false,
+      message: axiosError.response?.data?.message || 'Failed to fetch restaurant detail',
+      error: axiosError.message
+    };
+  }
+}
+
+export const searchRestaurantsByName = async (params: GetRestaurantsParams): Promise<ApiResponse> => {
+  try {
+    const response: AxiosResponse = await instanceAxios.get(
+      API_ENDPOINTS.RESTAURANT.SEARCH_BY_NAME,
+      {
+        params
+      }
     );
 
     return {
@@ -100,25 +147,76 @@ export const searchRestaurantsByName = async (
   }
 }
 
-export const getRestaurantsForMap = async (
-  params: getRestaurantsForMapParams
-): Promise<ApiResponse> => {
+export const searchRestaurantsByDish = async (params: {
+  dishName: string;
+  page?: number;
+  size?: number;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
+}): Promise<ApiResponse> => {
   try {
+    const { dishName, page = 0, size = 20, sortBy = 'createdAt', sortDirection = 'desc' } = params;
+
     const response: AxiosResponse = await instanceAxios.get(
-      API_ENDPOINTS.RESTAURANT.MAP_VIEW,
-      { params }
+      API_ENDPOINTS.RESTAURANT.SEARCH_BY_DISH,
+      {
+        params: {
+          dishName,
+          page,
+          size,
+          sortBy,
+          sortDirection,
+        }
+      }
     );
 
     return {
       success: true,
       data: response.data,
-      message: 'Fetched restaurants for map successfully'
+      message: 'Searched restaurants by dish successfully'
     };
   } catch (error) {
     const axiosError = error as AxiosError<ApiResponse>;
     return {
       success: false,
-      message: axiosError.response?.data?.message || 'Failed to fetch restaurants for map',
+      message: axiosError.response?.data?.message || 'Failed to search restaurants by dish',
+      error: axiosError.message
+    };
+  }
+}
+
+export const getRestaurantDishes = async (params: {
+  restaurantId: string;
+  page?: number;
+  size?: number;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
+}): Promise<ApiResponse> => {
+  try {
+    const { restaurantId, page = 0, size = 10, sortBy = 'name', sortDirection = 'asc' } = params;
+
+    const response: AxiosResponse = await instanceAxios.get(
+      `/restaurants/${restaurantId}/dishes`,
+      {
+        params: {
+          page,
+          size,
+          sortBy,
+          sortDirection,
+        }
+      }
+    );
+
+    return {
+      success: true,
+      data: response.data,
+      message: 'Fetched restaurant dishes successfully'
+    };
+  } catch (error) {
+    const axiosError = error as AxiosError<ApiResponse>;
+    return {
+      success: false,
+      message: axiosError.response?.data?.message || 'Failed to fetch restaurant dishes',
       error: axiosError.message
     };
   }

@@ -13,7 +13,7 @@ const FilterSideBar = memo(function FilterSideBar({
   // Check if any filters are active
   const hasActiveFilters = useMemo(() => {
     return (
-      filters.cuisineTypes.length > 0 ||
+      filters.cuisineIds.length > 0 ||
       filters.minRating !== null ||
       filters.maxRating !== null
     );
@@ -22,7 +22,7 @@ const FilterSideBar = memo(function FilterSideBar({
   // Count active filters
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    if (filters.cuisineTypes.length > 0) count += filters.cuisineTypes.length;
+    if (filters.cuisineIds.length > 0) count += filters.cuisineIds.length;
     if (filters.minRating !== null) count += 1;
     if (filters.maxRating !== null) count += 1;
     return count;
@@ -30,25 +30,23 @@ const FilterSideBar = memo(function FilterSideBar({
 
   const handleClearAll = useCallback(() => {
     onFilterChange({
-      cuisineTypes: [],
+      cuisineIds: [],
       minRating: null,
       maxRating: null,
     });
   }, [onFilterChange]);
 
-  const handleCuisineChange = useCallback((cuisines: string[]) => {
-    onFilterChange({ cuisineTypes: cuisines });
+  const handleCuisineChange = useCallback((cuisineIds: number[]) => {
+    onFilterChange({ cuisineIds });
   }, [onFilterChange]);
 
   const handleRatingChange = useCallback((minRating: number | null, maxRating: number | null) => {
     onFilterChange({ minRating, maxRating });
   }, [onFilterChange]);
 
-  const handleRemoveCuisine = useCallback((cuisine: string) => {
-    onFilterChange({
-      cuisineTypes: filters.cuisineTypes.filter(c => c !== cuisine)
-    });
-  }, [filters.cuisineTypes, onFilterChange]);
+  const handleRemoveCuisine = useCallback((cuisineId: number) => {
+    onFilterChange({ cuisineIds: filters.cuisineIds.filter(id => id !== cuisineId) });
+  }, [onFilterChange, filters.cuisineIds]);
 
   const handleRemoveMinRating = useCallback(() => {
     onFilterChange({ minRating: null });
@@ -90,7 +88,7 @@ const FilterSideBar = memo(function FilterSideBar({
 
         {/* Cuisine Filter */}
         <CuisineFilter
-          selectedCuisines={filters.cuisineTypes}
+          selectedCuisineIds={filters.cuisineIds}
           onChange={handleCuisineChange}
         />
 

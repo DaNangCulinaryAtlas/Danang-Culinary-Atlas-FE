@@ -57,16 +57,18 @@ export interface GetRestaurantsParams {
   size?: number;
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
+  name?: string;
   search?: string;
   minRating?: number;
   maxRating?: number;
-  cuisineTypes?: string[];
+  cuisineID?: number; // Changed from cuisineTypes to cuisineID
   priceRange?: [number, number];
   cuisine?: string[];
   location?: string;
   status?: string;
   wardId?: number;
   approvalStatus?: string;
+  cuisineIDs?: number[]; // Changed to array to support multiple cuisines
 }
 
 export interface getRestaurantsForMapParams {
@@ -75,4 +77,16 @@ export interface getRestaurantsForMapParams {
   maxLat: number;
   minLng: number;
   maxLng: number;
+}
+
+export interface MapRestaurant {
+  restaurantId: string;
+  name: string;
+  address: string;
+  photo: string;
+  wardId: number;
+  latitude: number;
+  longitude: number;
+  averageRating: number;
+  totalReviews: number;
 }

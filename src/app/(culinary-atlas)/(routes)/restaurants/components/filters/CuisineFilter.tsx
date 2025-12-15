@@ -1,27 +1,21 @@
 import { memo, useCallback } from "react";
-import { FilterOption } from "@/types/filter";
-import { cuisineTypes } from "@/lib/mock/cuisineTypes";
-
-// Convert cuisine types to FilterOption format
-const CUISINE_OPTIONS: FilterOption[] = cuisineTypes.map((type) => ({
-    label: type,
-    value: type,
-    count: 0 // Count will be updated dynamically from API if needed
-}));
+import { CUISINE_TAGS } from "@/constants/cuisineTags";
 
 interface CuisineFilterProps {
-    selectedCuisines: string[];
-    onChange: (cuisines: string[]) => void;
+    selectedCuisineIds: number[];
+    onChange: (cuisineIds: number[]) => void;
 }
 
 interface FilterCheckboxProps {
-    option: FilterOption;
+    tagId: number;
+    name: string;
     checked: boolean;
     onToggle: () => void;
 }
 
 const FilterCheckbox = memo(function FilterCheckbox({
-    option,
+    tagId,
+    name,
     checked,
     onToggle,
 }: FilterCheckboxProps) {
@@ -31,36 +25,50 @@ const FilterCheckbox = memo(function FilterCheckbox({
                 type="checkbox"
                 checked={checked}
                 onChange={onToggle}
-                className="w-4 h-4 rounded border-gray-300 text-[#44BACA] focus:ring-[#44BACA] focus:ring-offset-0 cursor-pointer transition"
+                className="w-4 h-4 border-gray-300 text-[#44BACA] focus:ring-[#44BACA] focus:ring-offset-0 cursor-pointer transition rounded"
             />
             <span className="text-sm text-gray-700 group-hover:text-gray-900 transition select-none">
-                {option.label} 
+                {name}
             </span>
         </label>
     );
 });
 
 const CuisineFilter = memo(function CuisineFilter({
-    selectedCuisines,
+    selectedCuisineIds,
     onChange,
 }: CuisineFilterProps) {
-    const handleToggle = useCallback((value: string) => {
-        const newValues = selectedCuisines.includes(value)
-            ? selectedCuisines.filter(v => v !== value)
-            : [...selectedCuisines, value];
-        onChange(newValues);
-    }, [selectedCuisines, onChange]);
+    const handleToggle = useCallback((tagId: number) => {
+        if (selectedCuisineIds.includes(tagId)) {
+            // Remove tagId from array
+            onChange(selectedCuisineIds.filter(id => id !== tagId));
+        } else {
+            // Add tagId to array
+            onChange([...selectedCuisineIds, tagId]);
+        }
+    }, [selectedCuisineIds, onChange]);
 
     return (
         <div className="space-y-3">
-            <h3 className="font-semibold text-gray-800 text-base">Cuisine/Food Type</h3>
+            <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-gray-800 text-base">Loại Ẩm Thực</h3>
+                {selectedCuisineIds.length > 0 && (
+                    <button
+                        onClick={() => onChange([])}
+                        className="text-xs text-[#44BACA] hover:text-[#3aa3b3] font-medium"
+                    >
+                        Xóa bộ lọc
+                    </button>
+                )}
+            </div>
             <div className="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-                {CUISINE_OPTIONS.map((option) => (
+                {CUISINE_TAGS.map((tag) => (
                     <FilterCheckbox
-                        key={option.value}
-                        option={option}
-                        checked={selectedCuisines.includes(option.value)}
-                        onToggle={() => handleToggle(option.value)}
+                        key={tag.tagId}
+                        tagId={tag.tagId}
+                        name={tag.name}
+                        checked={selectedCuisineIds.includes(tag.tagId)}
+                        onToggle={() => handleToggle(tag.tagId)}
                     />
                 ))}
             </div>

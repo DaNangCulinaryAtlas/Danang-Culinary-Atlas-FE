@@ -1,14 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
 
-import restaurantReducer from './restaurant'
-import atlasReducer from './atlas'
 import authReducer from './auth'
+import atlasReducer from './atlas'
 
 export const store = configureStore({
     reducer: {
-        restaurant: restaurantReducer,
+        auth: authReducer,
         atlas: atlasReducer,
-        auth: authReducer
     },
 })
 
