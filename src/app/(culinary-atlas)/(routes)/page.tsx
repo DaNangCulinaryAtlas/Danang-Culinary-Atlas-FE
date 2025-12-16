@@ -3,38 +3,50 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import CuisineFeatures from "@/components/cuisinefeatures";
 import DishCard from "@/components/dish";
+import RestaurantCard from "@/components/restaurants/RestaurantCard";
 import { Button } from "@/components/ui/button";
 import { Heart, Share2, MapPin, Star } from 'lucide-react';
 import DishCarousel from "@/components/restaurants/DishCarousel";
 import { useRouter } from "next/navigation";
-import { useRestaurants } from "@/hooks/queries/useRestaurants";
-import { useRestaurantDishes } from "@/hooks/queries/useRestaurantDishes";
 import { useTranslation } from 'react-i18next';
+import { useAppSelector } from "@/hooks/useRedux";
+import { useRecommendedDishesWithDetails, useRecommendedRestaurantsWithDetails } from "@/hooks/queries/useRecommendationsWithDetails";
 
 export default function HomePage() {
   const { t } = useTranslation();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentHour, setCurrentHour] = useState(new Date().getHours());
 
-  // Fetch restaurants using React Query
-  const { data: restaurantsData, isLoading, error } = useRestaurants({
-    page: 0,
-    size: 10
-  });
+  // Get user ID from Redux state (empty string if not logged in)
+  const accountId = useAppSelector((state) => state.auth.accountId);
+  const userId = accountId || "";
 
-  // Fetch dishes from specific restaurant
-  const { data: dishesData, isLoading: isDishesLoading } = useRestaurantDishes({
-    restaurantId: "d7e0fe63-d268-4ad9-bc8c-90dffe7004b4",
-    page: 0,
-    size: 4,
-    sortBy: 'name',
-    sortDirection: 'asc'
-  });
+  // Update current hour every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentHour(new Date().getHours());
+    }, 60000); // Update every minute
 
-  const restaurants = restaurantsData?.content || [];
+    return () => clearInterval(interval);
+  }, []);
 
-  // Map restaurant dishes to the Dish type expected by DishCard
-  const dishes = (dishesData?.content || []).map((dish) => ({
+  // Fetch recommended dishes with details
+  const {
+    data: recommendedDishes,
+    isLoading: isDishesLoading,
+    isError: isDishesError
+  } = useRecommendedDishesWithDetails(userId, currentHour, 4);
+
+  // Fetch recommended restaurants with details
+  const {
+    data: recommendedRestaurants,
+    isLoading: isRestaurantsLoading,
+    isError: isRestaurantsError
+  } = useRecommendedRestaurantsWithDetails(userId, currentHour, 4);
+
+  // Map recommended dishes to the Dish type expected by DishCard
+  const dishes = (recommendedDishes || []).map((dish: any) => ({
     id: dish.dishId,
     image: dish.images && dish.images.length > 0 ? dish.images[0] : "/images/default-dish.png",
     title: dish.name,
@@ -118,18 +130,6 @@ export default function HomePage() {
       </div>
 
       {/* Dishes Carousel Section */}
-      <div className="max-w-7xl mx-auto px-4 mt-16 mb-16">
-        <div className="flex flex-col justify-center items-center mb-8 text-center">
-          <h2 className="font-volkhov font-bold sm:text-2xl md:text-3xl lg:text-[36px] text-[#44BACA]">
-            Món Ăn Đặc Sắc
-          </h2>
-          <p className="w-[60%] mt-2 font-mulish font-semibold sm:text-sm md:text-[15px] text-[#778088] whitespace-wrap">
-            Khám phá những món ăn đặc trưng và hấp dẫn nhất tại Đà Nẵng
-          </p>
-        </div>
-        <DishCarousel restaurantId="7219c3da-579b-41ea-8a5a-96137e1676ec" />
-      </div>
-
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold text-[#44BACA] text-center mb-12">
           {t('home.recommendedDishes')}
@@ -234,42 +234,29 @@ export default function HomePage() {
       </h1>
       <div className="px-4">
         <div className="max-w-7xl mx-auto">
-          {/* {isLoading ? (
+          {isRestaurantsLoading ? (
             <div className="flex justify-center items-center py-20">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#44BACA]"></div>
             </div>
-          ) : error ? (
-            // <div className="text-center py-20">
-            //   <p className="text-red-600 text-lg">{error}</p>
-            //   <button
-            //     onClick={() => dispatch(getRestaurantsAsync({
-            //       page: 0,
-            //       size: 10,
-            //       sortBy: 'createdAt',
-            //       sortDirection: 'desc'
-            //     }))}
-            //     className="mt-4 px-4 py-2 bg-[#44BACA] text-white rounded hover:bg-[#3aa3b3]"
-            //   >
-            //     {t('home.tryAgain')}
-            //   </button>
-            // </div>
-          // ) : restaurants.length === 0 ? (
-          //   <div className="text-center py-20">
-          //     <p className="text-gray-500 text-lg">{t('home.noRestaurants')}</p>
-          //   </div>
-          // ) : (
-          //   <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          //     {restaurants.slice(0, 8).map((restaurant) => (
-          //       <RestaurantCard
-          //         key={restaurant.restaurantId}
-          //         restaurant={restaurant}
-          //         onClick={() => router.push(`/restaurants/${restaurant.restaurantId}`)}
-          //       />
-          //     ))}
-          //   </div>
-          // )}
-            })
-                    </div> */}
+          ) : isRestaurantsError ? (
+            <div className="text-center py-20">
+              <p className="text-red-600 text-lg">{t('home.errorLoadingRestaurants')}</p>
+            </div>
+          ) : recommendedRestaurants.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-gray-500 text-lg">{t('home.noRestaurants')}</p>
+            </div>
+          ) : (
+            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {recommendedRestaurants.map((restaurant: any) => (
+                <RestaurantCard
+                  key={restaurant.restaurantId}
+                  restaurant={restaurant}
+                  onClick={() => router.push(`/restaurants/${restaurant.restaurantId}`)}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <div className="mt-12">

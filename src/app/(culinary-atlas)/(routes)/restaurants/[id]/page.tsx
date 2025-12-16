@@ -219,42 +219,53 @@ export default function RestaurantDetail() {
         {/* Photo Gallery */}
         <section className="mb-8">
           {(() => {
-            // Filter out images with errors
-            const validImages = restaurant.images?.sub_photo?.filter((_, index) => !imageError[`thumb-${index}`]) || [];
-            const hasValidImages = validImages.length > 0;
+            // Check if restaurant has any images
+            const hasSubPhotos = restaurant.images?.sub_photo && restaurant.images.sub_photo.length > 0;
+            const hasMainPhoto = restaurant.images?.photo;
 
-            return hasValidImages ? (
+            // Filter out images with errors for thumbnails
+            const validSubPhotos = hasSubPhotos
+              ? restaurant.images.sub_photo
+                .map((photo, index) => ({ photo, index }))
+                .filter(({ index }) => !imageError[`thumb-${index}`])
+              : [];
+
+            // Determine which image to show in main display
+            const selectedPhoto = hasSubPhotos && restaurant.images.sub_photo[selectedImageIndex]
+              ? restaurant.images.sub_photo[selectedImageIndex]
+              : null;
+            const showMainPhoto = !imageError[`main-${selectedImageIndex}`] && selectedPhoto;
+
+            return (hasSubPhotos || hasMainPhoto) ? (
               <>
-                <div className="relative w-full h-72 md:h-96 rounded-2xl overflow-hidden mb-4 shadow-lg bg-gray-200">
-                  {!imageError[`main-${selectedImageIndex}`] && restaurant.images.sub_photo[selectedImageIndex] ? (
-                    <Image
-                      src={restaurant.images.sub_photo[selectedImageIndex]}
-                      alt={`${restaurant.name} - ${selectedImageIndex}`}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 80vw"
-                      priority={selectedImageIndex === 0}
-                      unoptimized
-                      onError={() => {
-                        setImageError({ ...imageError, [`main-${selectedImageIndex}`]: true });
-                        // Auto-switch to next valid image
-                        const nextValidIndex = restaurant.images.sub_photo.findIndex((_, i) =>
-                          i > selectedImageIndex && !imageError[`thumb-${i}`]
-                        );
-                        if (nextValidIndex !== -1) {
-                          setSelectedImageIndex(nextValidIndex);
-                        }
-                      }}
-                    />
-                  ) : restaurant.images?.photo ? (
-                    <Image
+                <div className="relative w-full h-80 md:h-130  mb-4  flex justify-start items-start">
+                  {showMainPhoto ? (
+                    !imageError[`main-${selectedImageIndex}`] ? (
+                      <img
+                        src={selectedPhoto}
+                        alt={`${restaurant.name} - ${selectedImageIndex}`}
+                        className="h-full object-contain"
+                        onError={() => {
+                          setImageError(prev => ({ ...prev, [`main-${selectedImageIndex}`]: true }));
+                          // Auto-switch to next valid image
+                          const nextValidIndex = restaurant.images.sub_photo.findIndex((_, i) =>
+                            i > selectedImageIndex && !imageError[`thumb-${i}`]
+                          );
+                          if (nextValidIndex !== -1) {
+                            setSelectedImageIndex(nextValidIndex);
+                          }
+                        }}
+                      />
+                    ) : null
+                  ) : hasMainPhoto && !imageError['main-photo'] ? (
+                    <img
                       src={restaurant.images.photo}
                       alt={restaurant.name}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 80vw"
-                      priority
-                      unoptimized
+                      className="h-full object-contain"
+                      onError={() => {
+                        console.error('Main photo failed to load:', restaurant.images.photo);
+                        setImageError(prev => ({ ...prev, 'main-photo': true }));
+                      }}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gray-300">
@@ -262,31 +273,27 @@ export default function RestaurantDetail() {
                     </div>
                   )}
                 </div>
-                <div className="grid grid-cols-6 gap-2">
-                  {restaurant.images.sub_photo.map((photo, index) => (
-                    // Only render if not in error state
-                    !imageError[`thumb-${index}`] && (
+                {hasSubPhotos && (
+                  <div className="grid grid-cols-6 gap-2">
+                    {validSubPhotos.map(({ photo, index }) => (
                       <button
                         key={index}
                         onClick={() => setSelectedImageIndex(index)}
-                        className={`relative w-full aspect-square rounded-lg overflow-hidden transition-all duration-300 bg-gray-200 ${selectedImageIndex === index
+                        className={`relative w-full aspect-square rounded-lg overflow-hidden transition-all duration-300 ${selectedImageIndex === index
                           ? 'ring-2 ring-[#44BACA]'
                           : 'opacity-70 hover:opacity-100'
                           }`}
                       >
-                        <Image
+                        <img
                           src={photo}
                           alt={`Thumbnail ${index}`}
-                          fill
-                          className="object-cover"
-                          sizes="100px"
-                          unoptimized
-                          onError={() => setImageError({ ...imageError, [`thumb-${index}`]: true })}
+                          className="w-full h-full object-cover"
+                          onError={() => setImageError(prev => ({ ...prev, [`thumb-${index}`]: true }))}
                         />
                       </button>
-                    )
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </>
             ) : (
               <div className="relative w-full h-72 md:h-96 rounded-2xl overflow-hidden mb-4 shadow-lg bg-gray-300 flex items-center justify-center">

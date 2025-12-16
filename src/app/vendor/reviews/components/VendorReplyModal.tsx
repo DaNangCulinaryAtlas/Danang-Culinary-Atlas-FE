@@ -37,7 +37,6 @@ export default function VendorReplyModal({ review, isOpen, onClose }: VendorRepl
             onClose();
         } catch (error) {
             toast.error('Failed to send reply');
-            console.error('Error replying to review:', error);
         }
     };
 

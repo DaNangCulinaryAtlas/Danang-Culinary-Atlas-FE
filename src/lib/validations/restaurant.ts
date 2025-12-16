@@ -20,9 +20,10 @@ export const restaurantFormSchema = z.object({
         .min(-180, 'Kinh độ không hợp lệ')
         .max(180, 'Kinh độ không hợp lệ'),
 
-    mainImage: z.instanceof(File, { message: 'Vui lòng chọn ảnh chính' })
+    mainImage: z.instanceof(File)
         .refine((file) => file.size <= 5 * 1024 * 1024, 'Ảnh phải nhỏ hơn 5MB')
-        .refine((file) => file.type.startsWith('image/'), 'Chỉ chấp nhận file ảnh'),
+        .refine((file) => file.type.startsWith('image/'), 'Chỉ chấp nhận file ảnh')
+        .optional(),
 
     subImages: z.array(z.instanceof(File))
         .max(5, 'Tối đa 5 ảnh phụ')

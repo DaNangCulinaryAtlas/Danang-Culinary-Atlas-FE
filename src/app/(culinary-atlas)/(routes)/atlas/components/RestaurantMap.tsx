@@ -12,7 +12,7 @@ import type { MapRestaurant, Restaurant } from '@/types/restaurant';
 import type { ViewStateChangeEvent } from 'react-map-gl/maplibre';
 import { getDirectionsOSRM, type RouteResponse } from '@/services/directions';
 import { MapPin } from 'lucide-react';
-
+import { toast } from 'react-hot-toast';
 // Validation helpers
 const isValidLatitude = (lat: any): boolean => {
   const num = parseFloat(lat);
@@ -214,12 +214,18 @@ const RestaurantMap: React.FC = () => {
           setUserLocation([longitude, latitude]);
         },
         (error) => {
-          console.error('Error getting location:', error);
-          alert('Không thể lấy vị trí của bạn. Vui lòng cho phép truy cập vị trí.');
+          console.log('Error getting user location:', error);
+          toast.error('Không thể lấy vị trí của bạn. Vui lòng cho phép truy cập vị trí.', {
+            position: 'top-right',
+            duration: 2500,
+          });
         }
       );
     } else {
-      alert('Trình duyệt của bạn không hỗ trợ định vị.');
+      toast.error('Trình duyệt của bạn không hỗ trợ định vị.', {
+        position: 'top-right',
+        duration: 2500,
+      });
     }
   }, []);
 

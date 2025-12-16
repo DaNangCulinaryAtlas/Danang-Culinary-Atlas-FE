@@ -5,9 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Mail, User, Shield, Calendar, Users, Save, Loader2, Upload, Camera } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState, useRef } from 'react';
-import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
-import { fetchUserProfile, updateUserProfile, uploadAvatar } from '@/stores/auth/action';
 import { toast } from 'react-toastify';
+import { useProfileQuery } from '@/hooks/queries/useProfileQuery';
+import { useUpdateProfileMutation, useUploadAvatarMutation } from '@/hooks/mutations/useProfileMutations';
 
 interface ProfileTabProps {
     user: {
@@ -23,10 +23,7 @@ interface ProfileTabProps {
 }
 
 export default function ProfileTab({ user }: ProfileTabProps) {
-    const dispatch = useAppDispatch();
     const [isEditing, setIsEditing] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
     const [errors, setErrors] = useState<{
         fullName?: string;
         dob?: string;
@@ -40,16 +37,34 @@ export default function ProfileTab({ user }: ProfileTabProps) {
         avatarUrl: user?.avatarUrl || '',
     });
 
+    // Get primary role
+    const primaryRole = user?.roles?.[0];
+
+    // React Query hooks
+    const { data: profileData, refetch } = useProfileQuery(primaryRole);
+    const updateProfileMutation = useUpdateProfileMutation();
+    const uploadAvatarMutation = useUploadAvatarMutation();
+
     // Fetch profile data when component mounts
     useEffect(() => {
-        if (user?.roles && user.roles.length > 0) {
-            // Use the first role to determine which endpoint to call
-            const primaryRole = user.roles[0];
-            dispatch(fetchUserProfile(primaryRole));
+        if (primaryRole) {
+            refetch();
         }
-    }, [dispatch, user?.roles]);
+    }, [primaryRole, refetch]);
 
-    // Update form data when user data changes
+    // Update form data when profile data changes
+    useEffect(() => {
+        if (profileData?.data) {
+            setFormData({
+                fullName: profileData.data.fullName || '',
+                dob: profileData.data.dob || '',
+                gender: profileData.data.gender || '',
+                avatarUrl: profileData.data.avatarUrl || '',
+            });
+        }
+    }, [profileData]);
+
+    // Update form data when user prop changes
     useEffect(() => {
         if (user) {
             setFormData({
@@ -86,26 +101,20 @@ export default function ProfileTab({ user }: ProfileTabProps) {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        setIsUploading(true);
-
         try {
-            const resultAction = await dispatch(uploadAvatar(file));
+            const result = await uploadAvatarMutation.mutateAsync(file);
 
-            if (uploadAvatar.fulfilled.match(resultAction)) {
+            if (result.data) {
                 // Update form data with the secure URL from Cloudinary
                 setFormData((prev) => ({
                     ...prev,
-                    avatarUrl: resultAction.payload,
+                    avatarUrl: result.data || '',
                 }));
                 toast.success('Avatar uploaded successfully!');
-            } else if (uploadAvatar.rejected.match(resultAction)) {
-                toast.error(resultAction.payload as string || 'Failed to upload avatar');
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error uploading image:', error);
-            toast.error('An error occurred while uploading avatar');
-        } finally {
-            setIsUploading(false);
+            toast.error(error.message || 'An error occurred while uploading avatar');
         }
     };
 
@@ -141,7 +150,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
     };
 
     const handleSave = async () => {
-        if (!user?.roles || user.roles.length === 0) return;
+        if (!primaryRole) return;
 
         // Validate form before submitting
         if (!validateForm()) {
@@ -152,11 +161,8 @@ export default function ProfileTab({ user }: ProfileTabProps) {
             return;
         }
 
-        setIsSaving(true);
-        const primaryRole = user.roles[0];
-
         try {
-            await dispatch(updateUserProfile({
+            await updateProfileMutation.mutateAsync({
                 role: primaryRole,
                 data: {
                     fullName: formData.fullName || undefined,
@@ -164,7 +170,8 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                     gender: formData.gender || undefined,
                     avatarUrl: formData.avatarUrl || undefined,
                 }
-            })).unwrap();
+            });
+
             toast.success('Cập nhật thông tin mới thành công', {
                 position: 'top-right',
                 autoClose: 2500,
@@ -174,31 +181,21 @@ export default function ProfileTab({ user }: ProfileTabProps) {
         } catch (error: any) {
             console.error('Failed to update profile:', error);
 
-            // Handle 400 errors from server
-            if (error?.response?.status === 400 || error?.status === 400) {
-                const errorMessage = error?.response?.data?.message || error?.message || 'Thông tin không hợp lệ';
+            const errorMessage = error?.message || 'Thông tin không hợp lệ';
 
-                // Try to parse specific field errors
-                if (errorMessage.includes('Ngày sinh')) {
-                    setErrors(prev => ({ ...prev, dob: errorMessage }));
-                } else if (errorMessage.includes('Tên') || errorMessage.includes('fullName')) {
-                    setErrors(prev => ({ ...prev, fullName: errorMessage }));
-                } else if (errorMessage.includes('gender') || errorMessage.includes('giới tính')) {
-                    setErrors(prev => ({ ...prev, gender: errorMessage }));
-                }
-
-                toast.error(errorMessage, {
-                    position: 'top-right',
-                    autoClose: 4000,
-                });
-            } else {
-                toast.error('Cập nhật thất bại. Vui lòng thử lại sau.', {
-                    position: 'top-right',
-                    autoClose: 3000,
-                });
+            // Try to parse specific field errors
+            if (errorMessage.includes('Ngày sinh')) {
+                setErrors(prev => ({ ...prev, dob: errorMessage }));
+            } else if (errorMessage.includes('Tên') || errorMessage.includes('fullName')) {
+                setErrors(prev => ({ ...prev, fullName: errorMessage }));
+            } else if (errorMessage.includes('gender') || errorMessage.includes('giới tính')) {
+                setErrors(prev => ({ ...prev, gender: errorMessage }));
             }
-        } finally {
-            setIsSaving(false);
+
+            toast.error(errorMessage, {
+                position: 'top-right',
+                autoClose: 4000,
+            });
         }
     };
 
@@ -237,6 +234,8 @@ export default function ProfileTab({ user }: ProfileTabProps) {
     };
 
     const avatarUrl = isValidUrl(formData.avatarUrl) ? formData.avatarUrl : null;
+    const isSaving = updateProfileMutation.isPending;
+    const isUploading = uploadAvatarMutation.isPending;
 
     return (
         <div className="space-y-6">

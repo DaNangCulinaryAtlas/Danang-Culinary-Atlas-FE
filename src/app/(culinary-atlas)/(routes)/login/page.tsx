@@ -47,7 +47,6 @@ export default function Login() {
         }
       },
       onError: (error) => {
-        console.error('Login failed:', error.message);
       },
     });
   }; const handleSocialLogin = (provider: string) => {

@@ -219,6 +219,61 @@ export const createRestaurant = async (
     }
 };
 
+// Update restaurant
+export interface UpdateRestaurantPayload {
+    name: string;
+    address: string;
+    images: {
+        photo: string;
+        sub_photo: string[];
+    };
+    wardId: number;
+    latitude: number;
+    longitude: number;
+    tagIds: number[];
+    openingHours: Record<string, string>;
+}
+
+export const updateRestaurant = async (
+    restaurantId: string,
+    payload: UpdateRestaurantPayload
+): Promise<ApiResponse<CreateRestaurantResponse>> => {
+    try {
+        const response = await instanceAxios.patch(API_ENDPOINTS.VENDOR.RESTAURANT_UPDATE(restaurantId), payload);
+        return {
+            success: true,
+            data: response.data,
+            message: 'Restaurant updated successfully'
+        };
+    } catch (error: any) {
+        return {
+            success: false,
+            message: error.response?.data?.message || 'Failed to update restaurant',
+            data: undefined
+        };
+    }
+};
+
+// Delete restaurant
+export const deleteRestaurant = async (
+    restaurantId: string
+): Promise<ApiResponse<void>> => {
+    try {
+        await instanceAxios.delete(API_ENDPOINTS.VENDOR.RESTAURANT_DELETE(restaurantId));
+        return {
+            success: true,
+            data: undefined,
+            message: 'Restaurant deleted successfully'
+        };
+    } catch (error: any) {
+        return {
+            success: false,
+            message: error.response?.data?.message || 'Failed to delete restaurant',
+            data: undefined
+        };
+    }
+};
+
 export interface VendorDishListResponse {
     content: VendorDishItem[];
     pageable: {
@@ -306,6 +361,33 @@ export const getVendorApprovedDishes = async (
         return {
             success: false,
             message: error.response?.data?.message || 'Failed to fetch vendor approved dishes',
+            data: undefined
+        };
+    }
+};
+
+// ============= RESTAURANT TAGS =============
+
+export interface RestaurantTagItem {
+    tagId: number;
+    name: string;
+}
+
+export const getRestaurantTagsByRestaurantId = async (
+    restaurantId: string
+): Promise<ApiResponse<RestaurantTagItem[]>> => {
+    try {
+        const response = await instanceAxios.get(API_ENDPOINTS.VENDOR.RESTAURANT_TAGS(restaurantId));
+        const tagsList = Array.isArray(response.data) ? response.data : response.data?.data || [];
+        return {
+            success: true,
+            data: tagsList,
+            message: 'Restaurant tags fetched successfully'
+        };
+    } catch (error: any) {
+        return {
+            success: false,
+            message: error.response?.data?.message || 'Failed to fetch restaurant tags',
             data: undefined
         };
     }
