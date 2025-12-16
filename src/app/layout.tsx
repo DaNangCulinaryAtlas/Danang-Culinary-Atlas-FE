@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { Mulish, Open_Sans, Volkhov, Poppins } from "next/font/google";
 import "./globals.css";
 import localFont from "next/font/local";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { I18nProvider } from '@/components/providers/I18nProvider';
-import Toast from "@/components/providers/Toast";
+import { Mulish, Open_Sans, Volkhov, Poppins } from "next/font/google";
+import Providers from "./providers";
+
+/* ===== Fonts (SSR-safe) ===== */
 const mulish = Mulish({
   subsets: ["latin"],
   variable: "--font-mulish",
   display: "swap",
 });
+
 const openSans = Open_Sans({
   subsets: ["latin"],
   variable: "--font-open-sans",
@@ -23,11 +23,7 @@ const volkhov = Volkhov({
   display: "swap",
   weight: ["400", "700"],
 });
-const nicoMoji = localFont({
-  src: "../../public/fonts/NicoMoji-Regular.ttf",
-  variable: "--font-nicomoji",
-  display: "swap",
-});
+
 const poppins = Poppins({
   subsets: ["latin"],
   variable: "--font-poppins",
@@ -35,6 +31,13 @@ const poppins = Poppins({
   weight: ["400", "700"],
 });
 
+const nicoMoji = localFont({
+  src: "../../public/fonts/NicoMoji-Regular.ttf",
+  variable: "--font-nicomoji",
+  display: "swap",
+});
+
+/* ===== Metadata (SSR-safe) ===== */
 export const metadata: Metadata = {
   title: "Danang Culinary Atlas",
   description:
@@ -45,39 +48,25 @@ export const metadata: Metadata = {
     "Vietnamese cuisine",
     "local specialties",
     "Da Nang street food",
-    "Vietnam food culture"
+    "Vietnam food culture",
   ],
   openGraph: {
     title: "Danang Culinary Atlas",
-  }
+  },
 };
 
+/* ===== Root Layout ===== */
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body
         className={`${mulish.variable} ${openSans.variable} ${volkhov.variable} ${poppins.variable} ${nicoMoji.variable} antialiased`}
-        suppressHydrationWarning
       >
-        <I18nProvider initialLanguage="vi">
-          {children}
-        </I18nProvider>
-        <ToastContainer
-          position="top-center"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={true}
-          closeOnClick
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="colored"
-        />
-        <Toast/>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
