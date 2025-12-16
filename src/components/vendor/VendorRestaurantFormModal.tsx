@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -9,19 +9,24 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Upload, X, Plus, Trash2 } from 'lucide-react';
 import { restaurantFormSchema, RestaurantFormData } from '@/lib/validations/restaurant';
-import { useCreateRestaurant } from '@/hooks/mutations/useRestaurantMutations';
+import { useCreateRestaurant, useUpdateRestaurant } from '@/hooks/mutations/useRestaurantMutations';
 import { useProvinces, useDistricts, useWards } from '@/hooks/queries/useLocations';
 import { useRestaurantTags } from '@/hooks/queries/useRestaurantTags';
+import { useRestaurantTagsByRestaurantId } from '@/hooks/queries/useRestaurantTagsByRestaurantId';
 import { uploadImageToCloudinary } from '@/services/upload-image';
+import { getWardById, getDistrictById } from '@/services/location';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { vendorColors } from '@/configs/colors';
 import toast from 'react-hot-toast';
 import { LocationMapPicker } from './LocationMapPicker';
+import type { Restaurant } from '@/app/vendor/restaurants/types';
 
 interface VendorRestaurantFormModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    restaurant?: Restaurant | null;
+    mode?: 'create' | 'edit';
 }
 
 const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -35,20 +40,28 @@ const DAY_LABELS: Record<string, string> = {
     Sun: 'Chủ nhật'
 };
 
-export function VendorRestaurantFormModal({ open, onOpenChange }: VendorRestaurantFormModalProps) {
+export function VendorRestaurantFormModal({ open, onOpenChange, restaurant, mode = 'create' }: VendorRestaurantFormModalProps) {
     const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
     const [subImagesPreview, setSubImagesPreview] = useState<string[]>([]);
     const [provinceId, setProvinceId] = useState<number | null>(null);
     const [districtId, setDistrictId] = useState<number | null>(null);
+    const [selectedWardId, setSelectedWardId] = useState<number | null>(null);
     const [selectedTags, setSelectedTags] = useState<number[]>([]);
     const [openingHours, setOpeningHours] = useState<Record<string, string>>({});
     const [isUploading, setIsUploading] = useState(false);
+    const [existingMainImage, setExistingMainImage] = useState<string | null>(null);
+    const [existingSubImages, setExistingSubImages] = useState<string[]>([]);
+    const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
     const { data: provinces, isLoading: isLoadingProvinces } = useProvinces();
     const { data: districts, isLoading: isLoadingDistricts } = useDistricts(provinceId);
     const { data: wards, isLoading: isLoadingWards } = useWards(districtId);
     const { data: tags, isLoading: isLoadingTags } = useRestaurantTags();
+    const { data: restaurantTags, isLoading: isLoadingRestaurantTags } = useRestaurantTagsByRestaurantId(
+        mode === 'edit' && restaurant?.id ? restaurant.id : undefined
+    );
     const createRestaurantMutation = useCreateRestaurant();
+    const updateRestaurantMutation = useUpdateRestaurant();
 
     const {
         register,
@@ -65,6 +78,160 @@ export function VendorRestaurantFormModal({ open, onOpenChange }: VendorRestaura
             openingHours: {}
         }
     });
+
+    // Function to find location hierarchy from wardId using direct API calls
+    const findLocationHierarchy = async (wardId: number) => {
+        setIsLoadingLocation(true);
+        try {
+            // Step 1: Get ward details to get districtId
+            const wardResponse = await getWardById(wardId);
+            if (!wardResponse.success || !wardResponse.data) {
+                console.error('Failed to fetch ward details');
+                setIsLoadingLocation(false);
+                return;
+            }
+            const wardData = wardResponse.data;
+            console.log('Ward details:', wardData);
+
+            // Step 2: Get district details to get provinceId
+            const districtResponse = await getDistrictById(wardData.districtId);
+            if (!districtResponse.success || !districtResponse.data) {
+                console.error('Failed to fetch district details');
+                setIsLoadingLocation(false);
+                return;
+            }
+            const districtData = districtResponse.data;
+            console.log('District details:', districtData);
+
+            // Step 3: Set province (default Đà Nẵng with provinceId = 1)
+            const foundProvinceId = districtData.provinceId || 1; // Default to Đà Nẵng
+
+            console.log('Found location hierarchy:', {
+                provinceId: foundProvinceId,
+                districtId: districtData.districtId,
+                districtName: districtData.name,
+                wardId: wardData.wardId,
+                wardName: wardData.name
+            });
+
+            // Store the target values to set after data loads
+            setPendingLocationData({
+                provinceId: foundProvinceId,
+                districtId: districtData.districtId,
+                wardId: wardData.wardId
+            });
+
+            // Set province first - this will trigger districts loading
+            setProvinceId(foundProvinceId);
+
+        } catch (error) {
+            console.error('Error finding location hierarchy:', error);
+            setIsLoadingLocation(false);
+        }
+    };
+
+    // State to store pending location data while cascading dropdowns load
+    const [pendingLocationData, setPendingLocationData] = useState<{
+        provinceId: number;
+        districtId: number;
+        wardId: number;
+    } | null>(null);
+
+    // Effect to set district after districts are loaded
+    useEffect(() => {
+        if (pendingLocationData && districts && districts.length > 0 && !isLoadingDistricts) {
+            const targetDistrict = districts.find(d => d.districtId === pendingLocationData.districtId);
+            if (targetDistrict && districtId !== pendingLocationData.districtId) {
+                console.log('Setting district:', targetDistrict.name, targetDistrict.districtId);
+                setDistrictId(pendingLocationData.districtId);
+            }
+        }
+    }, [districts, isLoadingDistricts, pendingLocationData, districtId]);
+
+    // Effect to set ward after wards are loaded
+    useEffect(() => {
+        console.log('Ward effect triggered:', {
+            hasPendingData: !!pendingLocationData,
+            wardsLength: wards?.length,
+            isLoadingWards,
+            currentDistrictId: districtId,
+            pendingDistrictId: pendingLocationData?.districtId,
+            pendingWardId: pendingLocationData?.wardId,
+            currentSelectedWardId: selectedWardId,
+            districtMatches: districtId === pendingLocationData?.districtId
+        });
+
+        if (pendingLocationData && wards && wards.length > 0 && !isLoadingWards && districtId === pendingLocationData.districtId) {
+            const targetWard = wards.find(w => w.wardId === pendingLocationData.wardId);
+            console.log('Looking for ward:', pendingLocationData.wardId, 'Found:', targetWard);
+            console.log('Available wards:', wards.map(w => ({ id: w.wardId, name: w.name })));
+
+            if (targetWard && selectedWardId !== pendingLocationData.wardId) {
+                console.log('Setting ward:', targetWard.name, targetWard.wardId);
+                setSelectedWardId(pendingLocationData.wardId);
+                setValue('wardId', pendingLocationData.wardId);
+
+                // Use setTimeout to ensure state update completes
+                setTimeout(() => {
+                    setIsLoadingLocation(false);
+                    setPendingLocationData(null); // Clear pending data
+                }, 100);
+            } else if (!targetWard) {
+                console.error('Ward not found in list!');
+                setIsLoadingLocation(false);
+            }
+        }
+    }, [wards, isLoadingWards, pendingLocationData, districtId, selectedWardId, setValue]);
+
+    // Load restaurant data when editing
+    useEffect(() => {
+        if (open && mode === 'edit' && restaurant) {
+            // Set basic info
+            setValue('name', restaurant.name);
+            setValue('address', restaurant.address);
+            setValue('latitude', restaurant.latitude || 16.0544);
+            setValue('longitude', restaurant.longitude || 108.2022);
+            setValue('wardId', restaurant.wardId || 0);
+
+            // Set images
+            if (restaurant.image) {
+                setExistingMainImage(restaurant.image);
+                setMainImagePreview(restaurant.image);
+            }
+            if (restaurant.subPhotos && restaurant.subPhotos.length > 0) {
+                setExistingSubImages(restaurant.subPhotos);
+                setSubImagesPreview(restaurant.subPhotos);
+            }
+
+            // Set opening hours
+            if (restaurant.openingHours) {
+                setOpeningHours(restaurant.openingHours as Record<string, string>);
+                setValue('openingHours', restaurant.openingHours as Record<string, string>);
+            } else {
+                setOpeningHours({});
+                setValue('openingHours', {});
+            }
+
+            // Set tags from API response in edit mode
+            if (mode === 'edit' && restaurantTags && restaurantTags.length > 0) {
+                const tagIds = restaurantTags.map(tag => tag.tagId);
+                console.log('Setting tags from API for edit:', { restaurantTags, tagIds });
+                setSelectedTags(tagIds);
+                setValue('tagIds', tagIds);
+            } else {
+                setSelectedTags([]);
+                setValue('tagIds', []);
+            }
+
+            // Load location hierarchy from wardId using direct API calls
+            if (restaurant.wardId) {
+                findLocationHierarchy(restaurant.wardId);
+            }
+        } else if (open && mode === 'create') {
+            // Reset form for create mode
+            resetForm();
+        }
+    }, [open, mode, restaurant, tags, restaurantTags, setValue]);
 
     const mainImage = watch('mainImage');
     const subImages = watch('subImages');
@@ -129,19 +296,49 @@ export function VendorRestaurantFormModal({ open, onOpenChange }: VendorRestaura
         setValue('openingHours', newHours);
     };
 
+    const resetForm = () => {
+        reset();
+        setMainImagePreview(null);
+        setSubImagesPreview([]);
+        setProvinceId(null);
+        setDistrictId(null);
+        setSelectedWardId(null);
+        setSelectedTags([]);
+        setOpeningHours({});
+        setExistingMainImage(null);
+        setExistingSubImages([]);
+        setPendingLocationData(null);
+        setIsLoadingLocation(false);
+    };
+
     const onSubmit = async (data: RestaurantFormData) => {
         try {
             setIsUploading(true);
 
-            // Upload main image
-            const mainImageResponse = await uploadImageToCloudinary(data.mainImage);
-            if (!mainImageResponse.success || !mainImageResponse.data) {
-                throw new Error('Failed to upload main image');
+            // Validate main image: either new file or existing image must exist
+            if (!data.mainImage && !existingMainImage) {
+                toast.error('Vui lòng chọn ảnh chính');
+                setIsUploading(false);
+                return;
             }
 
-            // Upload sub images
-            const subImageUrls: string[] = [];
-            for (const file of data.subImages) {
+            let mainImageUrl = existingMainImage;
+            let subImageUrls = [...existingSubImages];
+
+            // Upload main image only if it's a new file
+            if (data.mainImage && data.mainImage instanceof File) {
+                const mainImageResponse = await uploadImageToCloudinary(data.mainImage);
+                if (!mainImageResponse.success || !mainImageResponse.data) {
+                    throw new Error('Failed to upload main image');
+                }
+                mainImageUrl = mainImageResponse.data;
+            } else if (!mainImageUrl) {
+                throw new Error('Main image is required');
+            }
+
+            // Upload new sub images
+            const newSubImages = data.subImages.filter(img => img instanceof File) as File[];
+            for (const file of newSubImages) {
                 const response = await uploadImageToCloudinary(file);
                 if (response.success && response.data) {
                     subImageUrls.push(response.data);
@@ -153,29 +350,33 @@ export function VendorRestaurantFormModal({ open, onOpenChange }: VendorRestaura
                 name: data.name,
                 address: data.address,
                 images: {
-                    photo: mainImageResponse.data,
+                    photo: mainImageUrl,
                     sub_photo: subImageUrls
                 },
                 wardId: data.wardId,
                 latitude: data.latitude,
                 longitude: data.longitude,
-                tagIds: data.tagIds,
-                openingHours: data.openingHours
+                tagIds: data.tagIds && data.tagIds.length > 0 ? data.tagIds : [],
+                openingHours: data.openingHours || {}
             };
 
-            await createRestaurantMutation.mutateAsync(payload);
+            console.log('Submitting payload:', payload); // Debug log
+
+            if (mode === 'edit' && restaurant) {
+                await updateRestaurantMutation.mutateAsync({
+                    restaurantId: restaurant.id,
+                    payload
+                });
+            } else {
+                await createRestaurantMutation.mutateAsync(payload);
+            }
 
             // Reset form and close modal
-            reset();
-            setMainImagePreview(null);
-            setSubImagesPreview([]);
-            setProvinceId(null);
-            setDistrictId(null);
-            setSelectedTags([]);
-            setOpeningHours({});
+            resetForm();
             onOpenChange(false);
-        } catch (error) {
-            console.error('Error creating restaurant:', error);
+        } catch (error: any) {
+            console.error(`Error ${mode === 'edit' ? 'updating' : 'creating'} restaurant:`, error);
+            toast.error(error.message || `Không thể ${mode === 'edit' ? 'cập nhật' : 'tạo'} quán ăn`);
         } finally {
             setIsUploading(false);
         }
@@ -186,10 +387,12 @@ export function VendorRestaurantFormModal({ open, onOpenChange }: VendorRestaura
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold" style={{ color: vendorColors.primary[700] }}>
-                        Thêm quán ăn mới
+                        {mode === 'edit' ? 'Chỉnh sửa quán ăn' : 'Thêm quán ăn mới'}
                     </DialogTitle>
                     <DialogDescription>
-                        Điền thông tin quán ăn của bạn. Quán ăn sẽ được gửi đến admin để phê duyệt.
+                        {mode === 'edit'
+                            ? 'Cập nhật thông tin quán ăn của bạn.'
+                            : 'Điền thông tin quán ăn của bạn. Quán ăn sẽ được gửi đến admin để phê duyệt.'}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -229,16 +432,17 @@ export function VendorRestaurantFormModal({ open, onOpenChange }: VendorRestaura
                             <div>
                                 <Label>Tỉnh/Thành phố *</Label>
                                 <Select
-                                    value={provinceId?.toString()}
+                                    value={provinceId ? String(provinceId) : undefined}
                                     onValueChange={(value) => {
                                         setProvinceId(Number(value));
                                         setDistrictId(null);
+                                        setSelectedWardId(null);
                                         setValue('wardId', 0);
                                     }}
-                                    disabled={isLoadingProvinces}
+                                    disabled={isLoadingProvinces || isLoadingLocation}
                                 >
                                     <SelectTrigger className="mt-1">
-                                        <SelectValue placeholder={isLoadingProvinces ? "Đang tải..." : "Chọn tỉnh/thành"} />
+                                        <SelectValue placeholder={isLoadingProvinces || isLoadingLocation ? "Đang tải..." : "Chọn tỉnh/thành"} />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {isLoadingProvinces ? (
@@ -259,15 +463,16 @@ export function VendorRestaurantFormModal({ open, onOpenChange }: VendorRestaura
                             <div>
                                 <Label>Quận/Huyện *</Label>
                                 <Select
-                                    value={districtId?.toString()}
+                                    value={districtId ? String(districtId) : undefined}
                                     onValueChange={(value) => {
                                         setDistrictId(Number(value));
+                                        setSelectedWardId(null);
                                         setValue('wardId', 0);
                                     }}
-                                    disabled={!provinceId || isLoadingDistricts}
+                                    disabled={!provinceId || isLoadingDistricts || isLoadingLocation}
                                 >
                                     <SelectTrigger className="mt-1">
-                                        <SelectValue placeholder={isLoadingDistricts ? "Đang tải..." : "Chọn quận/huyện"} />
+                                        <SelectValue placeholder={isLoadingDistricts || isLoadingLocation ? "Đang tải..." : "Chọn quận/huyện"} />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {isLoadingDistricts ? (
@@ -288,14 +493,21 @@ export function VendorRestaurantFormModal({ open, onOpenChange }: VendorRestaura
                             <div>
                                 <Label>Phường/Xã *</Label>
                                 <Select
-                                    onValueChange={(value) => setValue('wardId', Number(value))}
-                                    disabled={!districtId || isLoadingWards}
+                                    key={`ward-${selectedWardId || 'none'}-${districtId || 'none'}`}
+                                    value={selectedWardId ? String(selectedWardId) : undefined}
+                                    onValueChange={(value) => {
+                                        const wardId = Number(value);
+                                        console.log('Ward changed manually to:', wardId);
+                                        setSelectedWardId(wardId);
+                                        setValue('wardId', wardId);
+                                    }}
+                                    disabled={!districtId || isLoadingWards || isLoadingLocation}
                                 >
                                     <SelectTrigger className="mt-1">
-                                        <SelectValue placeholder={isLoadingWards ? "Đang tải..." : "Chọn phường/xã"} />
+                                        <SelectValue placeholder={isLoadingWards || isLoadingLocation ? "Đang tải..." : "Chọn phường/xã"} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {isLoadingWards ? (
+                                        {isLoadingWards || isLoadingLocation ? (
                                             <div className="p-2 text-center text-sm text-gray-500">Đang tải...</div>
                                         ) : wards && wards.length > 0 ? (
                                             wards.filter(w => w?.wardId).map((ward) => (
@@ -313,6 +525,14 @@ export function VendorRestaurantFormModal({ open, onOpenChange }: VendorRestaura
                                 )}
                             </div>
                         </div>
+
+                        {/* Loading indicator for location */}
+                        {isLoadingLocation && (
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <span>Đang tải thông tin vị trí...</span>
+                            </div>
+                        )}
 
                         {/* Map Location Picker */}
                         <div>
@@ -380,7 +600,8 @@ export function VendorRestaurantFormModal({ open, onOpenChange }: VendorRestaura
                                             type="button"
                                             onClick={() => {
                                                 setMainImagePreview(null);
-                                                setValue('mainImage', null as any);
+                                                setExistingMainImage(null);
+                                                setValue('mainImage', undefined);
                                             }}
                                             className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
                                         >
@@ -535,13 +756,13 @@ export function VendorRestaurantFormModal({ open, onOpenChange }: VendorRestaura
                         </Button>
                         <Button
                             type="submit"
-                            disabled={isUploading || createRestaurantMutation.isPending}
+                            disabled={isUploading || createRestaurantMutation.isPending || updateRestaurantMutation.isPending}
                             style={{ background: vendorColors.gradients.primary }}
                         >
-                            {(isUploading || createRestaurantMutation.isPending) && (
+                            {(isUploading || createRestaurantMutation.isPending || updateRestaurantMutation.isPending) && (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             )}
-                            {isUploading ? 'Đang tải ảnh...' : 'Tạo quán ăn'}
+                            {isUploading ? 'Đang tải ảnh...' : mode === 'edit' ? 'Cập nhật quán ăn' : 'Tạo quán ăn'}
                         </Button>
                     </div>
                 </form>

@@ -93,13 +93,6 @@ export default function Header() {
               <span className="hidden lg:inline">{t('navbar.popularRestaurants')}</span>
               <span className="lg:hidden">{t('navbar.restaurants')}</span>
             </Link>
-            <Link
-              href="/packages"
-              className="text-sm font-mulish font-semibold text-[#495560] hover:opacity-90 transition-opacity whitespace-nowrap"
-            >
-              <span className="hidden lg:inline">{t('navbar.ourPackages')}</span>
-              <span className="lg:hidden">{t('navbar.packages')}</span>
-            </Link>
             {user ? (
               <>
                 {/* Notification Bell */}

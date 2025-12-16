@@ -15,18 +15,26 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { MapPin, Clock, FileText, Eye, Store, Search, Loader2, Star, Plus } from "lucide-react"
+import { MapPin, Clock, FileText, Eye, Store, Search, Loader2, Star, Plus, Pencil, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { useVendorRestaurants } from "../../../hooks/queries/useVendorRestaurants"
 import MiniMap from "./components/MiniMap"
 import type { Restaurant } from "./types"
 import { useAppSelector } from "@/hooks/useRedux"
 import { VendorRestaurantFormModal } from "@/components/vendor/VendorRestaurantFormModal"
+import { VendorConfirmDeleteModal } from "@/components/vendor/VendorConfirmDeleteModal"
+import { useDeleteRestaurant } from "@/hooks/mutations/useRestaurantMutations"
 
 export default function VendorRestaurantsPage() {
     const { user } = useAppSelector((state) => state.auth)
     const vendorId = user?.accountId || null
     const [isRestaurantModalOpen, setIsRestaurantModalOpen] = useState(false)
+    const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+    const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null)
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+    const [restaurantToDelete, setRestaurantToDelete] = useState<Restaurant | null>(null)
+
+    const deleteRestaurantMutation = useDeleteRestaurant()
 
     // Fetch all restaurants
     const { restaurants, isLoading, error, refetch } = useVendorRestaurants({
@@ -61,6 +69,32 @@ export default function VendorRestaurantsPage() {
         () => filteredRestaurants.filter((r) => r.approvalStatus === "REJECTED"),
         [filteredRestaurants]
     )
+
+    // Modal handlers
+    const handleCreateRestaurant = () => {
+        setModalMode('create')
+        setSelectedRestaurant(null)
+        setIsRestaurantModalOpen(true)
+    }
+
+    const handleEditRestaurant = (restaurant: Restaurant) => {
+        setModalMode('edit')
+        setSelectedRestaurant(restaurant)
+        setIsRestaurantModalOpen(true)
+    }
+
+    const handleDeleteRestaurant = (restaurant: Restaurant) => {
+        setRestaurantToDelete(restaurant)
+        setIsDeleteModalOpen(true)
+    }
+
+    const confirmDeleteRestaurant = async () => {
+        if (restaurantToDelete) {
+            await deleteRestaurantMutation.mutateAsync(restaurantToDelete.id)
+            setIsDeleteModalOpen(false)
+            setRestaurantToDelete(null)
+        }
+    }
 
     // Get status badge
     const getStatusBadge = (status: string, approvalStatus: string) => {
@@ -126,132 +160,150 @@ export default function VendorRestaurantsPage() {
                     </div>
                 )}
 
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button
-                            className="w-full font-semibold"
-                            style={{
-                                background: vendorColors.gradients.primarySoft,
-                                color: 'white'
-                            }}
-                        >
-                            <Eye className="mr-2 h-4 w-4" />
-                            Xem chi tiết
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle>Chi tiết Quán ăn</DialogTitle>
-                            <DialogDescription>{restaurant.name}</DialogDescription>
-                        </DialogHeader>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Left Column - Restaurant Info */}
-                            <div className="space-y-4">
-                                <div>
-                                    <h3 className="font-semibold mb-2">Thông tin quán</h3>
-                                    <div className="space-y-2 text-sm">
-                                        <div>
-                                            <span className="font-medium">Tên quán:</span> {restaurant.name}
-                                        </div>
-                                        <div className="flex items-start gap-2">
-                                            <MapPin className="h-4 w-4 mt-0.5" />
-                                            <span>
-                                                <span className="font-medium">Địa chỉ:</span> {restaurant.address}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-start gap-2">
-                                            <Clock className="h-4 w-4 mt-0.5" />
-                                            <span>
-                                                <span className="font-medium">Giờ mở cửa:</span>{" "}
-                                                {Object.keys(restaurant.openingHours || {}).length > 0
-                                                    ? JSON.stringify(restaurant.openingHours)
-                                                    : "Chưa có thông tin"}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-start gap-2">
-                                            <FileText className="h-4 w-4 mt-0.5" />
-                                            <span>
-                                                <span className="font-medium">Trạng thái:</span>{" "}
-                                                {getStatusBadge(restaurant.status, restaurant.approvalStatus)}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-start gap-2">
-                                            <Star className="h-4 w-4 mt-0.5 text-yellow-500" />
-                                            <span>
-                                                <span className="font-medium">Đánh giá:</span>{" "}
-                                                {restaurant.averageRating?.toFixed(1) || "0.0"} ({restaurant.totalReviews || 0} đánh giá)
-                                            </span>
-                                        </div>
-                                        {restaurant.createdAt && (
+                {/* Action Buttons */}
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full"
+                            >
+                                <Eye className="h-4 w-4" />
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle>Chi tiết Quán ăn</DialogTitle>
+                                <DialogDescription>{restaurant.name}</DialogDescription>
+                            </DialogHeader>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Left Column - Restaurant Info */}
+                                <div className="space-y-4">
+                                    <div>
+                                        <h3 className="font-semibold mb-2">Thông tin quán</h3>
+                                        <div className="space-y-2 text-sm">
                                             <div>
-                                                <span className="font-medium">Ngày tạo:</span>{" "}
-                                                {new Date(restaurant.createdAt).toLocaleString("vi-VN")}
+                                                <span className="font-medium">Tên quán:</span> {restaurant.name}
                                             </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {restaurant.approvalStatus === "REJECTED" && restaurant.rejectionReason && (
-                                    <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                                        <h4 className="font-semibold text-red-700 mb-1">Lý do từ chối</h4>
-                                        <p className="text-sm text-red-600">{restaurant.rejectionReason}</p>
-                                    </div>
-                                )}
-
-                                <div>
-                                    <h3 className="font-semibold mb-2">Bản đồ</h3>
-                                    <MiniMap
-                                        latitude={restaurant.latitude}
-                                        longitude={restaurant.longitude}
-                                        restaurantName={restaurant.name}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Right Column - Images */}
-                            <div className="space-y-4">
-                                <div>
-                                    <h3 className="font-semibold mb-2">Hình ảnh quán ăn</h3>
-                                    <div className="space-y-3">
-                                        <div className="h-48 bg-muted rounded-md flex items-center justify-center overflow-hidden">
-                                            {restaurant.image ? (
-                                                <Image
-                                                    src={restaurant.image}
-                                                    alt={restaurant.name}
-                                                    width={400}
-                                                    height={260}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <div className="flex flex-col items-center justify-center text-xs text-muted-foreground">
-                                                    <Store className="h-8 w-8 mb-1 text-gray-400" />
-                                                    Chưa có ảnh đại diện
+                                            <div className="flex items-start gap-2">
+                                                <MapPin className="h-4 w-4 mt-0.5" />
+                                                <span>
+                                                    <span className="font-medium">Địa chỉ:</span> {restaurant.address}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-start gap-2">
+                                                <Clock className="h-4 w-4 mt-0.5" />
+                                                <span>
+                                                    <span className="font-medium">Giờ mở cửa:</span>{" "}
+                                                    {Object.keys(restaurant.openingHours || {}).length > 0
+                                                        ? JSON.stringify(restaurant.openingHours)
+                                                        : "Chưa có thông tin"}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-start gap-2">
+                                                <FileText className="h-4 w-4 mt-0.5" />
+                                                <span>
+                                                    <span className="font-medium">Trạng thái:</span>{" "}
+                                                    {getStatusBadge(restaurant.status, restaurant.approvalStatus)}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-start gap-2">
+                                                <Star className="h-4 w-4 mt-0.5 text-yellow-500" />
+                                                <span>
+                                                    <span className="font-medium">Đánh giá:</span>{" "}
+                                                    {restaurant.averageRating?.toFixed(1) || "0.0"} ({restaurant.totalReviews || 0} đánh giá)
+                                                </span>
+                                            </div>
+                                            {restaurant.createdAt && (
+                                                <div>
+                                                    <span className="font-medium">Ngày tạo:</span>{" "}
+                                                    {new Date(restaurant.createdAt).toLocaleString("vi-VN")}
                                                 </div>
                                             )}
                                         </div>
-                                        {restaurant.subPhotos && restaurant.subPhotos.length > 0 && (
-                                            <div className="grid grid-cols-3 gap-2">
-                                                {restaurant.subPhotos.slice(0, 9).map((url, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="relative h-20 rounded-md overflow-hidden bg-muted"
-                                                    >
-                                                        <Image
-                                                            src={url}
-                                                            alt={`${restaurant.name} - hình ${index + 1}`}
-                                                            fill
-                                                            className="object-cover"
-                                                        />
+                                    </div>
+
+                                    {restaurant.approvalStatus === "REJECTED" && restaurant.rejectionReason && (
+                                        <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                                            <h4 className="font-semibold text-red-700 mb-1">Lý do từ chối</h4>
+                                            <p className="text-sm text-red-600">{restaurant.rejectionReason}</p>
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <h3 className="font-semibold mb-2">Bản đồ</h3>
+                                        <MiniMap
+                                            latitude={restaurant.latitude}
+                                            longitude={restaurant.longitude}
+                                            restaurantName={restaurant.name}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Right Column - Images */}
+                                <div className="space-y-4">
+                                    <div>
+                                        <h3 className="font-semibold mb-2">Hình ảnh quán ăn</h3>
+                                        <div className="space-y-3">
+                                            <div className="h-48 bg-muted rounded-md flex items-center justify-center overflow-hidden">
+                                                {restaurant.image ? (
+                                                    <Image
+                                                        src={restaurant.image}
+                                                        alt={restaurant.name}
+                                                        width={400}
+                                                        height={260}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="flex flex-col items-center justify-center text-xs text-muted-foreground">
+                                                        <Store className="h-8 w-8 mb-1 text-gray-400" />
+                                                        Chưa có ảnh đại diện
                                                     </div>
-                                                ))}
+                                                )}
                                             </div>
-                                        )}
+                                            {restaurant.subPhotos && restaurant.subPhotos.length > 0 && (
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {restaurant.subPhotos.slice(0, 9).map((url, index) => (
+                                                        <div
+                                                            key={index}
+                                                            className="relative h-20 rounded-md overflow-hidden bg-muted"
+                                                        >
+                                                            <Image
+                                                                src={url}
+                                                                alt={`${restaurant.name} - hình ${index + 1}`}
+                                                                fill
+                                                                className="object-cover"
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </DialogContent>
-                </Dialog>
+                        </DialogContent>
+                    </Dialog>
+
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => handleEditRestaurant(restaurant)}
+                    >
+                        <Pencil className="h-4 w-4" />
+                    </Button>
+
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => handleDeleteRestaurant(restaurant)}
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                </div>
             </CardContent>
         </Card>
     )
@@ -271,7 +323,7 @@ export default function VendorRestaurantsPage() {
                         </p>
                     </div>
                     <Button
-                        onClick={() => setIsRestaurantModalOpen(true)}
+                        onClick={handleCreateRestaurant}
                         className="font-semibold"
                         style={{
                             background: 'white',
@@ -440,6 +492,20 @@ export default function VendorRestaurantsPage() {
             <VendorRestaurantFormModal
                 open={isRestaurantModalOpen}
                 onOpenChange={setIsRestaurantModalOpen}
+                restaurant={selectedRestaurant}
+                mode={modalMode}
+            />
+
+            {/* Delete Confirmation Modal */}
+            <VendorConfirmDeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => {
+                    setIsDeleteModalOpen(false)
+                    setRestaurantToDelete(null)
+                }}
+                onConfirm={confirmDeleteRestaurant}
+                isLoading={deleteRestaurantMutation.isPending}
+                restaurantName={restaurantToDelete?.name || ''}
             />
         </div>
     )

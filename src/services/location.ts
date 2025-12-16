@@ -78,6 +78,42 @@ export const getWardsByDistrict = async (districtId: number): Promise<ApiRespons
     }
 };
 
+// Get single ward details by wardId
+export const getWardById = async (wardId: number): Promise<ApiResponse<Ward>> => {
+    try {
+        const response = await instanceAxios.get(`/locations/wards/${wardId}`);
+        return {
+            success: true,
+            data: response.data,
+            message: 'Ward fetched successfully'
+        };
+    } catch (error: any) {
+        return {
+            success: false,
+            message: error.response?.data?.message || 'Failed to fetch ward',
+            data: undefined
+        };
+    }
+};
+
+// Get single district details by districtId
+export const getDistrictById = async (districtId: number): Promise<ApiResponse<District>> => {
+    try {
+        const response = await instanceAxios.get(`/locations/districts/${districtId}`);
+        return {
+            success: true,
+            data: response.data,
+            message: 'District fetched successfully'
+        };
+    } catch (error: any) {
+        return {
+            success: false,
+            message: error.response?.data?.message || 'Failed to fetch district',
+            data: undefined
+        };
+    }
+};
+
 // ============= TAG SERVICES =============
 
 export interface RestaurantTag {

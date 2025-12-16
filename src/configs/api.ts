@@ -124,6 +124,7 @@ export const API_ENDPOINTS = {
     RESTAURANT_CREATE: '/restaurants', // Tạo quán ăn mới
     RESTAURANT_UPDATE: (restaurantId: string) => `/restaurants/${restaurantId}`, // Cập nhật quán ăn
     RESTAURANT_DELETE: (restaurantId: string) => `/restaurants/${restaurantId}`, // Xóa quán ăn
+    RESTAURANT_TAGS: (restaurantId: string) => `/tags/restaurant/${restaurantId}`, // Lấy tags của quán ăn
 
     // Dish Management - Quản lý món ăn của vendor
     RESTAURANT_VENDOR_DISHES: (restaurantId: string) => `/restaurants/${restaurantId}/vendor-dishes`, // Get all dishes (including pending/rejected)

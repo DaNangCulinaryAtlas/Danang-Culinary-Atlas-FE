@@ -5,6 +5,7 @@ import localFont from "next/font/local";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { I18nProvider } from '@/components/providers/I18nProvider';
+import Toast from "@/components/providers/Toast";
 const mulish = Mulish({
   subsets: ["latin"],
   variable: "--font-mulish",
@@ -76,6 +77,7 @@ export default function RootLayout({
           pauseOnHover
           theme="colored"
         />
+        <Toast/>
       </body>
     </html>
   );
