@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface SearchResultProps {
   totalResults: number;
@@ -6,13 +7,15 @@ interface SearchResultProps {
 }
 
 const SearchResult = memo(function SearchResult({ totalResults, searchTime }: SearchResultProps) {
+  const { t } = useTranslation();
+
   return (
     <p className="text-gray-600">
-      Tìm thấy{" "}
+      {t('restaurants.found')}{" "}
       <span className="font-semibold text-[#44BACA]">
-        {totalResults} kết quả
+        {totalResults} {t('restaurants.resultsText')}
       </span>{" "}
-      trong <span className="font-semibold">{searchTime} giây </span>
+      {t('restaurants.in')} <span className="font-semibold">{searchTime} {t('restaurants.seconds')} </span>
     </p>
   );
 });

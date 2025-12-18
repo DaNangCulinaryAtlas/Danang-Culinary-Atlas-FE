@@ -59,9 +59,7 @@ export default function DishDetail() {
     );
   }
 
-  const images = dish.images && dish.images.length > 0
-    ? dish.images
-    : ['https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop'];
+  const images = dish.images && dish.images.length > 0 ? dish.images : [];
 
   return (
     <div className="min-h-screen bg-white">
@@ -170,8 +168,8 @@ export default function DishDetail() {
                       key={index}
                       onClick={() => setSelectedImageIndex(index)}
                       className={`relative w-full aspect-square rounded-lg overflow-hidden transition-all duration-300 bg-gray-200 ${selectedImageIndex === index
-                          ? 'ring-2 ring-[#44BACA]'
-                          : 'opacity-70 hover:opacity-100'
+                        ? 'ring-2 ring-[#44BACA]'
+                        : 'opacity-70 hover:opacity-100'
                         }`}
                     >
                       {!imageError[`thumb-${index}`] ? (
@@ -194,8 +192,8 @@ export default function DishDetail() {
               )}
             </>
           ) : (
-            <div className="relative w-full h-[500px] rounded-2xl overflow-hidden mb-4 shadow-lg bg-gray-300 flex items-center justify-center">
-              <span className="text-gray-600">Chưa có hình ảnh</span>
+            <div className="relative w-full h-[500px] rounded-2xl overflow-hidden mb-4 shadow-lg bg-gray-200 flex items-center justify-center">
+              <span className="text-gray-600 text-lg font-medium">No image</span>
             </div>
           )}
         </section>

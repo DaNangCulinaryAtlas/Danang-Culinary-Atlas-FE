@@ -26,6 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Plus, Edit, Trash2, MapPin, Tag, Loader2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { BASE_URL, API_ENDPOINTS } from "@/configs/api"
+import { toast } from "react-toastify"
 
 interface Province {
   id: number
@@ -104,7 +105,10 @@ export default function SystemSettings() {
         setSelectedProvince(normalized[0].id)
       }
     } catch (error) {
-      console.error(error)
+      toast.error('Không thể tải danh sách tỉnh/thành phố', {
+               position: 'top-right',
+               autoClose: 2500,
+               });
     } finally {
       setIsLoadingProvinces(false)
     }
@@ -130,8 +134,10 @@ export default function SystemSettings() {
       }))
       setDistricts(normalized)
     } catch (error) {
-      console.error(error)
-      setDistricts([])
+      toast.error('Không thể tải danh sách quận/huyện', {
+         position: 'top-right',
+         autoClose: 2500,
+         });      setDistricts([])
     } finally {
       setIsLoadingDistricts(false)
     }
@@ -155,8 +161,10 @@ export default function SystemSettings() {
       }))
       setWards(normalized)
     } catch (error) {
-      console.error(error)
-      setWards([])
+      toast.error('Không thể tải danh sách xã/phường', {
+         position: 'top-right',
+         autoClose: 2500,
+         });      setWards([])
     } finally {
       setIsLoadingWards(false)
     }
@@ -179,8 +187,10 @@ export default function SystemSettings() {
       }))
       setRestaurantTags(normalized)
     } catch (error) {
-      console.error(error)
-      setRestaurantTags([])
+       toast.error('Không thể tải danh sách restaurant tags', {
+         position: 'top-right',
+         autoClose: 2500,
+         });      setRestaurantTags([])
     } finally {
       setIsLoadingRestaurantTags(false)
     }
@@ -203,8 +213,10 @@ export default function SystemSettings() {
       }))
       setDishTags(normalized)
     } catch (error) {
-      console.error(error)
-      setDishTags([])
+        toast.error('Không thể tải danh sách dish tags', {
+         position: 'top-right',
+         autoClose: 2500,
+         });      setDishTags([])
     } finally {
       setIsLoadingDishTags(false)
     }

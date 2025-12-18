@@ -10,8 +10,10 @@ import RestaurantGrid from "./components/RestaurantGrid";
 import ViewMode from "@/types/view-mode";
 import { FilterState } from "@/types/filter";
 import { useSearchRestaurants, useRestaurants, useSearchRestaurantsByName } from "@/hooks/queries/useRestaurants";
+import { useTranslation } from "@/hooks/useTranslation";
 
 function RestaurantSearchContent() {
+  const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [resultsPerPage, setResultsPerPage] = useState(9);
   const [searchTime, setSearchTime] = useState<number>(0);
@@ -163,7 +165,7 @@ function RestaurantSearchContent() {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <p className="text-red-600 text-lg">
-              {error instanceof Error ? error.message : 'Failed to load restaurants'}
+              {error instanceof Error ? error.message : t('restaurants.errorLoading')}
             </p>
             <button
               onClick={() => {
@@ -173,7 +175,7 @@ function RestaurantSearchContent() {
               }}
               className="mt-4 px-4 py-2 bg-[#44BACA] text-white rounded hover:bg-[#3aa3b3]"
             >
-              Try Again
+              {t('restaurants.tryAgain')}
             </button>
           </div>
         </div>
@@ -224,16 +226,20 @@ function RestaurantSearchContent() {
                     />
                   </svg>
                   <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                    Không tìm thấy nhà hàng nào
+                    {t('restaurants.noRestaurantsFound')}
                   </h3>
                   <p className="text-gray-600 mb-6">
-                    Chúng tôi không tìm thấy nhà hàng nào phù hợp với tìm kiếm của bạn.
+                    {t('restaurants.noRestaurantsDescription')}
                   </p>
                   <button
-                    onClick={() => router.push('/restaurants')}
+                    onClick={() => {
+                      setFilters({ cuisineIds: [], minRating: null, maxRating: null });
+                      setCurrentPage(1);
+                      router.push('/restaurants');
+                    }}
                     className="px-6 py-3 bg-[#44BACA] text-white rounded-lg hover:bg-[#3aa3b3] transition-colors font-medium shadow-sm hover:shadow-md"
                   >
-                    Xóa tất cả bộ lọc
+                    {t('restaurants.clearAllFilters')}
                   </button>
                 </div>
               </div>
@@ -274,11 +280,12 @@ export default function Page() {
 }
 
 function LoadingState() {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#44BACA] mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading restaurants...</p>
+        <p className="mt-4 text-gray-600">{t('restaurants.loading')}</p>
       </div>
     </div>
   );

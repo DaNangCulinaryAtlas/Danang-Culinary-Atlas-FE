@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Star, Heart } from 'lucide-react';
+import { MapPin, Star } from 'lucide-react';
 import Image from 'next/image';
 import type { Restaurant } from '@/types/restaurant';
 
@@ -33,15 +33,6 @@ const RestaurantMapCard: React.FC<RestaurantCardProps> = ({
             <span className="text-gray-400 text-sm font-medium">No image</span>
           </div>
         )}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            // Handle favorite toggle
-          }}
-          className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:scale-110 transition-transform"
-        >
-          <Heart size={18} className="text-gray-400 hover:text-red-500 transition-colors" />
-        </button>
       </div>
 
       {/* Content - Fixed Layout */}

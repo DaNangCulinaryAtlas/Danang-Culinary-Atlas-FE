@@ -274,7 +274,6 @@ const RestaurantMap: React.FC = () => {
         );
       }
     } catch (error) {
-      console.error('Error getting directions:', error);
       alert('Không thể tìm đường đi. Vui lòng thử lại.');
     } finally {
       setIsLoadingRoute(false);

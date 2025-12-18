@@ -21,6 +21,10 @@ export interface Restaurant {
   };
   averageRating: number;
   totalReviews: number;
+  tags?: Array<{
+    tagId: number;
+    name: string;
+  }>;
 }
 
 export interface RestaurantResponse {

@@ -30,6 +30,7 @@ import DishFormModal from "@/components/admin/DishFormModal"
 import DishDetailModal from "@/components/admin/DishDetailModal"
 import { DishApiResponse } from "@/types/dish"
 import { searchAdminDishes } from "@/services/admin"
+import { toast } from "react-toastify"
 
 export default function DishManagementPage() {
   const [activeTab, setActiveTab] = useState("pending")
@@ -187,7 +188,10 @@ export default function DishManagementPage() {
           setSearchResults(response.data)
         }
       } catch (error) {
-        console.error('Failed to search dishes:', error)
+        toast.error('Không thể tìm kiếm món ăn. Vui lòng thử lại.', {
+          position: "top-right",
+          autoClose: 3000,
+        })
       } finally {
         setIsSearching(false)
       }
@@ -269,7 +273,14 @@ export default function DishManagementPage() {
               </Badge>
             ) : null}
           </TabsTrigger>
-          <TabsTrigger value="all">Đã duyệt</TabsTrigger>
+          <TabsTrigger value="all">
+            Đã duyệt
+            {allDishesQuery.data?.data?.totalElements ? (
+              <Badge variant="secondary" className="ml-2">
+                {allDishesQuery.data.data.totalElements}
+              </Badge>
+            ) : null}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value={activeTab}>

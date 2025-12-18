@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { API_ENDPOINTS, BASE_URL } from "@/configs/api"
 import { VendorInfo } from "../types"
+import { toast } from "react-toastify"
 
 export function useVendors() {
   const [vendorsById, setVendorsById] = useState<Record<string, VendorInfo>>({})
@@ -57,7 +58,10 @@ export function useVendors() {
 
       setVendorsById(map)
     } catch (err) {
-      console.error(err)
+      toast.error('Không thể tải danh sách vendor', {
+               position: 'top-right',
+               autoClose: 2500,
+               });
     }
   }
 

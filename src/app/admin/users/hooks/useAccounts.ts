@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { BASE_URL, API_ENDPOINTS } from "@/configs/api"
 import { AccountItem } from "../types"
+import { toast } from "react-toastify"
 
 export function useAccounts(accountType: "USER" | "VENDOR", statusFilter: string) {
   const [accounts, setAccounts] = useState<AccountItem[]>([])
@@ -75,8 +76,10 @@ export function useAccounts(accountType: "USER" | "VENDOR", statusFilter: string
       setAccounts(accumulated)
       setTotalAccounts(accumulated.length)
     } catch (err: any) {
-      console.error(err)
-      setError(err?.message || "Có lỗi xảy ra")
+       toast.error('Không thể tải danh sách tài khoản', {
+         position: 'top-right',
+         autoClose: 2500,
+         });      setError(err?.message || "Có lỗi xảy ra")
       setAccounts([])
       setTotalAccounts(0)
     } finally {

@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react"
 import { BASE_URL, API_ENDPOINTS } from "@/configs/api"
 import { AccountItem } from "../types"
+import { toast } from "react-toastify"
 
 export function useAccountActions(refetch: () => void) {
   const [updatingAccountId, setUpdatingAccountId] = useState<string | null>(null)
@@ -25,8 +26,10 @@ export function useAccountActions(refetch: () => void) {
         refetch()
         return { success: true, message: "Đã cập nhật trạng thái tài khoản" }
       } catch (error) {
-        console.error(error)
-        return { success: false, message: "Cập nhật trạng thái thất bại" }
+         toast.error('Không thể cập nhật trạng thái tài khoản', {
+         position: 'top-right',
+         autoClose: 2500,
+         });        return { success: false, message: "Cập nhật trạng thái thất bại" }
       } finally {
         setUpdatingAccountId(null)
       }
@@ -52,7 +55,10 @@ export function useAccountActions(refetch: () => void) {
         }
         return { success: true, message: "Email đã được gửi thành công" }
       } catch (error) {
-        console.error(error)
+         toast.error('Không thể gửi email', {
+         position: 'top-right',
+         autoClose: 2500,
+         });
         return { success: false, message: "Gửi email thất bại" }
       } finally {
         setIsSendingEmail(false)

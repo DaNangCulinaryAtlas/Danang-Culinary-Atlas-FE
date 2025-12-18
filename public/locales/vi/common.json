@@ -29,6 +29,20 @@
         "vietnamese": "Tiếng Việt",
         "english": "English"
     },
+    "restaurants": {
+        "results": "Kết quả",
+        "perPage": "mỗi trang",
+        "errorLoading": "Không thể tải danh sách nhà hàng",
+        "tryAgain": "Thử lại",
+        "noRestaurantsFound": "Không tìm thấy nhà hàng nào",
+        "noRestaurantsDescription": "Chúng tôi không tìm thấy nhà hàng nào phù hợp với tìm kiếm của bạn.",
+        "clearAllFilters": "Xóa tất cả bộ lọc",
+        "loading": "Đang tải nhà hàng...",
+        "found": "Tìm thấy",
+        "resultsText": "kết quả",
+        "in": "trong",
+        "seconds": "giây"
+    },
     "home": {
         "heroTitle": "Khám phá ẩm thực tinh túy Đà Nẵng",
         "heroDescription": "Ẩm thực Đà Nẵng - sự hòa quyện tinh tế của hương vị miền Trung. Từ tô mì Quảng đậm đà, bánh xèo giòn tan đến những món hải sản tươi ngon bậc nhất. Một hành trình vị giác đầy phóng khoáng và đáng nhớ.",

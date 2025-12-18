@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface SearchResultPagesProps {
   resultsPerPage: number;
@@ -7,14 +8,16 @@ interface SearchResultPagesProps {
 
 const resultOptions = [9, 12, 24, 48];
 
-const SearchResultPages = memo(function SearchResultPages({ 
-  resultsPerPage, 
-  setResultsPerPage 
+const SearchResultPages = memo(function SearchResultPages({
+  resultsPerPage,
+  setResultsPerPage
 }: SearchResultPagesProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex items-center gap-2">
       <label htmlFor="results-select" className="text-sm text-gray-600 whitespace-nowrap">
-        Kết quả
+        {t('restaurants.results')}
       </label>
       <select
         id="results-select"
@@ -24,7 +27,7 @@ const SearchResultPages = memo(function SearchResultPages({
       >
         {resultOptions.map((option) => (
           <option key={option} value={option}>
-            {option} per page
+            {option} {t('restaurants.perPage')}
           </option>
         ))}
       </select>

@@ -3,20 +3,29 @@ import { getRestaurantDetail } from '@/services/restaurant';
 
 interface RestaurantDetail {
     restaurantId: string;
+    ownerAccountId: string;
     name: string;
     address: string;
     images: {
         photo: string;
         sub_photo: string[];
     };
+    wardId: number;
+    status: string;
+    createdAt: string;
+    approvalStatus: string;
+    approvedByAccountId: string | null;
+    approvedAt: string | null;
+    rejectionReason: string | null;
+    tags?: Array<{
+        tagId: number;
+        name: string;
+    }>;
+    latitude: number;
+    longitude: number;
     openingHours: Record<string, string>;
     averageRating: number;
     totalReviews: number;
-    latitude: number;
-    longitude: number;
-    phone?: string;
-    status: string;
-    tags?: string[] | null;
 }
 
 export const useRestaurantDetail = (restaurantId: string) => {

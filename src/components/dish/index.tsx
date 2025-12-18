@@ -10,7 +10,7 @@ export default function DishCard({ dish }: DishCardProps) {
   const router = useRouter();
   return (
     <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden flex flex-col"
-      onClick={() => router.push(`/dishes/${dish.title.replace(/\s+/g, '-').toLowerCase()}`)}
+      onClick={() => router.push(`/dishes/${dish.id}`)}
     >
       {/* Image Section */}
       <div className="relative w-full h-48 md:h-56 overflow-hidden bg-gray-200">

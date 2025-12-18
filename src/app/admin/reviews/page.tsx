@@ -24,7 +24,6 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Star, Eye, Trash2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import { format } from 'date-fns';
 
 export default function ReviewManagementPage() {
   const [page, setPage] = useState(0);
@@ -33,6 +32,35 @@ export default function ReviewManagementPage() {
   const [maxRating, setMaxRating] = useState(5);
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  const formatDate = (dateString: string) => {
+    try {
+      const parts = dateString.split('T');
+      if (parts.length !== 2) return '';
+
+      const [datePart, timePart] = parts;
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hour, minute] = timePart.split(':').map(Number);
+
+      const date = new Date(Date.UTC(year, month - 1, day, hour, minute));
+
+      if (isNaN(date.getTime())) {
+        return '';
+      }
+
+      const vnDate = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+
+      const h = String(vnDate.getUTCHours()).padStart(2, '0');
+      const m = String(vnDate.getUTCMinutes()).padStart(2, '0');
+      const d = String(vnDate.getUTCDate()).padStart(2, '0');
+      const mo = String(vnDate.getUTCMonth() + 1).padStart(2, '0');
+      const y = vnDate.getUTCFullYear();
+
+      return `${h}:${m} ${d}/${mo}/${y}`;
+    } catch (error) {
+      return '';
+    }
+  };
 
   const [selectedReviewId, setSelectedReviewId] = useState<string | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -79,8 +107,8 @@ export default function ReviewManagementPage() {
           <Star
             key={star}
             className={`w-4 h-4 ${star <= rating
-                ? 'fill-yellow-400 text-yellow-400'
-                : 'text-gray-300'
+              ? 'fill-yellow-400 text-yellow-400'
+              : 'text-gray-300'
               }`}
           />
         ))}
@@ -199,7 +227,6 @@ export default function ReviewManagementPage() {
                       <TableHead>Rating</TableHead>
                       <TableHead>Comment</TableHead>
                       <TableHead>Created At</TableHead>
-                      <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -225,29 +252,7 @@ export default function ReviewManagementPage() {
                           </p>
                         </TableCell>
                         <TableCell>
-                          {format(
-                            new Date(review.createdAt),
-                            'MMM dd, yyyy HH:mm'
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-1">
-                            {review.hasOpenReport && (
-                              <Badge variant="destructive" className="w-fit">
-                                Has Report
-                              </Badge>
-                            )}
-                            {review.vendorReply && (
-                              <Badge variant="secondary" className="w-fit">
-                                Replied
-                              </Badge>
-                            )}
-                            {review.images && review.images.length > 0 && review.images[0] !== 'string' && (
-                              <Badge variant="outline" className="w-fit">
-                                {review.images.length} Image{review.images.length > 1 ? 's' : ''}
-                              </Badge>
-                            )}
-                          </div>
+                          {formatDate(review.createdAt)}
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">

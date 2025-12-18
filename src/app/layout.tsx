@@ -65,6 +65,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${mulish.variable} ${openSans.variable} ${volkhov.variable} ${poppins.variable} ${nicoMoji.variable} antialiased`}
+        suppressHydrationWarning
       >
         <Providers>{children}</Providers>
       </body>

@@ -143,7 +143,7 @@ export default function Sidebar() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-white tracking-tight drop-shadow-sm">
-              Atlas Food
+              Admin Panel
             </h1>
             <p className="text-xs font-medium" style={{ color: adminColors.primary[200] }}>Dashboard</p>
           </div>

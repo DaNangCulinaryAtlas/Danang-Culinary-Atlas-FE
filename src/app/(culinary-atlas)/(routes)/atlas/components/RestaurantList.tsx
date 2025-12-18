@@ -35,9 +35,6 @@ export default function RestaurantList() {
           <h2 className="text-lg font-semibold text-gray-800">
             {restaurants.length} restaurants found
           </h2>
-          <Button variant="ghost" className="p-3 hover:bg-gray-100 rounded-lg transition-colors">
-            <SlidersHorizontal size={20} className="text-gray-600" />
-          </Button>
         </div>
       </div>
 

@@ -200,14 +200,6 @@ export default function NotificationPanel({ isOpen, onClose }: NotificationPanel
                             {unreadCount}
                         </span>
                     )}
-                    {/* WebSocket connection status */}
-                    <div className="ml-1" title={isConnected() ? 'Đã kết nối' : 'Mất kết nối'}>
-                        {isConnected() ? (
-                            <Wifi className="w-4 h-4 text-green-500" />
-                        ) : (
-                            <WifiOff className="w-4 h-4 text-gray-400" />
-                        )}
-                    </div>
                 </div>
                 <div className="flex items-center gap-2">
                     {unreadCount > 0 && (

@@ -68,7 +68,6 @@ export function useRestaurants() {
 
       setRestaurants(all)
     } catch (err: any) {
-      console.error(err)
       setError(err?.message || "Có lỗi xảy ra khi tải quán ăn")
       setRestaurants([])
     } finally {
