@@ -19,7 +19,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { format } from 'date-fns';
 import type { Report, ReportStatus } from '@/types/report';
 import { updateReportStatus } from '@/services/report';
 import { toast } from 'sonner';
@@ -32,6 +31,35 @@ interface ReportsTableProps {
 export const ReportsTable: React.FC<ReportsTableProps> = ({ reports, onStatusUpdate }) => {
     const [filterStatus, setFilterStatus] = useState<string>('ALL');
     const [updatingReportId, setUpdatingReportId] = useState<string | null>(null);
+
+    const formatDate = (dateString: string) => {
+        try {
+            const parts = dateString.split('T');
+            if (parts.length !== 2) return '';
+
+            const [datePart, timePart] = parts;
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hour, minute] = timePart.split(':').map(Number);
+
+            const date = new Date(Date.UTC(year, month - 1, day, hour, minute));
+
+            if (isNaN(date.getTime())) {
+                return '';
+            }
+
+            const vnDate = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+
+            const h = String(vnDate.getUTCHours()).padStart(2, '0');
+            const m = String(vnDate.getUTCMinutes()).padStart(2, '0');
+            const d = String(vnDate.getUTCDate()).padStart(2, '0');
+            const mo = String(vnDate.getUTCMonth() + 1).padStart(2, '0');
+            const y = vnDate.getUTCFullYear();
+
+            return `${h}:${m} ${d}/${mo}/${y}`;
+        } catch (error) {
+            return '';
+        }
+    };
 
     const filteredReports = reports.filter((report) => {
         if (filterStatus === 'ALL') return true;
@@ -115,11 +143,11 @@ export const ReportsTable: React.FC<ReportsTableProps> = ({ reports, onStatusUpd
                                     <TableCell className="max-w-xs truncate">{report.reason}</TableCell>
                                     <TableCell>{getStatusBadge(report.status)}</TableCell>
                                     <TableCell>
-                                        {format(new Date(report.createdAt), 'MMM dd, yyyy HH:mm')}
+                                        {formatDate(report.createdAt)}
                                     </TableCell>
                                     <TableCell>
                                         {report.processedAt
-                                            ? format(new Date(report.processedAt), 'MMM dd, yyyy HH:mm')
+                                            ? formatDate(report.processedAt)
                                             : '-'}
                                     </TableCell>
                                     <TableCell className="text-right">

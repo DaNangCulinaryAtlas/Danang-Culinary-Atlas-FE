@@ -23,7 +23,6 @@ export default function ReportsPage() {
       setStatistics(statsData);
       setReports(reportsData);
     } catch (error) {
-      console.error('Failed to fetch reports data:', error);
       toast.error('Failed to load reports data');
     } finally {
       setLoading(false);

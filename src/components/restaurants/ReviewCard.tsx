@@ -33,35 +33,37 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
 
     const isOwner = currentUserId === review.reviewerAccountId;
     const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        const now = new Date();
+        try {
+            // API trả về timestamp UTC, cần cộng 7 giờ để về giờ Việt Nam
+            // Ví dụ: "2025-12-18T08:30:44.849377" là 08:30 UTC = 15:30 VN
+            const parts = dateString.split('T');
+            if (parts.length !== 2) return '';
 
-        // Nếu parse lỗi, return empty
-        if (isNaN(date.getTime())) {
+            const [datePart, timePart] = parts;
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hour, minute] = timePart.split(':').map(Number);
+
+            // Tạo date với giờ UTC
+            const date = new Date(Date.UTC(year, month - 1, day, hour, minute));
+
+            if (isNaN(date.getTime())) {
+                return '';
+            }
+
+            // Cộng 7 giờ để chuyển sang giờ Việt Nam
+            const vnDate = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+
+            // Format thành HH:mm DD/MM/YYYY
+            const h = String(vnDate.getUTCHours()).padStart(2, '0');
+            const m = String(vnDate.getUTCMinutes()).padStart(2, '0');
+            const d = String(vnDate.getUTCDate()).padStart(2, '0');
+            const mo = String(vnDate.getUTCMonth() + 1).padStart(2, '0');
+            const y = vnDate.getUTCFullYear();
+
+            return `${h}:${m} ${d}/${mo}/${y}`;
+        } catch (error) {
             return '';
         }
-
-        const diffTime = now.getTime() - date.getTime();
-
-        // Nếu thời gian trong tương lai, không hiển thị
-        if (diffTime < 0) {
-            return '';
-        }
-
-        const diffMinutes = Math.floor(diffTime / (1000 * 60));
-        const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
-        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        const diffWeeks = Math.floor(diffDays / 7);
-        const diffMonths = Math.floor(diffDays / 30);
-        const diffYears = Math.floor(diffDays / 365);
-
-        if (diffMinutes < 1) return 'Just now';
-        if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`;
-        if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-        if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-        if (diffWeeks < 4) return `${diffWeeks} week${diffWeeks > 1 ? 's' : ''} ago`;
-        if (diffMonths < 12) return `${diffMonths} month${diffMonths > 1 ? 's' : ''} ago`;
-        return `${diffYears} year${diffYears > 1 ? 's' : ''} ago`;
     };
 
     const handleUpdate = () => {

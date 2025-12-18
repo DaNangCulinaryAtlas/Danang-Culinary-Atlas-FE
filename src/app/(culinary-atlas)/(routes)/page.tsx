@@ -6,7 +6,6 @@ import DishCard from "@/components/dish";
 import RestaurantCard from "@/components/restaurants/RestaurantCard";
 import { Button } from "@/components/ui/button";
 import { Heart, Share2, MapPin, Star } from 'lucide-react';
-import DishCarousel from "@/components/restaurants/DishCarousel";
 import { useRouter } from "next/navigation";
 import { useTranslation } from 'react-i18next';
 import { useAppSelector } from "@/hooks/useRedux";
@@ -15,7 +14,6 @@ import { useRecommendedDishesWithDetails, useRecommendedRestaurantsWithDetails }
 export default function HomePage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
   const [currentHour, setCurrentHour] = useState(new Date().getHours());
 
   // Get user ID from Redux state (empty string if not logged in)
@@ -55,13 +53,6 @@ export default function HomePage() {
     reviewCount: 0,
     price: dish.price / 1000 // Convert VND to display format
   }));
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle search logic here
-    console.log("Searching for:", searchQuery);
-    // You can navigate to search results page or filter content
-  };
   return (
     <div className="mt-auto">
       <div className="relative w-full h-auto mb-32">
@@ -95,28 +86,6 @@ export default function HomePage() {
 
         </div>
 
-        {/* Search Box - positioned absolutely at bottom of banner */}
-        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-full max-w-4xl px-4 z-10">
-          <form onSubmit={handleSearch}>
-            <div className="bg-white rounded-2xl shadow-2xl p-4 flex items-center gap-2">
-              <div className="flex flex-1">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={t('home.searchPlaceholder')}
-                  className="w-full text-gray-600 font-mulish text-sm outline-none placeholder-gray-400"
-                />
-              </div>
-              <button
-                type="submit"
-                className="bg-[#FFDA32] hover:bg-yellow-400 text-[#1C2B38] font-mulish font-bold px-8 py-3 rounded-xl transition-all shadow-md"
-              >
-                {t('home.search')}
-              </button>
-            </div>
-          </form>
-        </div>
       </div>
 
       <div className="flex flex-col">

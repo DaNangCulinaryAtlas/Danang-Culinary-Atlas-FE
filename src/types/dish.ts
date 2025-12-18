@@ -85,6 +85,7 @@ export interface UpdateDishStatusRequest {
 
 // Legacy type for UI components
 interface Dish {
+  id: string;
   image: string;
   title: string;
   description: string;

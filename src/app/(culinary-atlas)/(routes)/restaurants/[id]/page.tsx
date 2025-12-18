@@ -15,15 +15,14 @@ import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { Notification } from '@/services/notification';
-import { Review } from '@/services/review';
 import { useReportRestaurant } from '@/hooks/mutations/useReportRestaurant';
+import { MenuSection } from './components/MenuSection';
 
 export default function RestaurantDetail() {
   const router = useRouter();
   const params = useParams();
   const restaurantId = params.id as string;
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [sortBy, setSortBy] = useState('relevant');
   const [imageError, setImageError] = useState<{ [key: string]: boolean }>({});
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -94,7 +93,7 @@ export default function RestaurantDetail() {
             console.log('⏭️ [RestaurantDetail] Review is for different restaurant, skipping UI update');
           }
         } catch (error) {
-          console.error('❌ [RestaurantDetail] Error fetching review details:', error);
+          console.log('❌ [RestaurantDetail] Failed to fetch review details:', error);
         }
       } else {
         console.warn('⚠️ [RestaurantDetail] Could not extract reviewId from targetUrl:', notification.targetUrl);
@@ -204,12 +203,12 @@ export default function RestaurantDetail() {
           {/* Tags */}
           {restaurant.tags && restaurant.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {restaurant.tags.map((tag, index) => (
+              {restaurant.tags.map((tag) => (
                 <span
-                  key={index}
+                  key={tag.tagId}
                   className="px-3 py-1 bg-blue-100 text-[#44BACA] rounded-full text-sm font-medium"
                 >
-                  {tag}
+                  {tag.name}
                 </span>
               ))}
             </div>
@@ -263,7 +262,6 @@ export default function RestaurantDetail() {
                       alt={restaurant.name}
                       className="h-full object-contain"
                       onError={() => {
-                        console.error('Main photo failed to load:', restaurant.images.photo);
                         setImageError(prev => ({ ...prev, 'main-photo': true }));
                       }}
                     />
@@ -315,6 +313,9 @@ export default function RestaurantDetail() {
             />
           </section>
         )}
+
+        {/* Menu Section */}
+        <MenuSection restaurantId={restaurantId} />
 
         {/* Customer Reviews */}
         <section className="mb-8">

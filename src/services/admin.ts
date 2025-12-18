@@ -137,7 +137,7 @@ export const updateRolePermissions = async (
     actionIds: number[]
 ): Promise<UpdatePermissionsResponse> => {
     try {
-        const response: AxiosResponse = await instanceAxios.put(
+        const response: AxiosResponse = await instanceAxios.patch(
             API_ENDPOINTS.ADMIN.PERMISSIONS_UPDATE,
             { roleId, actionIds }
         );

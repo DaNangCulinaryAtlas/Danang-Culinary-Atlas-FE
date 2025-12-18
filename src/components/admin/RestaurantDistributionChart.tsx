@@ -138,8 +138,10 @@ export default function RestaurantDistributionChart() {
     };
 
     return (
-        <div className="h-[300px] relative">
-            <Pie data={chartData} options={options} />
+        <div className="relative">
+            <div className="h-[300px]">
+                <Pie data={chartData} options={options} />
+            </div>
             {data.length > 10 && (
                 <p className="text-xs text-gray-400 text-center mt-3">
                     * Hiển thị top 10 loại hình quán ăn phổ biến nhất

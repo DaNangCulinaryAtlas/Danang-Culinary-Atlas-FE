@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { API_ENDPOINTS, BASE_URL } from "@/configs/api"
 import { Province, District, Ward } from "../types"
+import { toast } from "react-toastify"
 
 export function useLocations() {
   const [provinces, setProvinces] = useState<Province[]>([])
@@ -24,8 +25,10 @@ export function useLocations() {
       const provincesList = Array.isArray(data) ? data : data?.data || []
       setProvinces(provincesList)
     } catch (err) {
-      console.error("Error fetching provinces:", err)
-    }
+      toast.error('Không thể tải danh sách tỉnh/thành phố', {
+         position: 'top-right',
+         autoClose: 2500,
+         });    }
   }, [])
 
   const fetchDistricts = useCallback(async (provinceId: number) => {
@@ -58,8 +61,10 @@ export function useLocations() {
         return [...existing, ...normalizedDistricts]
       })
     } catch (err) {
-      console.error("Error fetching districts:", err)
-    }
+       toast.error('Không thể tải danh sách quận/huyện', {
+         position: 'top-right',
+         autoClose: 2500,
+         });    }
   }, [])
 
   const fetchWards = useCallback(async (districtId: number) => {
@@ -92,7 +97,10 @@ export function useLocations() {
         return [...existing, ...normalizedWards]
       })
     } catch (err) {
-      console.error("Error fetching wards:", err)
+      toast.error('Không thể tải danh sách xã/phường', {
+        position: 'top-right',
+        autoClose: 2500,
+      });    
     }
   }, [])
 

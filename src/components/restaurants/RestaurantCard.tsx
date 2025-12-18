@@ -23,33 +23,25 @@ export default function RestaurantCard({
           <Image
             src={restaurant.images.photo}
             alt={restaurant.name}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            fill
             unoptimized={restaurant.images.photo.includes('googleusercontent.com')}
-            className="object-cover hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+            fill
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <span className="text-gray-400 text-sm font-medium">No image</span>
           </div>
         )}
-
-        {/* Favorite Icon */}
-        <button
-          className="absolute top-4 right-4 bg-white/80 hover:bg-white p-2 rounded-full shadow-md transition"
-          onClick={(e) => {
-            e.stopPropagation();
-            // Handle favorite toggle
-          }}
-        >
-          <Heart className="w-5 h-5 text-gray-700 hover:text-red-500 transition-colors" />
-        </button>
       </div>
 
       {/* Info Section - Fixed Layout */}
       <div className="p-5 flex flex-col gap-3 flex-grow">
-        {/* Name - Fixed 2 lines height */}
-        <h3 className="text-[#1C2B38] font-volkhov font-bold text-lg leading-tight line-clamp-2 h-14">
+        {/* Name - Single line with ellipsis */}
+        <h3
+          className="text-[#1C2B38] font-volkhov font-bold text-lg leading-tight truncate"
+          title={restaurant.name}
+        >
           {restaurant.name}
         </h3>
 

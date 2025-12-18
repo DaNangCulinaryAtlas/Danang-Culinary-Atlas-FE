@@ -29,6 +29,20 @@
         "vietnamese": "Tiếng Việt",
         "english": "English"
     },
+    "restaurants": {
+        "results": "Results",
+        "perPage": "per page",
+        "errorLoading": "Failed to load restaurants",
+        "tryAgain": "Try Again",
+        "noRestaurantsFound": "No restaurants found",
+        "noRestaurantsDescription": "We couldn't find any restaurants matching your search.",
+        "clearAllFilters": "Clear all filters",
+        "loading": "Loading restaurants...",
+        "found": "Found",
+        "resultsText": "results",
+        "in": "in",
+        "seconds": "seconds"
+    },
     "home": {
         "heroTitle": "Discover the Essence of Da Nang Culinary",
         "heroDescription": "Da Nang cuisine - a sophisticated blend of Central Vietnam's flavors. From hearty Mi Quang noodles and crispy Banh Xeo to the freshest seafood. A vibrant and unforgettable culinary journey.",

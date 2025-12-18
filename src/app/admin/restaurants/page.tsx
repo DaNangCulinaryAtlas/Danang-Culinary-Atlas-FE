@@ -35,6 +35,7 @@ import { filterRestaurantsByLocation, groupRestaurantsByVendor } from "./utils/r
 import MiniMap from "./components/MiniMap"
 import LocationFilter from "./components/LocationFilter"
 import type { Restaurant, VendorGroup } from "./types"
+import { toast } from "react-toastify"
 
 
 export default function RestaurantApproval() {
@@ -187,7 +188,10 @@ export default function RestaurantApproval() {
 
       await refetchRestaurants()
     } catch (error) {
-      console.error(error)
+      toast.error('Không thể duyệt quán ăn. Vui lòng thử lại.', {
+        position: 'top-right',
+        autoClose: 2500,
+      });
     }
   }
 
@@ -224,7 +228,10 @@ export default function RestaurantApproval() {
       setSelectedRestaurant(null)
       await refetchRestaurants()
     } catch (error) {
-      console.error(error)
+      toast.error('Không thể từ chối quán ăn. Vui lòng thử lại.', {
+        position: 'top-right',
+        autoClose: 2500,
+      });
     }
   }
 
