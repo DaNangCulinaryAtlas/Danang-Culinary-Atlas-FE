@@ -1,4 +1,4 @@
-export const BASE_URL = process.env.NEXT_PUBLIC_APP_API_URL || 'http://178.128.208.78:8081/api/v1';
+export const BASE_URL = process.env.NEXT_PUBLIC_APP_API_URL || 'http://103.249.200.211:8081/api/v1';
 export const BASE_URL_2 = BASE_URL.replace('/v1', '');
 
 export const API_ENDPOINTS = {
