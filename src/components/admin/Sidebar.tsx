@@ -16,6 +16,7 @@ import {
   Settings,
   LogOut,
   FileCheck,
+  Brain,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
@@ -63,6 +64,11 @@ const menuItems = [
     title: "Quản lý Báo cáo",
     href: "/admin/reports",
     icon: Flag,
+  },
+  {
+    title: "Hệ thống Gợi ý",
+    href: "/admin/recommendation",
+    icon: Brain,
   },
   {
     title: "Cài đặt hệ thống",

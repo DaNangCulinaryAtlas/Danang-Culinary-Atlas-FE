@@ -187,6 +187,76 @@
                 "restaurantDistributionDesc": "Biểu đồ tròn dựa trên RestaurantTag",
                 "chartPlaceholder": "Biểu đồ tròn - Cần tích hợp thư viện chart"
             }
+        },
+        "recommendation": {
+            "title": "Hệ thống Gợi ý AI",
+            "subtitle": "Giám sát & Quản lý Hệ thống Gợi ý Món ăn",
+            "systemHealth": {
+                "title": "Tình trạng Hệ thống",
+                "subtitle": "Trạng thái Dịch vụ Gợi ý",
+                "systemError": "Lỗi Hệ thống",
+                "unableToConnect": "Không thể kết nối đến dịch vụ gợi ý",
+                "healthy": "Hoạt động tốt",
+                "unhealthy": "Lỗi",
+                "serviceVersion": "Phiên bản Dịch vụ",
+                "modelStatus": "Trạng thái Model",
+                "modelLoaded": "Đã tải",
+                "modelNotLoaded": "Chưa tải",
+                "trainingStatus": "Trạng thái Huấn luyện",
+                "idle": "Sẵn sàng",
+                "training": "Đang huấn luyện",
+                "lastTraining": "Huấn luyện Gần nhất"
+            },
+            "trainingControl": {
+                "title": "Điều khiển Huấn luyện",
+                "subtitle": "Quản lý Huấn luyện Model",
+                "unableToLoad": "Chưa có dữ liệu huấn luyện",
+                "lastTraining": "Huấn luyện Gần nhất",
+                "autoRetrain": "Tự động Huấn luyện lại",
+                "enabled": "Bật",
+                "disabled": "Tắt",
+                "trainingInterval": "Khoảng thời gian Huấn luyện",
+                "nextTrainingIn": "Huấn luyện Tiếp theo Sau",
+                "hours": "giờ",
+                "startingTraining": "Đang bắt đầu huấn luyện...",
+                "trainingInProgress": "Đang Huấn luyện",
+                "triggerManualTraining": "Bắt đầu Huấn luyện Thủ công",
+                "confirmMessage": "Bạn có chắc muốn bắt đầu huấn luyện? Quá trình này có thể mất vài phút.",
+                "cancel": "Hủy",
+                "confirm": "Xác nhận"
+            },
+            "metrics": {
+                "title": "Chỉ số Mới nhất",
+                "subtitle": "Đánh giá Hiệu suất Model",
+                "unableToLoad": "Không thể tải chỉ số",
+                "validationSet": "Tập Xác thực",
+                "testDish": "Tập Kiểm tra - Món ăn",
+                "testRestaurant": "Tập Kiểm tra - Quán ăn",
+                "recall": "Recall@10",
+                "ndcg": "NDCG@10",
+                "lastUpdated": "Cập nhật lần cuối"
+            },
+            "history": {
+                "title": "Lịch sử Huấn luyện",
+                "subtitle": "Dòng thời gian Huấn luyện Model",
+                "noRecords": "Chưa có bản ghi huấn luyện nào",
+                "sessions": "Phiên",
+                "latest": "Mới nhất",
+                "session": "Phiên",
+                "validation": "Xác thực",
+                "testDish": "Kiểm tra - Món ăn",
+                "testRestaurant": "Kiểm tra - Quán ăn"
+            },
+            "about": {
+                "title": "Về Hệ thống Gợi ý",
+                "description": "Bảng điều khiển này cung cấp giám sát và quản lý toàn diện cho hệ thống gợi ý món ăn được hỗ trợ bởi AI. Hệ thống sử dụng các thuật toán học máy tiên tiến để gợi ý món ăn và quán ăn dựa trên sở thích người dùng, ngữ cảnh (thời gian trong ngày) và hành vi lịch sử. Huấn luyện định kỳ đảm bảo model luôn cập nhật với các tương tác mới nhất của người dùng.",
+                "recall": "Recall@10",
+                "recallDesc": "Đo độ chính xác gợi ý",
+                "ndcg": "NDCG@10",
+                "ndcgDesc": "Độ lợi tích lũy chiết khấu chuẩn hóa",
+                "autoTraining": "Huấn luyện Tự động",
+                "autoTrainingDesc": "Huấn luyện lại model theo lịch"
+            }
         }
     }
 }

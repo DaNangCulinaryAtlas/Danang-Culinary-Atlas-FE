@@ -187,6 +187,76 @@
                 "restaurantDistributionDesc": "Pie chart based on RestaurantTag",
                 "chartPlaceholder": "Pie chart - Chart library integration needed"
             }
+        },
+        "recommendation": {
+            "title": "AI Recommendation Engine",
+            "subtitle": "Food Recommendation Monitoring & Management",
+            "systemHealth": {
+                "title": "System Health",
+                "subtitle": "Recommendation Service Status",
+                "systemError": "System Error",
+                "unableToConnect": "Unable to connect to recommendation service",
+                "healthy": "Healthy",
+                "unhealthy": "Unhealthy",
+                "serviceVersion": "Service Version",
+                "modelStatus": "Model Status",
+                "modelLoaded": "Loaded",
+                "modelNotLoaded": "Not Loaded",
+                "trainingStatus": "Training Status",
+                "idle": "Idle",
+                "training": "Training",
+                "lastTraining": "Last Training"
+            },
+            "trainingControl": {
+                "title": "Training Control",
+                "subtitle": "Model Training Management",
+                "unableToLoad": "No training data available",
+                "lastTraining": "Last Training",
+                "autoRetrain": "Auto Retrain",
+                "enabled": "Enabled",
+                "disabled": "Disabled",
+                "trainingInterval": "Training Interval",
+                "nextTrainingIn": "Next Training In",
+                "hours": "hours",
+                "startingTraining": "Starting Training...",
+                "trainingInProgress": "Training in Progress",
+                "triggerManualTraining": "Trigger Manual Training",
+                "confirmMessage": "Are you sure you want to start training? This may take several minutes.",
+                "cancel": "Cancel",
+                "confirm": "Confirm"
+            },
+            "metrics": {
+                "title": "Latest Metrics",
+                "subtitle": "Model Performance Evaluation",
+                "unableToLoad": "Unable to load metrics",
+                "validationSet": "Validation Set",
+                "testDish": "Test Set - Dish",
+                "testRestaurant": "Test Set - Restaurant",
+                "recall": "Recall@10",
+                "ndcg": "NDCG@10",
+                "lastUpdated": "Last updated"
+            },
+            "history": {
+                "title": "Training History",
+                "subtitle": "Model Training Timeline",
+                "noRecords": "No training records available",
+                "sessions": "Sessions",
+                "latest": "Latest",
+                "session": "Session",
+                "validation": "Validation",
+                "testDish": "Test - Dish",
+                "testRestaurant": "Test - Restaurant"
+            },
+            "about": {
+                "title": "About Recommendation System",
+                "description": "This dashboard provides comprehensive monitoring and management of the AI-powered food recommendation engine. The system uses advanced machine learning algorithms to recommend dishes and restaurants based on user preferences, context (time of day), and historical behavior. Regular training ensures the model stays up-to-date with the latest user interactions.",
+                "recall": "Recall@10",
+                "recallDesc": "Measures recommendation accuracy",
+                "ndcg": "NDCG@10",
+                "ndcgDesc": "Normalized discounted cumulative gain",
+                "autoTraining": "Auto Training",
+                "autoTrainingDesc": "Scheduled model retraining"
+            }
         }
     }
 }

@@ -21,7 +21,7 @@ class WebSocketService {
         }
 
         this.client = new Client({
-            webSocketFactory: () => new SockJS('http://178.128.208.78:8081/ws'),
+            webSocketFactory: () => new SockJS(process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'http://103.249.200.211:8081/ws'),
             connectHeaders: {
                 Authorization: `Bearer ${token}`,
             },
@@ -76,7 +76,7 @@ class WebSocketService {
         };
 
         this.client.onWebSocketError = (error) => {
-            
+
         };
 
         this.client.onDisconnect = () => {
