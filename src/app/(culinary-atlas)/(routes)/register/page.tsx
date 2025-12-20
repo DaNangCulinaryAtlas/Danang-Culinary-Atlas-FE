@@ -266,43 +266,6 @@ export default function Register() {
                             </Button>
                         </form>
 
-                        {/* Divider */}
-                        <div className="relative my-6">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-gray-300"></div>
-                            </div>
-                            <div className="relative flex justify-center">
-                                <span className="px-3 bg-white text-gray-400 text-sm">OR</span>
-                            </div>
-                        </div>
-
-                        {/* Social Register */}
-                        <div className="flex justify-center gap-3">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="h-12 w-20 bg-[#E7F2F5] border-[#E7F2F5] hover:bg-[#d8e8ec]"
-                                onClick={() => handleSocialRegister('Google')}
-                            >
-                                <GoogleIcon />
-                            </Button>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="h-12 w-20 bg-[#E7F2F5] border-[#E7F2F5] hover:bg-[#d8e8ec]"
-                                onClick={() => handleSocialRegister('Facebook')}
-                            >
-                                <FacebookIcon />
-                            </Button>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="h-12 w-20 bg-[#E7F2F5] border-[#E7F2F5] hover:bg-[#d8e8ec]"
-                                onClick={() => handleSocialRegister('Apple')}
-                            >
-                                <AppleIcon />
-                            </Button>
-                        </div>
 
                         {/* Login Link */}
                         <p className="text-center text-xs font-mulish text-gray-600">

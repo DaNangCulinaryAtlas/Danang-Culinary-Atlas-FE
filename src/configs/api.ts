@@ -104,6 +104,18 @@ export const API_ENDPOINTS = {
     PERMISSIONS_FOR_ROLE: (roleId: string) => `/admin/permissions/roles/${roleId}/permissions`, // Get permissions for a specific role
     ACTIONS_LIST: '/admin/permissions/actions', // Get all available actions
 
+    // Role Management - Quản lý role
+    ROLE_LIST: '/admin/roles', // Get all roles
+    ROLE_CREATE: '/admin/roles', // Create new role
+    ROLE_UPDATE: (roleId: string) => `/admin/roles/${roleId}`, // Update role
+    ROLE_DELETE: (roleId: string) => `/admin/roles/${roleId}`, // Delete role
+
+    // User Role Management - Quản lý role của user
+    ACCOUNTS_ALL: '/admin/accounts/all', // Get all accounts with their information
+    ACCOUNTS_SEARCH: '/admin/accounts/search', // Search accounts by keyword
+    USER_ROLES: (userId: string) => `/admin/users/${userId}/roles`, // Get roles of a specific user
+    USER_ROLE_UPDATE_STATUS: (userId: string, roleId: string) => `/admin/users/${userId}/roles/${roleId}/status`, // Update license status
+
     REVIEW: {
       CREATE: '/reviews',
       UPDATE: (id: string) => `/reviews/${id}`,

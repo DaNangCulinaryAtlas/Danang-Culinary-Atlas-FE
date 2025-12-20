@@ -158,13 +158,7 @@ export default function Login() {
 
               {/* Remember Me & Forgot */}
               <div className="flex items-center justify-between text-xs">
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 text-[#69C3CF] rounded focus:ring-[#69C3CF]"
-                  />
-                  <span className="text-gray-600 font-poppins">Remember me</span>
-                </label>
+
                 <button
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
@@ -183,44 +177,6 @@ export default function Login() {
                 {loginMutation.isPending ? 'ĐANG ĐĂNG NHẬP' : 'ĐĂNG NHẬP'}
               </Button>
             </form>
-
-            {/* Divider */}
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center">
-                <span className="px-3 bg-white text-gray-400 text-sm">OR</span>
-              </div>
-            </div>
-
-            {/* Social Login */}
-            <div className="flex justify-center gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                className="h-12 w-20 bg-[#E7F2F5] border-[#E7F2F5] hover:bg-[#d8e8ec]"
-                onClick={() => handleSocialLogin('Google')}
-              >
-                <GoogleIcon />
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="h-12 w-20 bg-[#E7F2F5] border-[#E7F2F5] hover:bg-[#d8e8ec]"
-                onClick={() => handleSocialLogin('Facebook')}
-              >
-                <FacebookIcon />
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="h-12 w-20 bg-[#E7F2F5] border-[#E7F2F5] hover:bg-[#d8e8ec]"
-                onClick={() => handleSocialLogin('Apple')}
-              >
-                <AppleIcon />
-              </Button>
-            </div>
 
             {/* Register Link */}
             <p className="text-center text-xs font-mulish text-gray-600">
