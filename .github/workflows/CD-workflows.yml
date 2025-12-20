@@ -30,8 +30,6 @@ jobs:
         run: |
           echo "=== /tmp ==="
           ls -lah /tmp
-          echo "=== /tmp/docker-image ==="
-          ls -lah /tmp/docker-image
 
       - name: Load Docker Image
         run: |
