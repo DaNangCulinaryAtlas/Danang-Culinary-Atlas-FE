@@ -35,7 +35,7 @@ jobs:
 
       - name: Load Docker Image
         run: |
-          docker load -i /tmp/docker-image/danang-culinary-atlas-fe.tar
+          docker load -i /tmp/danang-culinary-atlas-fe.tar
           docker images | grep ${{ env.IMAGE_NAME }}
 
       - name: Tag Image for Deployment
