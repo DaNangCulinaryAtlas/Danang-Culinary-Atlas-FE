@@ -15,6 +15,7 @@ import {
   Flag,
   Settings,
   LogOut,
+  FileCheck,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
@@ -47,6 +48,11 @@ const menuItems = [
     title: "Quản lý Món ăn",
     href: "/admin/dishes",
     icon: Utensils,
+  },
+  {
+    title: "Quản lý Giấy phép",
+    href: "/admin/licenses",
+    icon: FileCheck,
   },
   {
     title: "Kiểm duyệt Đánh giá",
@@ -121,21 +127,21 @@ export default function Sidebar() {
   }
 
   return (
-    <div 
+    <div
       className="flex h-screen w-64 flex-col shadow-2xl relative overflow-hidden"
       style={{ background: adminColors.gradients.sidebar }}
     >
       {/* Decorative background elements */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-10"></div>
-      
+
       {/* Logo */}
-      <div 
+      <div
         className="relative flex h-20 items-center px-6 backdrop-blur-md"
       >
         <div className="flex items-center gap-3">
-          <div 
+          <div
             className="h-12 w-12 rounded-xl flex items-center justify-center shadow-xl transition-transform hover:scale-105"
-            style={{ 
+            style={{
               background: adminColors.gradients.primarySoft
             }}
           >
@@ -155,7 +161,7 @@ export default function Sidebar() {
         {menuItems.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href
-          
+
           return (
             <Link
               key={item.href}
@@ -189,11 +195,11 @@ export default function Sidebar() {
               )} style={!isActive ? { color: adminColors.primary[300] } : {}} />
               <span className="flex-1">{item.title}</span>
               {item.href === "/admin/restaurants" && pendingRestaurantsCount !== null && (
-                <Badge 
+                <Badge
                   className="ml-auto text-xs font-bold px-2 py-0.5 rounded-full text-white shadow-lg"
                   style={{
-                    background: isActive 
-                      ? adminColors.status.error 
+                    background: isActive
+                      ? adminColors.status.error
                       : `rgba(239, 68, 68, 0.85)`
                   }}
                 >
@@ -201,7 +207,7 @@ export default function Sidebar() {
                 </Badge>
               )}
               {isActive && (
-                <div 
+                <div
                   className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full shadow-sm"
                   style={{ background: 'rgba(255,255,255,0.9)' }}
                 ></div>
@@ -212,7 +218,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Logout Button */}
-      <div 
+      <div
         className="relative border-t p-4 backdrop-blur-sm"
       >
         <Button

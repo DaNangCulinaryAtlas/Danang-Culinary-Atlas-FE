@@ -14,8 +14,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { MapPin, Clock, FileText, Eye, Store, Search, Loader2, Star, Plus, Pencil, Trash2 } from "lucide-react"
+import { MapPin, Clock, FileText, Eye, Store, Loader2, Star, Plus, Pencil, Trash2, CheckCircle, XCircle, AlertCircle, Download, Image as ImageIcon } from "lucide-react"
 import Image from "next/image"
 import { useVendorRestaurants } from "../../../hooks/queries/useVendorRestaurants"
 import MiniMap from "./components/MiniMap"
@@ -24,6 +23,11 @@ import { useAppSelector } from "@/hooks/useRedux"
 import { VendorRestaurantFormModal } from "@/components/vendor/VendorRestaurantFormModal"
 import { VendorConfirmDeleteModal } from "@/components/vendor/VendorConfirmDeleteModal"
 import { useDeleteRestaurant } from "@/hooks/mutations/useRestaurantMutations"
+import { useDeleteLicense } from "@/hooks/mutations/useLicenseMutations"
+import { LicenseFormModal } from "@/components/vendor/LicenseFormModal"
+import { LicenseImageModal } from "@/components/vendor/LicenseImageModal"
+import { useVendorLicenses } from "@/hooks/queries/useVendorLicenses"
+import type { License } from "@/types/license"
 
 export default function VendorRestaurantsPage() {
     const { user } = useAppSelector((state) => state.auth)
@@ -33,8 +37,17 @@ export default function VendorRestaurantsPage() {
     const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [restaurantToDelete, setRestaurantToDelete] = useState<Restaurant | null>(null)
+    const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false)
+    const [selectedLicense, setSelectedLicense] = useState<License | null>(null)
+    const [selectedRestaurantForLicense, setSelectedRestaurantForLicense] = useState<Restaurant | null>(null)
+    const [isImageModalOpen, setIsImageModalOpen] = useState(false)
+    const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null)
+    const [isDeleteLicenseModalOpen, setIsDeleteLicenseModalOpen] = useState(false)
+    const [licenseToDelete, setLicenseToDelete] = useState<License | null>(null)
 
     const deleteRestaurantMutation = useDeleteRestaurant()
+    const deleteLicenseMutation = useDeleteLicense()
+    const { data: licenses, isLoading: isLoadingLicenses } = useVendorLicenses()
 
     // Fetch all restaurants
     const { restaurants, isLoading, error, refetch } = useVendorRestaurants({
@@ -96,6 +109,109 @@ export default function VendorRestaurantsPage() {
         }
     }
 
+    const handleAddLicense = (restaurant: Restaurant) => {
+        setSelectedRestaurantForLicense(restaurant)
+        setSelectedLicense(null)
+        setIsLicenseModalOpen(true)
+    }
+
+    const handleEditLicense = (license: License, restaurant: Restaurant) => {
+        setSelectedRestaurantForLicense(restaurant)
+        setSelectedLicense(license)
+        setIsLicenseModalOpen(true)
+    }
+
+    const handleDeleteLicense = (license: License) => {
+        setLicenseToDelete(license)
+        setIsDeleteLicenseModalOpen(true)
+    }
+
+    const confirmDeleteLicense = async () => {
+        if (licenseToDelete) {
+            await deleteLicenseMutation.mutateAsync(licenseToDelete.licenseId)
+            setIsDeleteLicenseModalOpen(false)
+            setLicenseToDelete(null)
+        }
+    }
+
+    const handleViewImage = (url: string) => {
+        setSelectedImageUrl(url)
+        setIsImageModalOpen(true)
+    }
+
+    const isPdfFile = (url: string) => {
+        return url.toLowerCase().endsWith('.pdf') || url.includes('/documents/')
+    }
+
+    const handleDownloadPdf = async (url: string, licenseNumber: string) => {
+        try {
+            const response = await fetch(url)
+            const blob = await response.blob()
+            const downloadUrl = window.URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = downloadUrl
+            link.download = `giay-phep-${licenseNumber}.pdf`
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            window.URL.revokeObjectURL(downloadUrl)
+        } catch (error) {
+            console.error('Error downloading file:', error)
+        }
+    }
+
+    const getApprovalStatusBadge = (status: string) => {
+        switch (status) {
+            case 'APPROVED':
+                return (
+                    <Badge className="bg-green-100 text-green-800 border-green-300">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Đã duyệt
+                    </Badge>
+                )
+            case 'REJECTED':
+                return (
+                    <Badge className="bg-red-100 text-red-800 border-red-300">
+                        <XCircle className="w-3 h-3 mr-1" />
+                        Bị từ chối
+                    </Badge>
+                )
+            default:
+                return (
+                    <Badge variant="outline" className="border-yellow-500 text-yellow-600">
+                        <AlertCircle className="w-3 h-3 mr-1" />
+                        Chờ duyệt
+                    </Badge>
+                )
+        }
+    }
+
+    const formatDate = (dateString: string) => {
+        try {
+            const date = new Date(dateString)
+            return date.toLocaleDateString('vi-VN')
+        } catch {
+            return dateString
+        }
+    }
+
+    const getLicenseTypeLabel = (type: string) => {
+        switch (type) {
+            case 'BUSINESS_REGISTRATION':
+                return 'Giấy phép đăng ký kinh doanh'
+            case 'FOOD_SAFETY_CERT':
+                return 'Giấy chứng nhận an toàn thực phẩm'
+            default:
+                return type
+        }
+    }
+
+    // Get licenses for a specific restaurant
+    const getRestaurantLicenses = (restaurantId: string) => {
+        if (!licenses) return []
+        return licenses.filter(license => license.restaurantId === restaurantId)
+    }
+
     // Get status badge
     const getStatusBadge = (status: string, approvalStatus: string) => {
         if (approvalStatus === "PENDING") {
@@ -111,202 +227,332 @@ export default function VendorRestaurantsPage() {
     }
 
     // Restaurant Card Component
-    const RestaurantCard = ({ restaurant }: { restaurant: Restaurant }) => (
-        <Card
-            className="border-2 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] bg-white group"
-            style={{ borderColor: vendorColors.primary[200] }}
-        >
-            <CardHeader className="pb-3">
-                <div className="h-40 bg-muted rounded-lg flex items-center justify-center mb-3 overflow-hidden">
-                    {restaurant.image ? (
-                        <Image
-                            src={restaurant.image}
-                            alt={restaurant.name}
-                            width={300}
-                            height={200}
-                            className="w-full h-full object-cover"
-                        />
-                    ) : (
-                        <div className="text-center">
-                            <Store className="h-12 w-12 mx-auto mb-2 text-gray-400" />
-                            <p className="text-xs text-gray-400">Chưa có hình ảnh</p>
+    const RestaurantCard = ({ restaurant }: { restaurant: Restaurant }) => {
+        const restaurantLicenses = getRestaurantLicenses(restaurant.id)
+        const businessLicense = restaurantLicenses.find(l => l.licenseType === 'BUSINESS_REGISTRATION')
+        const foodSafetyLicense = restaurantLicenses.find(l => l.licenseType === 'FOOD_SAFETY_CERT')
+
+        return (
+            <Card
+                className="border-2 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] bg-white group"
+                style={{ borderColor: vendorColors.primary[200] }}
+            >
+                <CardHeader className="pb-3">
+                    <div className="h-40 bg-muted rounded-lg flex items-center justify-center mb-3 overflow-hidden">
+                        {restaurant.image ? (
+                            <Image
+                                src={restaurant.image}
+                                alt={restaurant.name}
+                                width={300}
+                                height={200}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="text-center">
+                                <Store className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+                                <p className="text-xs text-gray-400">Chưa có hình ảnh</p>
+                            </div>
+                        )}
+                    </div>
+                    <CardTitle className="text-lg font-bold truncate" style={{ color: vendorColors.primary[700] }}>
+                        {restaurant.name}
+                    </CardTitle>
+                    <CardDescription className="text-sm line-clamp-2">
+                        <MapPin className="h-3 w-3 inline mr-1" />
+                        {restaurant.address}
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                            <Star className="h-4 w-4 text-yellow-500" />
+                            <span className="text-sm font-medium">
+                                {restaurant.averageRating?.toFixed(1) || "0.0"} ({restaurant.totalReviews || 0})
+                            </span>
+                        </div>
+                        {getStatusBadge(restaurant.status, restaurant.approvalStatus)}
+                    </div>
+
+                    {restaurant.approvalStatus === "REJECTED" && restaurant.rejectionReason && (
+                        <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded-md">
+                            <p className="text-xs text-red-700">
+                                <strong>Lý do từ chối:</strong> {restaurant.rejectionReason}
+                            </p>
                         </div>
                     )}
-                </div>
-                <CardTitle className="text-lg font-bold truncate" style={{ color: vendorColors.primary[700] }}>
-                    {restaurant.name}
-                </CardTitle>
-                <CardDescription className="text-sm line-clamp-2">
-                    <MapPin className="h-3 w-3 inline mr-1" />
-                    {restaurant.address}
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0">
-                <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                        <Star className="h-4 w-4 text-yellow-500" />
-                        <span className="text-sm font-medium">
-                            {restaurant.averageRating?.toFixed(1) || "0.0"} ({restaurant.totalReviews || 0})
-                        </span>
-                    </div>
-                    {getStatusBadge(restaurant.status, restaurant.approvalStatus)}
-                </div>
 
-                {restaurant.approvalStatus === "REJECTED" && restaurant.rejectionReason && (
-                    <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded-md">
-                        <p className="text-xs text-red-700">
-                            <strong>Lý do từ chối:</strong> {restaurant.rejectionReason}
-                        </p>
-                    </div>
-                )}
-
-                {/* Action Buttons */}
-                <div className="grid grid-cols-3 gap-2 mb-3">
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="w-full"
-                            >
-                                <Eye className="h-4 w-4" />
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                            <DialogHeader>
-                                <DialogTitle>Chi tiết Quán ăn</DialogTitle>
-                                <DialogDescription>{restaurant.name}</DialogDescription>
-                            </DialogHeader>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Left Column - Restaurant Info */}
-                                <div className="space-y-4">
-                                    <div>
-                                        <h3 className="font-semibold mb-2">Thông tin quán</h3>
-                                        <div className="space-y-2 text-sm">
-                                            <div>
-                                                <span className="font-medium">Tên quán:</span> {restaurant.name}
-                                            </div>
-                                            <div className="flex items-start gap-2">
-                                                <MapPin className="h-4 w-4 mt-0.5" />
-                                                <span>
-                                                    <span className="font-medium">Địa chỉ:</span> {restaurant.address}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-start gap-2">
-                                                <Clock className="h-4 w-4 mt-0.5" />
-                                                <span>
-                                                    <span className="font-medium">Giờ mở cửa:</span>{" "}
-                                                    {Object.keys(restaurant.openingHours || {}).length > 0
-                                                        ? JSON.stringify(restaurant.openingHours)
-                                                        : "Chưa có thông tin"}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-start gap-2">
-                                                <FileText className="h-4 w-4 mt-0.5" />
-                                                <span>
-                                                    <span className="font-medium">Trạng thái:</span>{" "}
-                                                    {getStatusBadge(restaurant.status, restaurant.approvalStatus)}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-start gap-2">
-                                                <Star className="h-4 w-4 mt-0.5 text-yellow-500" />
-                                                <span>
-                                                    <span className="font-medium">Đánh giá:</span>{" "}
-                                                    {restaurant.averageRating?.toFixed(1) || "0.0"} ({restaurant.totalReviews || 0} đánh giá)
-                                                </span>
-                                            </div>
-                                            {restaurant.createdAt && (
-                                                <div>
-                                                    <span className="font-medium">Ngày tạo:</span>{" "}
-                                                    {new Date(restaurant.createdAt).toLocaleString("vi-VN")}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {restaurant.approvalStatus === "REJECTED" && restaurant.rejectionReason && (
-                                        <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                                            <h4 className="font-semibold text-red-700 mb-1">Lý do từ chối</h4>
-                                            <p className="text-sm text-red-600">{restaurant.rejectionReason}</p>
-                                        </div>
-                                    )}
-
-                                    <div>
-                                        <h3 className="font-semibold mb-2">Bản đồ</h3>
-                                        <MiniMap
-                                            latitude={restaurant.latitude}
-                                            longitude={restaurant.longitude}
-                                            restaurantName={restaurant.name}
-                                        />
-                                    </div>
+                    {/* License Status */}
+                    <div className="mb-3 space-y-2">
+                        <div className="text-xs font-semibold text-gray-600 mb-1">Giấy phép:</div>
+                        <div className="space-y-1">
+                            {businessLicense ? (
+                                <div className="flex items-center justify-between text-xs p-1.5 bg-green-50 rounded border border-green-200">
+                                    <span className="flex items-center gap-1">
+                                        <CheckCircle className="w-3 h-3 text-green-600" />
+                                        <span className="text-green-700">Đăng ký KD</span>
+                                    </span>
+                                    {getApprovalStatusBadge(businessLicense.approvalStatus)}
                                 </div>
+                            ) : (
+                                <div className="flex items-center justify-between text-xs p-1.5 bg-gray-50 rounded border border-gray-200">
+                                    <span className="flex items-center gap-1">
+                                        <XCircle className="w-3 h-3 text-gray-400" />
+                                        <span className="text-gray-600">Chưa có ĐKKD</span>
+                                    </span>
+                                </div>
+                            )}
+                            {foodSafetyLicense ? (
+                                <div className="flex items-center justify-between text-xs p-1.5 bg-green-50 rounded border border-green-200">
+                                    <span className="flex items-center gap-1">
+                                        <CheckCircle className="w-3 h-3 text-green-600" />
+                                        <span className="text-green-700">An toàn TP</span>
+                                    </span>
+                                    {getApprovalStatusBadge(foodSafetyLicense.approvalStatus)}
+                                </div>
+                            ) : (
+                                <div className="flex items-center justify-between text-xs p-1.5 bg-gray-50 rounded border border-gray-200">
+                                    <span className="flex items-center gap-1">
+                                        <XCircle className="w-3 h-3 text-gray-400" />
+                                        <span className="text-gray-600">Chưa có ATVSTP</span>
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
-                                {/* Right Column - Images */}
-                                <div className="space-y-4">
-                                    <div>
-                                        <h3 className="font-semibold mb-2">Hình ảnh quán ăn</h3>
-                                        <div className="space-y-3">
-                                            <div className="h-48 bg-muted rounded-md flex items-center justify-center overflow-hidden">
-                                                {restaurant.image ? (
-                                                    <Image
-                                                        src={restaurant.image}
-                                                        alt={restaurant.name}
-                                                        width={400}
-                                                        height={260}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                ) : (
-                                                    <div className="flex flex-col items-center justify-center text-xs text-muted-foreground">
-                                                        <Store className="h-8 w-8 mb-1 text-gray-400" />
-                                                        Chưa có ảnh đại diện
+                    {/* Action Buttons */}
+                    <div className="grid grid-cols-3 gap-2 mb-3">
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-full"
+                                >
+                                    <Eye className="h-4 w-4" />
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                                <DialogHeader>
+                                    <DialogTitle>Chi tiết Quán ăn</DialogTitle>
+                                    <DialogDescription>{restaurant.name}</DialogDescription>
+                                </DialogHeader>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Left Column - Restaurant Info */}
+                                    <div className="space-y-4">
+                                        <div>
+                                            <h3 className="font-semibold mb-2">Thông tin quán</h3>
+                                            <div className="space-y-2 text-sm">
+                                                <div>
+                                                    <span className="font-medium">Tên quán:</span> {restaurant.name}
+                                                </div>
+                                                <div className="flex items-start gap-2">
+                                                    <MapPin className="h-4 w-4 mt-0.5" />
+                                                    <span>
+                                                        <span className="font-medium">Địa chỉ:</span> {restaurant.address}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-start gap-2">
+                                                    <Clock className="h-4 w-4 mt-0.5" />
+                                                    <span>
+                                                        <span className="font-medium">Giờ mở cửa:</span>{" "}
+                                                        {Object.keys(restaurant.openingHours || {}).length > 0
+                                                            ? JSON.stringify(restaurant.openingHours)
+                                                            : "Chưa có thông tin"}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-start gap-2">
+                                                    <FileText className="h-4 w-4 mt-0.5" />
+                                                    <span>
+                                                        <span className="font-medium">Trạng thái:</span>{" "}
+                                                        {getStatusBadge(restaurant.status, restaurant.approvalStatus)}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-start gap-2">
+                                                    <Star className="h-4 w-4 mt-0.5 text-yellow-500" />
+                                                    <span>
+                                                        <span className="font-medium">Đánh giá:</span>{" "}
+                                                        {restaurant.averageRating?.toFixed(1) || "0.0"} ({restaurant.totalReviews || 0} đánh giá)
+                                                    </span>
+                                                </div>
+                                                {restaurant.createdAt && (
+                                                    <div>
+                                                        <span className="font-medium">Ngày tạo:</span>{" "}
+                                                        {new Date(restaurant.createdAt).toLocaleString("vi-VN")}
                                                     </div>
                                                 )}
                                             </div>
-                                            {restaurant.subPhotos && restaurant.subPhotos.length > 0 && (
-                                                <div className="grid grid-cols-3 gap-2">
-                                                    {restaurant.subPhotos.slice(0, 9).map((url, index) => (
-                                                        <div
-                                                            key={index}
-                                                            className="relative h-20 rounded-md overflow-hidden bg-muted"
-                                                        >
-                                                            <Image
-                                                                src={url}
-                                                                alt={`${restaurant.name} - hình ${index + 1}`}
-                                                                fill
-                                                                className="object-cover"
-                                                            />
+                                        </div>
+
+                                        {restaurant.approvalStatus === "REJECTED" && restaurant.rejectionReason && (
+                                            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                                                <h4 className="font-semibold text-red-700 mb-1">Lý do từ chối</h4>
+                                                <p className="text-sm text-red-600">{restaurant.rejectionReason}</p>
+                                            </div>
+                                        )}
+
+                                        {/* Licenses Section */}
+                                        <div>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <h3 className="font-semibold">Giấy phép</h3>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => handleAddLicense(restaurant)}
+                                                    className="h-7"
+                                                >
+                                                    <Plus className="h-3 w-3 mr-1" />
+                                                    Thêm
+                                                </Button>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {restaurantLicenses.length === 0 ? (
+                                                    <div className="text-sm text-gray-500 text-center py-4 border border-dashed rounded-md">
+                                                        Chưa có giấy phép nào
+                                                    </div>
+                                                ) : (
+                                                    restaurantLicenses.map((license) => (
+                                                        <div key={license.licenseId} className="border rounded-md p-3 space-y-2 bg-gray-50">
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="text-sm font-medium">{getLicenseTypeLabel(license.licenseType)}</span>
+                                                                {getApprovalStatusBadge(license.approvalStatus)}
+                                                            </div>
+                                                            <div className="text-xs space-y-1 text-gray-600">
+                                                                <div><span className="font-medium">Số GP:</span> {license.licenseNumber}</div>
+                                                                <div><span className="font-medium">Ngày cấp:</span> {formatDate(license.issueDate)}</div>
+                                                                {license.expireDate && (
+                                                                    <div><span className="font-medium">Hết hạn:</span> {formatDate(license.expireDate)}</div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex gap-2 pt-1">
+                                                                {isPdfFile(license.documentUrl) ? (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="outline"
+                                                                        onClick={() => handleDownloadPdf(license.documentUrl, license.licenseNumber)}
+                                                                        className="h-7 text-xs"
+                                                                    >
+                                                                        <Download className="h-3 w-3 mr-1" />
+                                                                        Tải xuống
+                                                                    </Button>
+                                                                ) : (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="outline"
+                                                                        onClick={() => handleViewImage(license.documentUrl)}
+                                                                        className="h-7 text-xs"
+                                                                    >
+                                                                        <Eye className="h-3 w-3 mr-1" />
+                                                                        Xem
+                                                                    </Button>
+                                                                )}
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    onClick={() => handleEditLicense(license, restaurant)}
+                                                                    className="h-7 text-xs"
+                                                                >
+                                                                    <Pencil className="h-3 w-3 mr-1" />
+                                                                    Sửa
+                                                                </Button>
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    onClick={() => handleDeleteLicense(license)}
+                                                                    className="h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                                >
+                                                                    <Trash2 className="h-3 w-3 mr-1" />
+                                                                    Xóa
+                                                                </Button>
+                                                            </div>
+                                                            {license.rejectionReason && (
+                                                                <div className="text-xs text-red-600 mt-2 p-2 bg-red-50 rounded border border-red-200">
+                                                                    <strong>Lý do từ chối:</strong> {license.rejectionReason}
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                    ))}
+                                                    ))
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h3 className="font-semibold mb-2">Bản đồ</h3>
+                                            <MiniMap
+                                                latitude={restaurant.latitude}
+                                                longitude={restaurant.longitude}
+                                                restaurantName={restaurant.name}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Right Column - Images */}
+                                    <div className="space-y-4">
+                                        <div>
+                                            <h3 className="font-semibold mb-2">Hình ảnh quán ăn</h3>
+                                            <div className="space-y-3">
+                                                <div className="h-48 bg-muted rounded-md flex items-center justify-center overflow-hidden">
+                                                    {restaurant.image ? (
+                                                        <Image
+                                                            src={restaurant.image}
+                                                            alt={restaurant.name}
+                                                            width={400}
+                                                            height={260}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="flex flex-col items-center justify-center text-xs text-muted-foreground">
+                                                            <Store className="h-8 w-8 mb-1 text-gray-400" />
+                                                            Chưa có ảnh đại diện
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            )}
+                                                {restaurant.subPhotos && restaurant.subPhotos.length > 0 && (
+                                                    <div className="grid grid-cols-3 gap-2">
+                                                        {restaurant.subPhotos.slice(0, 9).map((url, index) => (
+                                                            <div
+                                                                key={index}
+                                                                className="relative h-20 rounded-md overflow-hidden bg-muted"
+                                                            >
+                                                                <Image
+                                                                    src={url}
+                                                                    alt={`${restaurant.name} - hình ${index + 1}`}
+                                                                    fill
+                                                                    className="object-cover"
+                                                                />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </DialogContent>
-                    </Dialog>
+                            </DialogContent>
+                        </Dialog>
 
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        onClick={() => handleEditRestaurant(restaurant)}
-                    >
-                        <Pencil className="h-4 w-4" />
-                    </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                            onClick={() => handleEditRestaurant(restaurant)}
+                        >
+                            <Pencil className="h-4 w-4" />
+                        </Button>
 
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => handleDeleteRestaurant(restaurant)}
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
-                </div>
-            </CardContent>
-        </Card>
-    )
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => handleDeleteRestaurant(restaurant)}
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
 
     return (
         <div className="space-y-6">
@@ -506,6 +752,70 @@ export default function VendorRestaurantsPage() {
                 onConfirm={confirmDeleteRestaurant}
                 isLoading={deleteRestaurantMutation.isPending}
                 restaurantName={restaurantToDelete?.name || ''}
+            />
+
+            {/* License Form Modal */}
+            <LicenseFormModal
+                open={isLicenseModalOpen}
+                onOpenChange={setIsLicenseModalOpen}
+                license={selectedLicense}
+                restaurantId={selectedRestaurantForLicense?.id}
+                restaurantName={selectedRestaurantForLicense?.name}
+                restaurants={restaurants.map(r => ({ id: r.id, name: r.name }))}
+            />
+
+            {/* Delete License Confirmation Modal */}
+            <Dialog open={isDeleteLicenseModalOpen} onOpenChange={setIsDeleteLicenseModalOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Xác nhận xóa giấy phép</DialogTitle>
+                        <DialogDescription>
+                            Bạn có chắc chắn muốn xóa giấy phép này không? Hành động này không thể hoàn tác.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4">
+                        {licenseToDelete && (
+                            <div className="space-y-2 text-sm">
+                                <p><span className="font-semibold">Loại giấy phép:</span> {getLicenseTypeLabel(licenseToDelete.licenseType)}</p>
+                                <p><span className="font-semibold">Số giấy phép:</span> {licenseToDelete.licenseNumber}</p>
+                                <p><span className="font-semibold">Nhà hàng:</span> {licenseToDelete.restaurantName}</p>
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex justify-end gap-3">
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setIsDeleteLicenseModalOpen(false)
+                                setLicenseToDelete(null)
+                            }}
+                            disabled={deleteLicenseMutation.isPending}
+                        >
+                            Hủy
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={confirmDeleteLicense}
+                            disabled={deleteLicenseMutation.isPending}
+                        >
+                            {deleteLicenseMutation.isPending ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    Đang xóa...
+                                </>
+                            ) : (
+                                'Xác nhận xóa'
+                            )}
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* License Image Modal */}
+            <LicenseImageModal
+                open={isImageModalOpen}
+                onOpenChange={setIsImageModalOpen}
+                imageUrl={selectedImageUrl}
             />
         </div>
     )

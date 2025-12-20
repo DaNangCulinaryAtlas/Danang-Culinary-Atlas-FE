@@ -13,7 +13,7 @@ export function useAccountActions(refetch: () => void) {
       try {
         const token = typeof window !== "undefined" ? window.localStorage.getItem("token") : null
         const response = await fetch(`${BASE_URL}${API_ENDPOINTS.ADMIN.UPDATE_ACCOUNT_STATUS(account.id)}`, {
-          method: "PUT",
+          method: "PATCH",
           headers: {
             "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
