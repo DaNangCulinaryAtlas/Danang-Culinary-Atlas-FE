@@ -30,10 +30,12 @@ jobs:
         run: |
           echo "=== /tmp ==="
           ls -lah /tmp
+          echo "=== /tmp/docker-image ==="
+          ls -lah /tmp/docker-image || echo "docker-image directory not found"
 
       - name: Load Docker Image
         run: |
-          docker load -i /tmp/danang-culinary-atlas-fe.tar
+          docker load -i /tmp/docker-image/danang-culinary-atlas-fe.tar
           docker images | grep ${{ env.IMAGE_NAME }}
 
       - name: Tag Image for Deployment
