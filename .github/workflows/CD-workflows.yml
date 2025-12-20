@@ -24,18 +24,18 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: docker-image
-          path: /tmp
+          path: ${{ github.workspace }}
 
       - name: Debug artifact location
         run: |
-          echo "=== /tmp ==="
-          ls -lah /tmp | grep danang-culinary-atlas-fe.tar || echo "File not found in /tmp"
+          echo "=== workspace ==="
+          ls -lah ${{ github.workspace }}
 
       - name: Load Docker Image
         run: |
-          docker load -i /tmp/danang-culinary-atlas-fe.tar
+          cat ${{ github.workspace }}/danang-culinary-atlas-fe.tar | docker load
           docker images | grep ${{ env.IMAGE_NAME }}
-
+        
       - name: Tag Image for Deployment
         run: |
           docker tag ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} ${{ env.IMAGE_NAME }}:latest
