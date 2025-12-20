@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useReviewsByRatingRange } from '@/hooks/queries/useReviews';
 import { useDeleteReview } from '@/hooks/mutations/useReviewMutations';
 import { ReviewDetailModal } from '@/components/admin/ReviewDetailModal';
@@ -22,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { Loader2, Star, Eye, Trash2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function ReviewManagementPage() {

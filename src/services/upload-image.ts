@@ -14,14 +14,18 @@ export const uploadImageToCloudinary = async (file: File): Promise<ApiResponse<s
             throw new Error('Cloudinary configuration is missing. Please check environment variables.');
         }
 
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
+        // Validate file type (accept only images)
+        const allowedTypes = ['image/'];
+        const isValidType = allowedTypes.some(type => file.type.startsWith(type));
+
+        if (!isValidType) {
             throw new Error('Please select an image file');
         }
 
-        // Validate file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            throw new Error('Image size must be less than 5MB');
+        // Validate file size (max 5MB for images)
+        const maxSize = 5 * 1024 * 1024;
+        if (file.size > maxSize) {
+            throw new Error('File size must be less than 5MB');
         }
 
         const formData = new FormData();

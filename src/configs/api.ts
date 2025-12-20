@@ -130,4 +130,12 @@ export const API_ENDPOINTS = {
     RESTAURANT_VENDOR_DISHES: (restaurantId: string) => `/restaurants/${restaurantId}/vendor-dishes`, // Get all dishes (including pending/rejected)
     RESTAURANT_DISHES: (restaurantId: string) => `/restaurants/${restaurantId}/dishes`, // Get approved dishes only
   },
+  LICENSE: {
+    CREATE: '/licenses', // Tạo giấy phép mới
+    UPDATE: (licenseId: string) => `/licenses/${licenseId}`, // Cập nhật giấy phép
+    DELETE: (licenseId: string) => `/licenses/${licenseId}`, // Xóa giấy phép
+    MY_LICENSES: '/licenses/me', // Lấy danh sách giấy phép của vendor
+    ADMIN_LIST: '/admin/licenses', // Lấy danh sách giấy phép (admin)
+    ADMIN_UPDATE_STATUS: (licenseId: string) => `/admin/licenses/${licenseId}/status`, // Cập nhật trạng thái giấy phép (approve/reject)
+  },
 };
