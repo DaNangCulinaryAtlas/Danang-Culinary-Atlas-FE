@@ -30,10 +30,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Search, Eye, Lock, Unlock, Mail, Loader2, ChevronLeft, ChevronRight } from "lucide-react"
-import Image from "next/image"
 import { useAccounts } from "./hooks/useAccounts"
 import { useAccountActions } from "./hooks/useAccountActions"
-import { formatDate, isValidImageUrl, displayStatus, displayRole } from "./utils/accountUtils"
+import { formatDate, displayStatus, displayRole } from "./utils/accountUtils"
 import Toast from "./components/Toast"
 import EmailDialog from "./components/EmailDialog"
 import BlockConfirmDialog from "./components/BlockConfirmDialog"
@@ -48,7 +47,7 @@ export default function UserVendorManagement() {
   const [confirmAccount, setConfirmAccount] = useState<AccountItem | null>(null)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
-  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null)
+  const [toastMsg, setToastMsg] = useState<{ type: "success" | "error"; message: string } | null>(null)
 
   const { accounts, isLoading, error, totalAccounts, refetch } = useAccounts(accountType, statusFilter)
   const { updateAccountStatus, sendEmail, updatingAccountId, isSendingEmail } = useAccountActions(refetch)
@@ -62,8 +61,8 @@ export default function UserVendorManagement() {
   }, [accountType, statusFilter, searchQuery])
 
   const showToast = (type: "success" | "error", message: string) => {
-    setToast({ type, message })
-    setTimeout(() => setToast(null), 3000)
+    setToastMsg({ type, message })
+    setTimeout(() => setToastMsg(null), 3000)
   }
 
   const filteredAccounts = useMemo(() => {
@@ -112,13 +111,15 @@ export default function UserVendorManagement() {
 
   return (
     <div className="space-y-6">
-      {toast && <Toast type={toast.type} message={toast.message} />}
+      {toastMsg && <Toast type={toastMsg.type} message={toastMsg.message} />}
 
       <div
         className="rounded-xl p-5 md:p-6 text-white shadow-lg"
         style={{ background: adminColors.gradients.primary }}
       >
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-1">Quản lý User & Vendor</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-1">
+          Quản lý User & Vendor
+        </h1>
         <p className="text-sm md:text-base font-medium" style={{ color: adminColors.primary[200] }}>
           Theo dõi và điều phối tài khoản người dùng, vendor trong hệ thống
         </p>
@@ -174,8 +175,7 @@ export default function UserVendorManagement() {
           <CardDescription className="font-semibold" style={{ color: adminColors.primary[200] }}>
             {error
               ? error
-              : `Tổng: ${totalAccounts} tài khoản${searchQuery.trim() ? ` · Kết quả phù hợp: ${filteredAccounts.length}` : ""
-              }`}
+              : `Tổng: ${totalAccounts} tài khoản${searchQuery.trim() ? ` · Kết quả phù hợp: ${filteredAccounts.length}` : ""}`}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
@@ -194,7 +194,6 @@ export default function UserVendorManagement() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>ID</TableHead>
-                    <TableHead>Avatar</TableHead>
                     <TableHead>Họ tên</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Vai trò</TableHead>
@@ -207,21 +206,6 @@ export default function UserVendorManagement() {
                   {paginatedAccounts.map((account) => (
                     <TableRow key={account.id}>
                       <TableCell className="font-semibold text-gray-600">{account.id}</TableCell>
-                      <TableCell>
-                        {isValidImageUrl(account.avatarUrl) ? (
-                          <Image
-                            src={account.avatarUrl as string}
-                            alt={account.name}
-                            width={36}
-                            height={36}
-                            className="rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="h-9 w-9 rounded-full bg-gray-100 flex items-center justify-center font-semibold text-gray-500">
-                            {account.name.charAt(0)}
-                          </div>
-                        )}
-                      </TableCell>
                       <TableCell className="font-medium">
                         <div>{account.name}</div>
                         {account.vendorName && (
@@ -308,7 +292,8 @@ export default function UserVendorManagement() {
                 </TableBody>
               </Table>
             </div>
-          )}
+          )
+          }
         </CardContent>
       </Card>
 

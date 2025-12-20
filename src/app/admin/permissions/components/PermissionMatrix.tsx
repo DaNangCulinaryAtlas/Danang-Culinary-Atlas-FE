@@ -16,6 +16,7 @@ interface PermissionMatrixProps {
   actions: Action[]
   permissionMatrix: Record<number, Record<number, boolean>>
   onPermissionChange: (roleId: number, actionId: number, checked: boolean) => void
+  disabled?: boolean
 }
 
 export default function PermissionMatrix({
@@ -23,6 +24,7 @@ export default function PermissionMatrix({
   actions,
   permissionMatrix,
   onPermissionChange,
+  disabled = false,
 }: PermissionMatrixProps) {
   return (
     <div className="overflow-x-auto">
@@ -52,6 +54,7 @@ export default function PermissionMatrix({
                   <TableCell key={`${roleKey}-${actionKey}`} className="text-center">
                     <Checkbox
                       checked={isChecked}
+                      disabled={disabled}
                       onCheckedChange={(checked) =>
                         onPermissionChange(role.id, action.id, checked === true)
                       }

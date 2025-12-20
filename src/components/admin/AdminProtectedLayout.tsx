@@ -47,9 +47,9 @@ export default function AdminProtectedLayout({ children }: AdminProtectedLayoutP
         )
     }
 
-    // Show access denied if user doesn't have ADMIN role
-    if (!user.roles || !user.roles.includes("ADMIN")) {
-        return <AccessDenied requiredRole="ADMIN" />
+    // Show access denied if user doesn't have ADMIN or SUPER_ADMIN role
+    if (!user.roles || (!user.roles.includes("ADMIN") && !user.roles.includes("SUPER_ADMIN"))) {
+        return <AccessDenied requiredRole="ADMIN or SUPER_ADMIN" />
     }
 
     return <>{children}</>

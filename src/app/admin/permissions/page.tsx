@@ -7,12 +7,16 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Shield, Save, Loader2, CheckCircle2, XCircle } from "lucide-react"
 import { adminColors } from "@/configs/colors"
 import { usePermissions } from "../../../services/permission-role"
+import { useAppSelector } from "@/hooks/useRedux"
 import Notification from "./components/Notification"
 import PermissionMatrix from "./components/PermissionMatrix"
 import RolesPermissionsDetail from "@/components/admin/RolesPermissionsDetail"
 import ConfirmUpdateModal from "@/components/admin/ConfirmUpdateModal"
 
 export default function PermissionsManagement() {
+  const { user } = useAppSelector((state) => state.auth)
+  const isSuperAdmin = user?.roles?.includes("SUPER_ADMIN") || false
+
   const [notification, setNotification] = useState<{ type: "success" | "error" | null; message: string }>({
     type: null,
     message: "",
@@ -120,30 +124,34 @@ export default function PermissionsManagement() {
                 Ma trận Phân quyền
               </CardTitle>
               <CardDescription className="font-semibold mt-1" style={{ color: adminColors.primary[600] }}>
-                Chọn checkbox để cấp quyền cho role tương ứng
+                {isSuperAdmin
+                  ? "Chọn checkbox để cấp quyền cho role tương ứng"
+                  : "Xem ma trận phân quyền hệ thống (chỉ SUPER_ADMIN mới có thể chỉnh sửa)"}
               </CardDescription>
             </div>
-            <Button
-              onClick={handleOpenConfirmModal}
-              disabled={isSaving}
-              className="shadow-lg hover:shadow-xl transition-all"
-              style={{
-                background: adminColors.gradients.primarySoft,
-                color: "white",
-              }}
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Đang lưu...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Lưu thay đổi
-                </>
-              )}
-            </Button>
+            {isSuperAdmin && (
+              <Button
+                onClick={handleOpenConfirmModal}
+                disabled={isSaving}
+                className="shadow-lg hover:shadow-xl transition-all"
+                style={{
+                  background: adminColors.gradients.primarySoft,
+                  color: "white",
+                }}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Đang lưu...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Lưu thay đổi
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -152,6 +160,7 @@ export default function PermissionsManagement() {
             actions={actions}
             permissionMatrix={permissionMatrix}
             onPermissionChange={updatePermission}
+            disabled={!isSuperAdmin}
           />
         </CardContent>
       </Card>
@@ -185,7 +194,7 @@ export default function PermissionsManagement() {
         <CardContent className="p-6">
           <div className="flex items-start gap-4">
             <div
-              className="h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0"
+              className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0"
               style={{ background: adminColors.primary[50] }}
             >
               <Shield className="h-5 w-5" style={{ color: adminColors.primary[600] }} />

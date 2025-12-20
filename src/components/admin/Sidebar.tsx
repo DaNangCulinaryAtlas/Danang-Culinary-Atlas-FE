@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { useAppDispatch } from "@/hooks/useRedux"
+import { useAppDispatch, useAppSelector } from "@/hooks/useRedux"
 import { logout } from "@/stores/auth"
 import {
   LayoutDashboard,
@@ -17,6 +17,8 @@ import {
   LogOut,
   FileCheck,
   Brain,
+  ShieldCheck,
+  UserCog,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
@@ -24,56 +26,78 @@ import { Button } from "@/components/ui/button"
 import { adminColors } from "@/configs/colors"
 import { API_ENDPOINTS, BASE_URL } from "@/configs/api"
 
-const menuItems = [
+const getMenuItems = (isSuperAdmin: boolean) => [
   {
     title: "Tổng quan",
     href: "/admin",
     icon: LayoutDashboard,
+    roles: ["ADMIN", "SUPER_ADMIN"],
   },
   {
     title: "Quản trị Permission",
     href: "/admin/permissions",
     icon: Shield,
+    roles: ["ADMIN", "SUPER_ADMIN"],
+  },
+  {
+    title: "Quản lý Role",
+    href: "/admin/roles",
+    icon: ShieldCheck,
+    roles: ["SUPER_ADMIN"],
+  },
+  {
+    title: "Quản lý User Role",
+    href: "/admin/user-roles",
+    icon: UserCog,
+    roles: ["SUPER_ADMIN"],
   },
   {
     title: "Quản lý Người dùng",
     href: "/admin/users",
     icon: Users,
+    roles: ["ADMIN", "SUPER_ADMIN"],
   },
   {
     title: "Quản lý Quán ăn",
     href: "/admin/restaurants",
     icon: Store,
+    roles: ["ADMIN", "SUPER_ADMIN"],
   },
   {
     title: "Quản lý Món ăn",
     href: "/admin/dishes",
     icon: Utensils,
+    roles: ["ADMIN", "SUPER_ADMIN"],
   },
   {
     title: "Quản lý Giấy phép",
     href: "/admin/licenses",
     icon: FileCheck,
+    roles: ["ADMIN", "SUPER_ADMIN"],
   },
   {
     title: "Kiểm duyệt Đánh giá",
     href: "/admin/reviews",
     icon: MessageSquare,
+    roles: ["ADMIN", "SUPER_ADMIN"],
   },
   {
     title: "Quản lý Báo cáo",
     href: "/admin/reports",
     icon: Flag,
+    roles: ["ADMIN", "SUPER_ADMIN"],
   },
   {
     title: "Hệ thống Gợi ý",
     href: "/admin/recommendation",
     icon: Brain,
+    roles: ["ADMIN", "SUPER_ADMIN"],
   },
   {
     title: "Cài đặt hệ thống",
     href: "/admin/settings",
     icon: Settings,
+    roles: ["ADMIN", "SUPER_ADMIN"],
   },
 ]
 
@@ -81,7 +105,14 @@ export default function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const dispatch = useAppDispatch()
+  const { user } = useAppSelector((state) => state.auth)
   const [pendingRestaurantsCount, setPendingRestaurantsCount] = useState<number | null>(null)
+
+  const isSuperAdmin = user?.roles?.includes("SUPER_ADMIN") || false
+  const userRoles = user?.roles || []
+  const menuItems = getMenuItems(isSuperAdmin).filter(
+    (item) => item.roles.some((role) => userRoles.includes(role))
+  )
 
   useEffect(() => {
     const fetchPendingRestaurantsCount = async () => {
