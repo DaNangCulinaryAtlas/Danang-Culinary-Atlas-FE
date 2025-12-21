@@ -1,6 +1,6 @@
 "use client";
 import { useState, useMemo, useEffect } from "react";
-import { Search, SlidersHorizontal, Grid3x3, List, X, Loader2, TrendingUp, CircleDollarSign, Layers2 } from "lucide-react";
+import { Search, SlidersHorizontal, Grid3x3, List, X, Loader2, TrendingUp, CircleDollarSign, Layers2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDishes } from "@/hooks/queries/useDishes";
 import { CUISINE_TAGS } from "@/constants/cuisineTags";
@@ -9,7 +9,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 
 export default function DishPage() {
   const { t } = useTranslation();
-  
+
   const PRICE_RANGES = [
     { label: t('dishes.priceRanges.under30k'), min: 0, max: 30000, key: 'under30k' },
     { label: t('dishes.priceRanges.30k50k'), min: 30000, max: 50000, key: '30k50k' },
@@ -47,12 +47,12 @@ export default function DishPage() {
     searchQuery
       ? {
         page: currentPage,
-        size: 20,
+        size: 12,
         search: searchQuery,
       }
       : {
         page: currentPage,
-        size: 20,
+        size: 12,
         tagId: selectedTagId,
         minPrice: priceRange?.min,
         maxPrice: priceRange?.max,
@@ -115,17 +115,23 @@ export default function DishPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div
-        className="relative text-white py-24 overflow-hidden"
-        style={{
-          backgroundImage: "url('/images/bg-dish.png')",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      >
-        {/* Overlay gradient for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#44BACA]/80 via-[#44BACA]/70 to-[#69C3CF]/80"></div>
+      <div className="relative text-white py-20 md:py-32 overflow-hidden">
+        {/* Background Image with Parallax Effect */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat transform scale-105"
+          style={{
+            backgroundImage: "url('/images/bg-dish.png')",
+          }}
+        />
+
+        {/* Multi-layer Gradient Overlay for Depth */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#44BACA]/85 via-[#44BACA]/75 to-[#1a8997]/80"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
+
+        {/* Decorative Pattern Overlay */}
+        <div className="absolute inset-0 opacity-5" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        }}></div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4">
           <h1 className="font-volkhov font-bold text-4xl md:text-5xl text-center mb-6 drop-shadow-lg">
@@ -135,22 +141,25 @@ export default function DishPage() {
             {totalElements > 0 ? t('dishes.subtitle', { count: totalElements }) : t('dishes.subtitleEmpty')}
           </p>
 
-          {/* Search Bar */}
-          <div className="max-w-2xl mx-auto">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('dishes.searchPlaceholder')}
-                className="w-full pl-12 pr-4 py-4 rounded-full text-gray-900 font-mulish text-base focus:outline-none focus:ring-2 focus:ring-white/50 shadow-xl"
-              />
+          {/* Enhanced Search Bar */}
+          <div className="max-w-3xl mx-auto mb-8">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-white/20 rounded-full blur-xl group-hover:bg-white/30 transition-all duration-300"></div>
+              <div className="relative bg-white rounded-full shadow-2xl overflow-hidden">
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 z-10" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t('dishes.searchPlaceholder')}
+                  className="w-full pl-14 pr-6 py-4 sm:py-5 text-gray-900 font-mulish text-base sm:text-lg focus:outline-none focus:ring-2 focus:ring-white/70 rounded-full bg-transparent"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Quick Filters */}
-          <div className="flex flex-wrap justify-center gap-3 mt-6">
+          {/* Stylish Quick Filters */}
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
             {CUISINE_TAGS.slice(0, 6).map((tag) => (
               <Button
                 key={tag.tagId}
@@ -158,10 +167,15 @@ export default function DishPage() {
                   toggleTag(tag.tagId);
                   setShowMobileFilters(false);
                 }}
-                className={`backdrop-blur-sm border rounded-full px-6 py-2 ${selectedTagId === tag.tagId
-                  ? 'bg-white text-[#44BACA] border-white'
-                  : 'bg-white/20 hover:bg-white/30 border-white/30'
-                  }`}
+                className={`
+                  backdrop-blur-md border-2 rounded-full px-5 sm:px-7 py-2.5 
+                  font-medium text-sm sm:text-base
+                  transition-all duration-300 transform hover:scale-105
+                  ${selectedTagId === tag.tagId
+                    ? 'bg-white text-[#44BACA] border-white shadow-lg scale-105'
+                    : 'bg-white/10 hover:bg-white/25 border-white/40 hover:border-white/60 text-white'
+                  }
+                `}
               >
                 {tag.name}
               </Button>
@@ -269,7 +283,7 @@ export default function DishPage() {
             <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="font-semibold text-gray-700">
-                  {t('dishes.found')} <span className="text-[#44BACA]">{filteredDishes.length}</span> {t('dishes.dishes')}
+                  <span className="text-[#44BACA]">{totalElements}</span> {searchQuery ? t('dishes.dishesFor', { query: searchQuery }) : hasActiveFilters ? t('dishes.dishesMatching') : t('dishes.dishesTotal')}
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -388,48 +402,92 @@ export default function DishPage() {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 mt-8">
-                    <Button
+                  <nav className="flex items-center justify-center gap-2 mt-8" aria-label="Pagination">
+                    <button
                       onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
                       disabled={currentPage === 0}
-                      className="px-4 py-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-2 rounded-lg hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      aria-label="Previous page"
                     >
-                      {t('dishes.previous')}
-                    </Button>
-                    <div className="flex gap-2">
-                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                        let pageNum;
-                        if (totalPages <= 5) {
-                          pageNum = i;
-                        } else if (currentPage < 3) {
-                          pageNum = i;
-                        } else if (currentPage > totalPages - 3) {
-                          pageNum = totalPages - 5 + i;
-                        } else {
-                          pageNum = currentPage - 2 + i;
-                        }
-                        return (
-                          <Button
-                            key={pageNum}
-                            onClick={() => setCurrentPage(pageNum)}
-                            className={`w-10 h-10 rounded-lg ${currentPage === pageNum
-                              ? 'bg-[#44BACA] text-white'
-                              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                              }`}
+                      <ChevronLeft className="w-5 h-5 text-gray-600" />
+                    </button>
+
+                    {(() => {
+                      const pages: (number | string)[] = [];
+                      const maxVisible = 5;
+
+                      if (totalPages <= maxVisible) {
+                        return Array.from({ length: totalPages }, (_, i) => i).map(page => (
+                          <button
+                            key={`page-${page}`}
+                            onClick={() => setCurrentPage(page)}
+                            className={`
+                              px-4 py-2 rounded-lg transition
+                              ${currentPage === page
+                                ? "bg-[#44BACA] text-white"
+                                : "hover:bg-gray-100"
+                              }
+                            `}
+                            aria-label={`Go to page ${page + 1}`}
+                            aria-current={currentPage === page ? "page" : undefined}
                           >
-                            {pageNum + 1}
-                          </Button>
-                        );
-                      })}
-                    </div>
-                    <Button
+                            {(page + 1).toString().padStart(2, "0")}
+                          </button>
+                        ));
+                      }
+
+                      // Always show first page
+                      pages.push(0);
+
+                      // Calculate range around current page
+                      const leftSide = Math.max(1, currentPage - 1);
+                      const rightSide = Math.min(totalPages - 2, currentPage + 1);
+
+                      if (leftSide > 1) pages.push("...");
+
+                      for (let i = leftSide; i <= rightSide; i++) {
+                        pages.push(i);
+                      }
+
+                      if (rightSide < totalPages - 2) pages.push("...");
+
+                      // Always show last page
+                      if (totalPages > 1) pages.push(totalPages - 1);
+
+                      return pages.map((page, index) => (
+                        typeof page === "number" ? (
+                          <button
+                            key={`page-${page}`}
+                            onClick={() => setCurrentPage(page)}
+                            className={`
+                              px-4 py-2 rounded-lg transition
+                              ${currentPage === page
+                                ? "bg-[#44BACA] text-white"
+                                : "hover:bg-gray-100"
+                              }
+                            `}
+                            aria-label={`Go to page ${page + 1}`}
+                            aria-current={currentPage === page ? "page" : undefined}
+                          >
+                            {(page + 1).toString().padStart(2, "0")}
+                          </button>
+                        ) : (
+                          <span key={`ellipsis-${index}`} className="px-2 text-gray-500">
+                            {page}
+                          </span>
+                        )
+                      ));
+                    })()}
+
+                    <button
                       onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
                       disabled={currentPage === totalPages - 1}
-                      className="px-4 py-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-2 rounded-lg hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      aria-label="Next page"
                     >
-                      {t('dishes.next')}
-                    </Button>
-                  </div>
+                      <ChevronRight className="w-5 h-5 text-gray-600" />
+                    </button>
+                  </nav>
                 )}
               </>
             ) : (

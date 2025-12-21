@@ -167,7 +167,10 @@ export default function ReviewForm({ restaurantId }: ReviewFormProps) {
           setImages([]);
 
           // Show success toast
-          toast.success(t('reviews.postSuccess'));
+          toast.success(t('reviews.postSuccess'), {
+            position: 'top-right',
+            autoClose: 2500,
+          });
         },
         onError: (error: any) => {
           toast.error(t('reviews.postError'), {

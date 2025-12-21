@@ -230,7 +230,10 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
     const handleDelete = () => {
         deleteReview(review.reviewId, {
             onSuccess: () => {
-                toast.success(t('reviews.deleteSuccess'));
+                toast.success(t('reviews.deleteSuccess'),{
+                    position: 'top-right',
+                    autoClose: 2500,
+                });
                 setShowDeleteModal(false);
             },
             onError: (error: any) => {

@@ -50,6 +50,14 @@ export const metadata: Metadata = {
     "Da Nang street food",
     "Vietnam food culture",
   ],
+  icons: {
+    icon: [
+      { url: "/images/logo.png" },
+      { url: "/images/logo.png", sizes: "32x32", type: "image/png" },
+      { url: "/images/logo.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: "/images/logo.png",
+  },
   openGraph: {
     title: "Danang Culinary Atlas",
   },
