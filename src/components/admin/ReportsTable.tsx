@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/select';
 import type { Report, ReportStatus } from '@/types/report';
 import { updateReportStatus } from '@/services/report';
-import { toast } from 'sonner';
+import { toast } from 'react-toastify';
 
 interface ReportsTableProps {
     reports: Report[];
@@ -73,8 +73,10 @@ export const ReportsTable: React.FC<ReportsTableProps> = ({ reports, onStatusUpd
             toast.success('Report status updated successfully');
             onStatusUpdate();
         } catch (error) {
-            console.error('Failed to update report status:', error);
-            toast.error('Failed to update report status');
+            toast.error('Failed to update report status', {
+                position: 'top-right',
+                autoClose: 2500,
+            });
         } finally {
             setUpdatingReportId(null);
         }

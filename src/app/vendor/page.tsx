@@ -9,8 +9,8 @@ import { useVendorOverview } from "@/hooks/queries/useVendorOverview"
 import { useVendorLicenses } from "@/hooks/queries/useVendorLicenses"
 import { VendorRestaurantFormModal } from "@/components/vendor/VendorRestaurantFormModal"
 import { LicenseImageModal } from "@/components/vendor/LicenseImageModal"
-import type { License } from "@/types/license"
 import { Badge } from "@/components/ui/badge"
+import { toast } from "react-toastify"
 
 export default function VendorDashboard() {
     const router = useRouter()
@@ -42,7 +42,10 @@ export default function VendorDashboard() {
             document.body.removeChild(link)
             window.URL.revokeObjectURL(downloadUrl)
         } catch (error) {
-            console.error('Error downloading file:', error)
+            toast.error('Lỗi khi tải file', {
+                position: 'top-right',
+                autoClose: 2500,
+            });
         }
     }
 
@@ -50,21 +53,21 @@ export default function VendorDashboard() {
         switch (status) {
             case 'APPROVED':
                 return (
-                    <Badge className="bg-green-500 hover:bg-green-600">
+                    <Badge className="bg-green-500 hover:bg-green-600 transition-colors cursor-default">
                         <CheckCircle className="w-3 h-3 mr-1" />
                         Đã duyệt
                     </Badge>
                 )
             case 'REJECTED':
                 return (
-                    <Badge variant="destructive">
+                    <Badge variant="destructive" className="hover:bg-red-700 transition-colors cursor-default">
                         <XCircle className="w-3 h-3 mr-1" />
                         Đã từ chối
                     </Badge>
                 )
             default:
                 return (
-                    <Badge variant="outline" className="border-yellow-500 text-yellow-600">
+                    <Badge variant="outline" className="border-yellow-500 text-yellow-600 hover:bg-yellow-50 hover:border-yellow-600 transition-colors cursor-default">
                         <Clock className="w-3 h-3 mr-1" />
                         Chờ duyệt
                     </Badge>

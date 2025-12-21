@@ -14,6 +14,7 @@ import { useApproveDish } from '@/hooks/mutations/useDishMutations';
 import { DishApiResponse } from '@/types/dish';
 import { adminColors } from '@/configs/colors';
 import { Check, X, Loader2 } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 interface DishApprovalModalProps {
     dish: DishApiResponse | null;
@@ -50,7 +51,10 @@ export default function DishApprovalModal({
             onOpenChange(false);
             onSuccess?.();
         } catch (error) {
-            console.error('Failed to update dish approval:', error);
+            toast.error('Lỗi khi cập nhật duyệt món ăn', {
+                position: 'top-right',
+                autoClose: 2500,
+            });
         }
     };
 

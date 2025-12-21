@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { adminColors } from "@/configs/colors"
 import { API_ENDPOINTS, BASE_URL } from "@/configs/api"
+import { toast } from "react-toastify"
 
 const getMenuItems = (isSuperAdmin: boolean) => [
   {
@@ -150,7 +151,10 @@ export default function Sidebar() {
 
         setPendingRestaurantsCount(pendingCount)
       } catch (error) {
-        console.error(error)
+        toast.error('Lỗi khi tải số lượng nhà hàng chờ duyệt', {
+          position: 'top-right',
+          autoClose: 2500,
+        });
         setPendingRestaurantsCount(null)
       }
     }

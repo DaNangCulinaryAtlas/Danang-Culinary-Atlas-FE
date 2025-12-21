@@ -74,14 +74,6 @@ export default function HomePage() {
             <p className="hidden md:block text-[#1C2B38] font-mulish font-semibold text-[11px] max-w-[569px] mx-auto">
               {t('home.heroDescription')}
             </p>
-
-            {/* Watch Video Button */}
-            <button className="hidden sm:flex items-center gap-2 mx-auto px-6 py-3 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-lg">
-              <svg className="w-5 h-5 text-teal-600" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-              <span className="font-mulish font-semibold text-[#1C2B38]">{t('home.watchVideo')}</span>
-            </button>
           </div>
 
         </div>

@@ -21,6 +21,7 @@ interface AuthState {
     refreshToken: string | null;
     isAuthenticated: boolean;
     accountId: string | null;
+    isHydrated: boolean;
     ui: UIState;
 }
 
@@ -32,6 +33,7 @@ const getInitialState = (): AuthState => {
         refreshToken: null,
         isAuthenticated: false,
         accountId: null,
+        isHydrated: false,
         ui: {
             sidebarOpen: false,
             theme: 'light',
@@ -141,6 +143,7 @@ const authSlice = createSlice({
                     }
                 }
             }
+            state.isHydrated = true;
         },
     },
 });

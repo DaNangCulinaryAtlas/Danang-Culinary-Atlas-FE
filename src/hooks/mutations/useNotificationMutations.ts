@@ -12,7 +12,10 @@ export const useMarkNotificationAsRead = () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
         },
         onError: (error: any) => {
-            console.error('Failed to mark notification as read:', error);
+            toast.error('Lỗi khi đánh dấu thông báo đã đọc', {
+                position: 'top-right',
+                autoClose: 2500,
+            });
             if (error?.response?.status === 401) {
                 toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', {
                     position: 'top-right',
@@ -37,7 +40,10 @@ export const useMarkAllNotificationsAsRead = () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
         },
         onError: (error: any) => {
-            console.error('Failed to mark all notifications as read:', error);
+            toast.error('Lỗi khi đánh dấu tất cả thông báo', {
+                position: 'top-right',
+                autoClose: 2500,
+            });
             if (error?.response?.status === 401) {
                 toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', {
                     position: 'top-right',

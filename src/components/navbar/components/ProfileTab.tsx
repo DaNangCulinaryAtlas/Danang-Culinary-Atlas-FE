@@ -110,11 +110,13 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                     ...prev,
                     avatarUrl: result.data || '',
                 }));
-                toast.success('Avatar uploaded successfully!');
+                toast.success('Avatar uploaded successfully');
             }
         } catch (error: any) {
-            console.error('Error uploading image:', error);
-            toast.error(error.message || 'An error occurred while uploading avatar');
+            toast.error('Lỗi khi tải ảnh lên', {
+                position: 'top-right',
+                autoClose: 2500,
+            });
         }
     };
 
@@ -179,7 +181,10 @@ export default function ProfileTab({ user }: ProfileTabProps) {
             setIsEditing(false);
             setErrors({});
         } catch (error: any) {
-            console.error('Failed to update profile:', error);
+            toast.error('Lỗi khi cập nhật hồ sơ', {
+                position: 'top-right',
+                autoClose: 2500,
+            });
 
             const errorMessage = error?.message || 'Thông tin không hợp lệ';
 

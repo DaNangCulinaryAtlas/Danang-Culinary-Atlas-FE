@@ -28,7 +28,7 @@ import { LicenseFormModal } from "@/components/vendor/LicenseFormModal"
 import { LicenseImageModal } from "@/components/vendor/LicenseImageModal"
 import { useVendorLicenses } from "@/hooks/queries/useVendorLicenses"
 import type { License } from "@/types/license"
-
+import { toast } from "react-toastify"
 export default function VendorRestaurantsPage() {
     const { user } = useAppSelector((state) => state.auth)
     const vendorId = user?.accountId || null
@@ -156,7 +156,10 @@ export default function VendorRestaurantsPage() {
             document.body.removeChild(link)
             window.URL.revokeObjectURL(downloadUrl)
         } catch (error) {
-            console.error('Error downloading file:', error)
+            toast.error('Lỗi khi tải file', {
+                position: 'top-right',
+                autoClose: 2500,
+            });
         }
     }
 
@@ -164,21 +167,21 @@ export default function VendorRestaurantsPage() {
         switch (status) {
             case 'APPROVED':
                 return (
-                    <Badge className="bg-green-100 text-green-800 border-green-300">
+                    <Badge className="bg-green-100 text-green-800 border-green-300 hover:bg-green-200 hover:border-green-400 transition-colors cursor-default">
                         <CheckCircle className="w-3 h-3 mr-1" />
                         Đã duyệt
                     </Badge>
                 )
             case 'REJECTED':
                 return (
-                    <Badge className="bg-red-100 text-red-800 border-red-300">
+                    <Badge className="bg-red-100 text-red-800 border-red-300 hover:bg-red-200 hover:border-red-400 transition-colors cursor-default">
                         <XCircle className="w-3 h-3 mr-1" />
                         Bị từ chối
                     </Badge>
                 )
             default:
                 return (
-                    <Badge variant="outline" className="border-yellow-500 text-yellow-600">
+                    <Badge variant="outline" className="border-yellow-500 text-yellow-600 hover:bg-yellow-50 hover:border-yellow-600 transition-colors cursor-default">
                         <AlertCircle className="w-3 h-3 mr-1" />
                         Chờ duyệt
                     </Badge>
@@ -446,15 +449,18 @@ export default function VendorRestaurantsPage() {
                                                                         Xem
                                                                     </Button>
                                                                 )}
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="outline"
-                                                                    onClick={() => handleEditLicense(license, restaurant)}
-                                                                    className="h-7 text-xs"
-                                                                >
-                                                                    <Pencil className="h-3 w-3 mr-1" />
-                                                                    Sửa
-                                                                </Button>
+                                                                {/* Chỉ hiển thị nút Sửa khi giấy phép chưa được duyệt */}
+                                                                {license.approvalStatus !== 'APPROVED' && (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="outline"
+                                                                        onClick={() => handleEditLicense(license, restaurant)}
+                                                                        className="h-7 text-xs"
+                                                                    >
+                                                                        <Pencil className="h-3 w-3 mr-1" />
+                                                                        Sửa
+                                                                    </Button>
+                                                                )}
                                                                 <Button
                                                                     size="sm"
                                                                     variant="outline"

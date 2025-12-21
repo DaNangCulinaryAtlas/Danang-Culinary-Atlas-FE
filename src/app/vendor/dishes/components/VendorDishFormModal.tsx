@@ -26,7 +26,7 @@ import { uploadImageToCloudinary } from '@/services/upload-image';
 import { vendorColors } from '@/configs/colors';
 import type { VendorDish } from '../types';
 import Image from 'next/image';
-
+import { toast } from 'react-toastify';
 interface VendorDishFormModalProps {
     dish?: VendorDish | null;
     restaurantId: string;
@@ -99,10 +99,13 @@ export default function VendorDishFormModal({
             setImages((prev) => [...prev, ...successfulUrls]);
 
             if (errors.images) {
-                setErrors(prev => ({ ...prev, images: '' }));
+                setErrors((prev) => ({ ...prev, images: '' }));
             }
         } catch (error) {
-            console.error('Failed to upload images:', error);
+            toast.error('Lỗi khi tải ảnh lên', {
+                position: 'top-right',
+                autoClose: 2500,
+            });
         } finally {
             setUploading(false);
         }
@@ -169,7 +172,10 @@ export default function VendorDishFormModal({
             onOpenChange(false);
             onSuccess?.();
         } catch (error) {
-            console.error('Failed to save dish:', error);
+            toast.error('Lỗi khi lưu món ăn', {
+                position: 'top-right',
+                autoClose: 2500,
+            });
         }
     };
 
