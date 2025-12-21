@@ -70,8 +70,12 @@ instanceAxios.interceptors.response.use(
           // Refresh token itself failed - logout
           console.error('🔴 Refresh token expired - logging out');
           if (typeof window !== 'undefined' && !isRedirecting) {
-            const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
-            const isPublicRoute = publicRoutes.some(route => window.location.pathname.includes(route));
+            const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/atlas', '/dishes', '/restaurants', '/our-story'];
+            const isPublicRoute = publicRoutes.some(route => {
+              // Check exact match for root or if pathname starts with the route
+              return window.location.pathname === route ||
+                (route !== '/' && window.location.pathname.startsWith(route));
+            });
 
             if (!isPublicRoute) {
               isRedirecting = true;
@@ -107,8 +111,12 @@ instanceAxios.interceptors.response.use(
 
           if (!refreshToken) {
             // Define public routes that don't need authentication
-            const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
-            const isPublicRoute = publicRoutes.some(route => window.location.pathname.includes(route));
+            const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/atlas', '/dishes', '/restaurants', '/our-story'];
+            const isPublicRoute = publicRoutes.some(route => {
+              // Check exact match for root or if pathname starts with the route
+              return window.location.pathname === route ||
+                (route !== '/' && window.location.pathname.startsWith(route));
+            });
 
             if (!isRedirecting && !isPublicRoute) {
               isRedirecting = true;
@@ -173,8 +181,12 @@ instanceAxios.interceptors.response.use(
 
             // Clear auth data and redirect to login
             if (!isRedirecting) {
-              const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
-              const isPublicRoute = publicRoutes.some(route => window.location.pathname.includes(route));
+              const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/atlas', '/dishes', '/restaurants', '/our-story'];
+              const isPublicRoute = publicRoutes.some(route => {
+                // Check exact match for root or if pathname starts with the route
+                return window.location.pathname === route ||
+                  (route !== '/' && window.location.pathname.startsWith(route));
+              });
 
               if (!isPublicRoute) {
                 isRedirecting = true;

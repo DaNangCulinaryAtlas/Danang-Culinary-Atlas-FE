@@ -8,6 +8,7 @@ import { store } from "@/stores"
 import { Provider } from "react-redux"
 import { adminColors } from "@/configs/colors"
 import ReactQueryProvider from "@/components/providers/ReactQueryProvider"
+import { Toaster } from "sonner"
 
 export default function AdminLayout({
   children,
@@ -33,6 +34,7 @@ export default function AdminLayout({
                 </main>
               </div>
             </div>
+            <Toaster position="top-right" richColors />
           </AdminProtectedLayout>
         </AuthProvider>
       </ReactQueryProvider>

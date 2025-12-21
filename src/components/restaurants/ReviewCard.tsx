@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Image from 'next/image';
-import { Star, MoreVertical, Edit2, Trash2, X, Flag } from 'lucide-react';
+import { Star, MoreVertical, Edit2, Trash2, X, Flag, ImagePlus, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useAppSelector } from '@/hooks/useRedux';
@@ -9,10 +9,20 @@ import { useUpdateReview } from '@/hooks/mutations/useUpdateReview';
 import { useDeleteReview } from '@/hooks/mutations/useDeleteReview';
 import { ReportReviewModal } from '@/components/restaurants/ReportReviewModal';
 import { useReportReview } from '@/hooks/mutations/useReportReview';
+import { uploadImageToCloudinary } from '@/services/upload-image';
 
 interface ReviewCardProps {
     review: Review;
     restaurantId: string;
+}
+
+interface ImagePreview {
+    file?: File;
+    preview: string;
+    cloudinaryUrl?: string;
+    isUploading?: boolean;
+    uploadError?: string;
+    isExisting?: boolean; // Flag to identify existing images from review
 }
 
 export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
@@ -23,6 +33,8 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
     const [showReportModal, setShowReportModal] = useState(false);
     const [editRating, setEditRating] = useState(review.rating);
     const [editComment, setEditComment] = useState(review.comment);
+    const [editImages, setEditImages] = useState<ImagePreview[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const { mutate: updateReview, isPending: isUpdating } = useUpdateReview({ restaurantId });
     const { mutate: deleteReview, isPending: isDeleting } = useDeleteReview({ restaurantId });
     const reportMutation = useReportReview();
@@ -66,6 +78,72 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
         }
     };
 
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files) return;
+
+        const fileArray = Array.from(files);
+
+        // Create preview objects for each file
+        const newImages: ImagePreview[] = fileArray.map(file => ({
+            file,
+            preview: URL.createObjectURL(file),
+            isUploading: true,
+        }));
+
+        setEditImages(prev => [...prev, ...newImages]);
+
+        // Upload each image to Cloudinary
+        for (let i = 0; i < fileArray.length; i++) {
+            const file = fileArray[i];
+            const imageIndex = editImages.length + i;
+
+            try {
+                const result = await uploadImageToCloudinary(file);
+
+                if (result.success && result.data) {
+                    // Update the image with Cloudinary URL
+                    setEditImages(prev => prev.map((img, idx) =>
+                        idx === imageIndex
+                            ? { ...img, cloudinaryUrl: result.data, isUploading: false }
+                            : img
+                    ));
+                } else {
+                    // Update with error
+                    setEditImages(prev => prev.map((img, idx) =>
+                        idx === imageIndex
+                            ? { ...img, isUploading: false, uploadError: result.message || 'Upload failed' }
+                            : img
+                    ));
+                    toast.error(`Failed to upload image: ${result.message}`);
+                }
+            } catch (error) {
+                setEditImages(prev => prev.map((img, idx) =>
+                    idx === imageIndex
+                        ? { ...img, isUploading: false, uploadError: 'Upload failed' }
+                        : img
+                ));
+                toast.error('Failed to upload image');
+            }
+        }
+
+        // Reset input so same file can be selected again
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const removeEditImage = (index: number) => {
+        setEditImages(prev => {
+            const newImages = prev.filter((_, i) => i !== index);
+            // Revoke the object URL to free memory (only for new uploads)
+            if (prev[index].file) {
+                URL.revokeObjectURL(prev[index].preview);
+            }
+            return newImages;
+        });
+    };
+
     const handleUpdate = () => {
         if (editComment.trim().length < 2) {
             toast.error('Review must be at least 2 characters', {
@@ -75,17 +153,43 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
             return;
         }
 
+        // Check if any images are still uploading
+        const isAnyImageUploading = editImages.some(img => img.isUploading);
+        if (isAnyImageUploading) {
+            toast.warning('Please wait for all images to finish uploading');
+            return;
+        }
+
+        // Check if any images failed to upload
+        const failedImages = editImages.filter(img => img.uploadError);
+        if (failedImages.length > 0) {
+            toast.error('Some images failed to upload. Please remove them or try again.');
+            return;
+        }
+
+        // Get all image URLs (both existing and newly uploaded)
+        const allImageUrls = editImages
+            .map(img => img.isExisting ? img.preview : img.cloudinaryUrl)
+            .filter(Boolean) as string[];
+
         updateReview(
             {
                 reviewId: review.reviewId,
                 payload: {
                     rating: editRating,
                     comment: editComment.trim(),
-                    images: review.images,
+                    images: allImageUrls,
                 },
             },
             {
                 onSuccess: () => {
+                    // Clean up object URLs for new uploads
+                    editImages.forEach(img => {
+                        if (img.file) {
+                            URL.revokeObjectURL(img.preview);
+                        }
+                    });
+
                     toast.success('Review updated successfully! ✨', {
                         position: 'top-right',
                         autoClose: 2500,
@@ -199,6 +303,18 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                                             <>
                                                 <button
                                                     onClick={() => {
+                                                        // Initialize edit state with current review data
+                                                        setEditRating(review.rating);
+                                                        setEditComment(review.comment);
+
+                                                        // Load existing images
+                                                        const existingImages: ImagePreview[] = (review.images || []).map(url => ({
+                                                            preview: url,
+                                                            cloudinaryUrl: url,
+                                                            isExisting: true,
+                                                        }));
+                                                        setEditImages(existingImages);
+
                                                         setShowEditModal(true);
                                                         setShowMenu(false);
                                                     }}
@@ -287,7 +403,7 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <p className="font-semibold text-[#44BACA] text-sm">Vendor Response</p>
+                                        <p className="font-semibold text-[#44BACA] text-sm">Phản hồi của nhà hàng</p>
                                         {review.repliedAt && (
                                             <span className="text-xs text-gray-400">
                                                 • {formatDate(review.repliedAt)}
@@ -305,11 +421,19 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
             {/* Edit Modal */}
             {showEditModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl max-w-md w-full p-6">
+                    <div className="bg-white rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-lg font-bold text-gray-900">Edit Review</h3>
                             <button
-                                onClick={() => setShowEditModal(false)}
+                                onClick={() => {
+                                    // Clean up object URLs for new uploads
+                                    editImages.forEach(img => {
+                                        if (img.file) {
+                                            URL.revokeObjectURL(img.preview);
+                                        }
+                                    });
+                                    setShowEditModal(false);
+                                }}
                                 className="text-gray-400 hover:text-gray-600"
                             >
                                 <X size={20} />
@@ -350,10 +474,82 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                             <p className="text-xs text-gray-500 mt-1">{editComment.length} characters</p>
                         </div>
 
+                        {/* Image Editor */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Images</label>
+
+                            {/* Image Preview Grid */}
+                            {editImages.length > 0 && (
+                                <div className="grid grid-cols-4 gap-2 mb-3">
+                                    {editImages.map((image, index) => (
+                                        <div key={index} className="relative w-full aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200">
+                                            <img
+                                                src={image.preview}
+                                                alt={`Preview ${index + 1}`}
+                                                className="w-full h-full object-cover"
+                                            />
+
+                                            {/* Upload Status Overlay */}
+                                            {image.isUploading && (
+                                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                                    <Loader2 size={20} className="text-white animate-spin" />
+                                                </div>
+                                            )}
+
+                                            {/* Upload Error Overlay */}
+                                            {image.uploadError && (
+                                                <div className="absolute inset-0 bg-red-500/70 flex items-center justify-center">
+                                                    <AlertCircle size={16} className="text-white" />
+                                                </div>
+                                            )}
+
+                                            {/* Remove Button */}
+                                            <button
+                                                type="button"
+                                                onClick={() => removeEditImage(index)}
+                                                disabled={image.isUploading}
+                                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors shadow-md disabled:opacity-50"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Upload Button */}
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#44BACA] hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 text-sm text-gray-600 hover:text-[#44BACA]"
+                            >
+                                <ImagePlus size={18} />
+                                Add Images
+                            </button>
+
+                            {/* Hidden File Input */}
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                multiple
+                                accept="image/*"
+                                onChange={handleImageUpload}
+                                className="hidden"
+                            />
+                        </div>
+
                         {/* Buttons */}
                         <div className="flex gap-2">
                             <button
-                                onClick={() => setShowEditModal(false)}
+                                onClick={() => {
+                                    // Clean up object URLs for new uploads
+                                    editImages.forEach(img => {
+                                        if (img.file) {
+                                            URL.revokeObjectURL(img.preview);
+                                        }
+                                    });
+                                    setShowEditModal(false);
+                                }}
                                 className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                             >
                                 Cancel

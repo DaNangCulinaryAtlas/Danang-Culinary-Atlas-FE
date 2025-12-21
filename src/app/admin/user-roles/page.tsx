@@ -253,7 +253,7 @@ export default function UserRoleManagementPage() {
               </h3>
               <ul className="space-y-1 text-sm text-gray-600">
                 <li>
-                  • <strong>Tìm kiếm:</strong> Nhập tên, email hoặc Account ID để tìm kiếm
+                  • <strong>Tìm kiếm:</strong> Nhập tên, email để tìm kiếm
                 </li>
                 <li>
                   • <strong>Lọc theo Role:</strong> Chọn USER, VENDOR, hoặc ADMIN để lọc theo loại tài khoản

@@ -181,7 +181,7 @@ export default function PermissionsManagement() {
             Chi tiết Roles & Permissions
           </CardTitle>
           <CardDescription className="font-semibold" style={{ color: adminColors.accent.emerald }}>
-            Xem tổng quan phân quyền chi tiết cho từng role
+            Xem tổng quan phân quyền chi tiết cho từng role. SUPER_ADMIN có thể cấu hình action nâng cao
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
@@ -212,6 +212,12 @@ export default function PermissionsManagement() {
                 </li>
                 <li>
                   • <strong>Checkbox:</strong> Tích vào để cấp quyền, bỏ tích để thu hồi quyền
+                </li>
+                <li>
+                  • <strong className="text-red-500">*</strong> Đánh dấu action nâng cao để sử dụng
+                </li>
+                <li>
+                  • <strong className="text-orange-500">⚡</strong> Trong phần chi tiết, SUPER_ADMIN có thể toggle switch để cấu hình action thành mặc định hoặc nâng cao
                 </li>
                 <li>
                   • Nhấn <strong>"Lưu thay đổi"</strong> để áp dụng các thay đổi vào hệ thống

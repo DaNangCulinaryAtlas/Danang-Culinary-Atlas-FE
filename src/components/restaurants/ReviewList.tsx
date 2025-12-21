@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { Loader2 } from 'lucide-react';
 import ReviewCard from '@/components/restaurants/ReviewCard';
 import { Review } from '@/services/review';
@@ -24,7 +23,7 @@ export default function ReviewList({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-2xl font-bold text-gray-900">
-          Customer Reviews ({reviews.length})
+          Customer Reviews
         </h3>
       </div>
 

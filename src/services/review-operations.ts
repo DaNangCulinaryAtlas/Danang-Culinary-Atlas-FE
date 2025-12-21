@@ -27,7 +27,7 @@ export const updateReview = async (
     payload: UpdateReviewPayload
 ): Promise<UpdateReviewResponse> => {
     try {
-        const response = await instanceAxios.put(
+        const response = await instanceAxios.patch(
             API_ENDPOINTS.ADMIN.REVIEW.UPDATE(reviewId),
             payload
         );
