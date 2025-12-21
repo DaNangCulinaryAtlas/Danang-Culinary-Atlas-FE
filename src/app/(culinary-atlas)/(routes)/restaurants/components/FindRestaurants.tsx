@@ -1,7 +1,10 @@
 "use client";
 import Image from 'next/image';
 import SearchBox from './SearchBox';
+import { useTranslation } from '@/hooks/useTranslation';
+
 export default function FindRestaurants() {
+    const { t } = useTranslation();
     return (
         <div className="relative w-full h-[450px] overflow-hidden">
             {/* Background Image */}
@@ -23,10 +26,10 @@ export default function FindRestaurants() {
                 {/* Title */}
                 <div className="text-center space-y-2">
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg font-volkhov">
-                        Khám Phá Ẩm Thực Đà Nẵng
+                        {t('restaurants.findTitle')}
                     </h1>
                     <p className="text-lg md:text-xl text-white/90 drop-shadow-md font-mulish">
-                        Tìm kiếm nhà hàng yêu thích của bạn
+                        {t('restaurants.findSubtitle')}
                     </p>
                 </div>
 

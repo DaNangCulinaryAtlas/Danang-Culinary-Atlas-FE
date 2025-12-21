@@ -5,11 +5,13 @@ import { FilterSideBarProps } from "@/types/filter";
 import CuisineFilter from "./filters/CuisineFilter";
 import RatingFilter from "./filters/RatingFilter";
 import ActiveFilters from "./filters/ActiveFilters";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const FilterSideBar = memo(function FilterSideBar({
   filters,
   onFilterChange,
 }: FilterSideBarProps) {
+  const { t } = useTranslation();
   // Check if any filters are active
   const hasActiveFilters = useMemo(() => {
     return (
@@ -66,7 +68,7 @@ const FilterSideBar = memo(function FilterSideBar({
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
-            <h2 className="text-[#44BACA] font-semibold text-lg">Filters</h2>
+            <h2 className="text-[#44BACA] font-semibold text-lg">{t('restaurants.filters.title')}</h2>
             {activeFilterCount > 0 && (
               <span className="bg-[#44BACA] text-white text-xs font-semibold px-2 py-0.5 rounded-full">
                 {activeFilterCount}
@@ -78,10 +80,10 @@ const FilterSideBar = memo(function FilterSideBar({
             <button
               onClick={handleClearAll}
               className="flex items-center gap-1 text-sm text-gray-600 hover:text-[#44BACA] transition group"
-              aria-label="Clear all filters"
+              aria-label={t('restaurants.clearAllFilters')}
             >
               <RotateCcw className="w-3.5 h-3.5 group-hover:rotate-180 transition-transform duration-300" />
-              <span>Clear</span>
+              <span>{t('restaurants.filters.clear')}</span>
             </button>
           )}
         </div>

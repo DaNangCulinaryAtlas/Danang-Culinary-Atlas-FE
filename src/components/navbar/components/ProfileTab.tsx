@@ -8,6 +8,7 @@ import { useEffect, useState, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { useProfileQuery } from '@/hooks/queries/useProfileQuery';
 import { useUpdateProfileMutation, useUploadAvatarMutation } from '@/hooks/mutations/useProfileMutations';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ProfileTabProps {
     user: {
@@ -23,6 +24,7 @@ interface ProfileTabProps {
 }
 
 export default function ProfileTab({ user }: ProfileTabProps) {
+    const { t } = useTranslation();
     const [isEditing, setIsEditing] = useState(false);
     const [errors, setErrors] = useState<{
         fullName?: string;
@@ -110,10 +112,10 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                     ...prev,
                     avatarUrl: result.data || '',
                 }));
-                toast.success('Avatar uploaded successfully');
+                toast.success(t('profile.avatarUploaded'));
             }
         } catch (error: any) {
-            toast.error('Lỗi khi tải ảnh lên', {
+            toast.error(t('profile.avatarUploadError'), {
                 position: 'top-right',
                 autoClose: 2500,
             });
@@ -125,7 +127,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
 
         // Validate fullName
         if (formData.fullName && formData.fullName.trim().length < 2) {
-            newErrors.fullName = 'Tên phải có ít nhất 2 ký tự';
+            newErrors.fullName = t('profile.fullNameMinLength');
         }
 
         // Validate dob (must be in the past)
@@ -135,15 +137,15 @@ export default function ProfileTab({ user }: ProfileTabProps) {
             today.setHours(0, 0, 0, 0);
 
             if (dobDate >= today) {
-                newErrors.dob = 'Ngày sinh phải là ngày trong quá khứ';
+                newErrors.dob = t('profile.dobPast');
             }
 
             // Check if age is reasonable (at least 5 years old, max 150 years)
             const age = today.getFullYear() - dobDate.getFullYear();
             if (age < 5) {
-                newErrors.dob = 'Tuổi phải từ 5 tuổi trở lên';
+                newErrors.dob = t('profile.dobMinAge');
             } else if (age > 150) {
-                newErrors.dob = 'Ngày sinh không hợp lệ';
+                newErrors.dob = t('profile.dobInvalid');
             }
         }
 
@@ -156,7 +158,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
 
         // Validate form before submitting
         if (!validateForm()) {
-            toast.error('Vui lòng kiểm tra lại thông tin', {
+            toast.error(t('profile.checkInfo'), {
                 position: 'top-right',
                 autoClose: 3000,
             });
@@ -174,19 +176,19 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                 }
             });
 
-            toast.success('Cập nhật thông tin mới thành công', {
+            toast.success(t('profile.updateSuccess'), {
                 position: 'top-right',
                 autoClose: 2500,
             });
             setIsEditing(false);
             setErrors({});
         } catch (error: any) {
-            toast.error('Lỗi khi cập nhật hồ sơ', {
+            toast.error(t('profile.updateError'), {
                 position: 'top-right',
                 autoClose: 2500,
             });
 
-            const errorMessage = error?.message || 'Thông tin không hợp lệ';
+            const errorMessage = error?.message || t('profile.invalidInfo');
 
             // Try to parse specific field errors
             if (errorMessage.includes('Ngày sinh')) {
@@ -307,12 +309,12 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                         {isUploading ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Uploading...
+                                {t('profile.uploading')}
                             </>
                         ) : (
                             <>
                                 <Upload className="mr-2 h-4 w-4" />
-                                Upload Avatar
+                                {t('profile.uploadAvatar')}
                             </>
                         )}
                     </Button>
@@ -324,7 +326,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                 <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                         <Mail className="inline-block mr-2" size={16} />
-                        Email
+                        {t('profile.email')}
                     </label>
                     <Input
                         type="email"
@@ -337,7 +339,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                 <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                         <User className="inline-block mr-2" size={16} />
-                        Full Name
+                        {t('profile.fullName')}
                     </label>
                     <Input
                         type="text"
@@ -346,7 +348,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                         onChange={handleInputChange}
                         disabled={!isEditing}
                         className={!isEditing ? 'bg-gray-100' : errors.fullName ? 'border-red-500' : ''}
-                        placeholder="Enter your full name"
+                        placeholder={t('profile.fullNamePlaceholder')}
                     />
                     {errors.fullName && (
                         <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>
@@ -356,7 +358,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                 <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                         <Calendar className="inline-block mr-2" size={16} />
-                        Date of Birth
+                        {t('profile.dateOfBirth')}
                     </label>
                     <Input
                         type="date"
@@ -374,7 +376,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                 <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                         <Users className="inline-block mr-2" size={16} />
-                        Gender
+                        {t('profile.gender')}
                     </label>
                     <select
                         name="gender"
@@ -384,10 +386,10 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#69C3CF] ${!isEditing ? 'bg-gray-100' : errors.gender ? 'border-red-500' : 'border-gray-300'
                             }`}
                     >
-                        <option value="">Select gender</option>
-                        <option value="MALE">Male</option>
-                        <option value="FEMALE">Female</option>
-                        <option value="OTHER">Other</option>
+                        <option value="">{t('profile.selectGender')}</option>
+                        <option value="MALE">{t('profile.male')}</option>
+                        <option value="FEMALE">{t('profile.female')}</option>
+                        <option value="OTHER">{t('profile.other')}</option>
                     </select>
                     {errors.gender && (
                         <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
@@ -397,7 +399,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                 {user?.status && (
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Status
+                            {t('profile.status')}
                         </label>
                         <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${user.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                             }`}>
@@ -409,7 +411,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                 <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                         <Shield className="inline-block mr-2" size={16} />
-                        Roles
+                        {t('profile.roles')}
                     </label>
                     <div className="flex flex-wrap gap-2">
                         {user?.roles.map((role) => (
@@ -431,7 +433,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                         onClick={() => setIsEditing(true)}
                         className="flex-1 bg-[#69C3CF] hover:bg-[#57a8ae] text-white"
                     >
-                        Edit Profile
+                        {t('profile.editProfile')}
                     </Button>
                 ) : (
                     <>
@@ -441,7 +443,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                             className="flex-1"
                             disabled={isSaving || isUploading}
                         >
-                            Cancel
+                            {t('profile.cancel')}
                         </Button>
                         <Button
                             onClick={handleSave}
@@ -451,12 +453,12 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                             {isSaving ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Saving...
+                                    {t('profile.saving')}
                                 </>
                             ) : (
                                 <>
                                     <Save className="mr-2 h-4 w-4" />
-                                    Save Changes
+                                    {t('profile.saveChanges')}
                                 </>
                             )}
                         </Button>

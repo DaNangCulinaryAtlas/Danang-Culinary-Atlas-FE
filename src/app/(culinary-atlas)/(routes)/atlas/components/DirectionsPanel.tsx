@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigation, X, MapPin, ArrowUp, ArrowUpRight, ArrowRight, ArrowUpLeft, ArrowLeft, MoveRight } from 'lucide-react';
 import { formatDistance, formatDuration, type RouteResponse } from '@/services/directions';
 import type { MapRestaurant } from '@/types/restaurant';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface DirectionsPanelProps {
     routeData: RouteResponse;
@@ -14,6 +15,7 @@ const DirectionsPanel: React.FC<DirectionsPanelProps> = ({
     selectedRestaurant,
     onClose
 }) => {
+    const { t } = useTranslation();
     // Get icon for maneuver type
     const getManeuverIcon = (type: string, modifier?: string) => {
         const iconClass = "w-4 h-4";
@@ -49,7 +51,7 @@ const DirectionsPanel: React.FC<DirectionsPanelProps> = ({
             <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
                     <Navigation className="w-5 h-5 text-blue-600" />
-                    <h3 className="font-bold text-gray-900">Chỉ đường</h3>
+                    <h3 className="font-bold text-gray-900">{t('atlas.directions')}</h3>
                 </div>
                 <button
                     onClick={onClose}
@@ -61,20 +63,20 @@ const DirectionsPanel: React.FC<DirectionsPanelProps> = ({
 
             <div className="space-y-2 mb-3">
                 <div className="text-sm">
-                    <span className="text-gray-600">Đến: </span>
+                    <span className="text-gray-600">{t('atlas.to')}: </span>
                     <span className="font-semibold text-gray-900">
                         {selectedRestaurant.name}
                     </span>
                 </div>
                 <div className="flex gap-4 text-sm">
                     <div>
-                        <span className="text-gray-600">Khoảng cách: </span>
+                        <span className="text-gray-600">{t('atlas.distance')}: </span>
                         <span className="font-semibold text-blue-600">
                             {formatDistance(routeData.distance)}
                         </span>
                     </div>
                     <div>
-                        <span className="text-gray-600">Thời gian: </span>
+                        <span className="text-gray-600">{t('atlas.duration')}: </span>
                         <span className="font-semibold text-blue-600">
                             {formatDuration(routeData.duration)}
                         </span>
@@ -84,7 +86,7 @@ const DirectionsPanel: React.FC<DirectionsPanelProps> = ({
 
             {/* Turn-by-turn instructions */}
             <div className="border-t pt-3">
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">Hướng dẫn từng bước:</h4>
+                <h4 className="text-sm font-semibold text-gray-700 mb-2">{t('atlas.stepByStepGuide')}:</h4>
                 <div className="space-y-3 max-h-64 overflow-y-auto">
                     {routeData.instructions.map((instruction, index) => (
                         <div key={index} className="flex gap-3 items-start bg-gray-50 p-2 rounded-lg hover:bg-gray-100 transition-colors">

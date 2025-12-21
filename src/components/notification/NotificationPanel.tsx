@@ -6,11 +6,12 @@ import { useNotifications } from '@/hooks/queries/useNotifications';
 import { useMarkNotificationAsRead, useMarkAllNotificationsAsRead } from '@/hooks/mutations/useNotificationMutations';
 import { Notification } from '@/services/notification';
 import { formatDistanceToNow } from 'date-fns';
-import { vi } from 'date-fns/locale';
+import { vi, enUS } from 'date-fns/locale';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface NotificationPanelProps {
     isOpen: boolean;
@@ -18,6 +19,7 @@ interface NotificationPanelProps {
 }
 
 export default function NotificationPanel({ isOpen, onClose }: NotificationPanelProps) {
+    const { t, currentLanguage } = useTranslation();
     const queryClient = useQueryClient();
     const [realtimeNotifications, setRealtimeNotifications] = useState<Notification[]>([]);
     const [processedNotificationIds, setProcessedNotificationIds] = useState<Set<number>>(new Set());
@@ -180,7 +182,8 @@ export default function NotificationPanel({ isOpen, onClose }: NotificationPanel
     }; const formatDate = (dateString: string) => {
         try {
             const date = new Date(dateString);
-            return formatDistanceToNow(date, { addSuffix: true, locale: vi });
+            const locale = currentLanguage === 'vi' ? vi : enUS;
+            return formatDistanceToNow(date, { addSuffix: true, locale });
         } catch {
             return '';
         }
@@ -194,7 +197,7 @@ export default function NotificationPanel({ isOpen, onClose }: NotificationPanel
             <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white rounded-t-2xl">
                 <div className="flex items-center gap-2">
                     <Bell className="w-5 h-5 text-[#44BACA]" />
-                    <h3 className="font-bold text-gray-900">Thông báo</h3>
+                    <h3 className="font-bold text-gray-900">{t('notifications.title')}</h3>
                     {unreadCount > 0 && (
                         <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
                             {unreadCount}
@@ -208,7 +211,7 @@ export default function NotificationPanel({ isOpen, onClose }: NotificationPanel
                             className="text-xs text-[#44BACA] hover:text-[#3aa3b3] font-semibold flex items-center gap-1"
                         >
                             <CheckCheck className="w-4 h-4" />
-                            <span className="hidden sm:inline">Đánh dấu tất cả</span>
+                            <span className="hidden sm:inline">{t('notifications.markAllAsRead')}</span>
                         </button>
                     )}
                     <button
@@ -229,8 +232,8 @@ export default function NotificationPanel({ isOpen, onClose }: NotificationPanel
                 ) : notifications.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
                         <Bell className="w-16 h-16 text-gray-300 mb-4" />
-                        <p className="text-gray-500 font-medium">Không có thông báo nào</p>
-                        <p className="text-gray-400 text-sm mt-1">Thông báo mới sẽ hiển thị tại đây</p>
+                        <p className="text-gray-500 font-medium">{t('notifications.noNotifications')}</p>
+                        <p className="text-gray-400 text-sm mt-1">{t('notifications.newNotificationsWillAppear')}</p>
                     </div>
                 ) : (
                     <div className="divide-y">
@@ -279,7 +282,7 @@ export default function NotificationPanel({ isOpen, onClose }: NotificationPanel
                                                     className="text-xs text-[#44BACA] hover:text-[#3aa3b3] font-medium flex items-center gap-1 cursor-pointer"
                                                 >
                                                     <Check className="w-3 h-3" />
-                                                    Đánh dấu đã đọc
+                                                    {t('notifications.markAsRead')}
                                                 </span>
                                             )}
                                         </div>
@@ -301,10 +304,10 @@ export default function NotificationPanel({ isOpen, onClose }: NotificationPanel
                             {isFetchingNextPage ? (
                                 <>
                                     <Loader2 className="w-4 h-4 animate-spin" />
-                                    Đang tải...
+                                    {t('notifications.loading')}
                                 </>
                             ) : (
-                                'Xem thêm'
+                                t('notifications.loadMore')
                             )}
                         </button>
                     </div>

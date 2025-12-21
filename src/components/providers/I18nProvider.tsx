@@ -41,19 +41,33 @@ export function I18nProvider({ children, initialLanguage = 'vi' }: I18nProviderP
                     react: {
                         useSuspense: false,
                     },
+                })
+                .then(() => {
+                    // Set language from localStorage or use initial language after init
+                    const savedLanguage = (localStorage.getItem('language') || initialLanguage) as 'vi' | 'en';
+                    return i18next.changeLanguage(savedLanguage);
+                })
+                .then(() => {
+                    setIsReady(true);
+                })
+                .catch((error) => {
+                    console.error('i18next initialization error:', error);
+                    setIsReady(true); // Still set ready to prevent blocking
                 });
             i18nInitialized = true;
+        } else {
+            // If already initialized, just set language and ready
+            const savedLanguage = (localStorage.getItem('language') || initialLanguage) as 'vi' | 'en';
+            i18next.changeLanguage(savedLanguage).then(() => {
+                setIsReady(true);
+            }).catch(() => {
+                setIsReady(true);
+            });
         }
-
-        // Set language from localStorage or use initial language
-        const savedLanguage = (localStorage.getItem('language') || initialLanguage) as 'vi' | 'en';
-        i18next.changeLanguage(savedLanguage).then(() => {
-            setIsReady(true);
-        });
     }, [initialLanguage]);
 
     if (!isReady) {
-        return <>{children}</>;
+        return null; // Don't render children until i18next is ready
     }
 
     return <I18nextProvider i18n={i18next}>{children}</I18nextProvider>;

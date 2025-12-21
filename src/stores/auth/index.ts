@@ -130,6 +130,7 @@ const authSlice = createSlice({
                 const refreshToken = window.localStorage.getItem('refreshToken');
                 const userData = window.localStorage.getItem('userData');
                 const accountId = window.localStorage.getItem('accountId');
+                const savedLanguage = window.localStorage.getItem('language') as 'vi' | 'en' | null;
 
                 if (token && userData) {
                     try {
@@ -141,6 +142,11 @@ const authSlice = createSlice({
                     } catch (error) {
                         console.error('Failed to hydrate auth state:', error);
                     }
+                }
+
+                // Hydrate language preference
+                if (savedLanguage && (savedLanguage === 'vi' || savedLanguage === 'en')) {
+                    state.ui.language = savedLanguage;
                 }
             }
             state.isHydrated = true;

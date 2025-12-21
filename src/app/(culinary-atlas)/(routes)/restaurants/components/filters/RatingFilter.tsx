@@ -1,5 +1,6 @@
 import { memo, useCallback } from "react";
 import Star from "@/components/restaurants/Star";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface RatingFilterProps {
     minRating: number | null;
@@ -12,6 +13,7 @@ const RatingFilter = memo(function RatingFilter({
     maxRating,
     onChange,
 }: RatingFilterProps) {
+    const { t } = useTranslation();
     const handleMinRatingClick = useCallback((rating: number) => {
         // If clicking the same rating, clear it
         if (minRating === rating) {
@@ -42,11 +44,11 @@ const RatingFilter = memo(function RatingFilter({
 
     return (
         <div className="space-y-4">
-            <h3 className="font-semibold text-gray-800 text-base">Ratings</h3>
+            <h3 className="font-semibold text-gray-800 text-base">{t('restaurants.filters.ratings')}</h3>
 
             {/* Min Rating */}
             <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Minimum Rating</label>
+                <label className="text-sm font-medium text-gray-700">{t('restaurants.filters.minimumRating')}</label>
                 <div className="flex items-center gap-1">
                     {[1, 2, 3, 4, 5].map((rating) => (
                         <button
@@ -56,8 +58,8 @@ const RatingFilter = memo(function RatingFilter({
                                     ? 'opacity-100'
                                     : 'opacity-40 hover:opacity-70'
                                 }`}
-                            aria-label={`Set minimum rating to ${rating} stars`}
-                            title={`Minimum: ${rating} star${rating > 1 ? 's' : ''}`}
+                            aria-label={t('restaurants.filters.setMinimumRating', { rating })}
+                            title={`${t('restaurants.filters.minimum')}: ${rating} ${rating > 1 ? t('restaurants.filters.stars') : t('restaurants.filters.star')}`}
                         >
                             <div className="w-5 h-5">
                                 <Star filled={minRating !== null && rating <= minRating} />
@@ -68,7 +70,7 @@ const RatingFilter = memo(function RatingFilter({
                         <button
                             onClick={() => onChange(null, maxRating)}
                             className="ml-2 text-xs text-gray-500 hover:text-[#44BACA] transition"
-                            aria-label="Clear minimum rating"
+                            aria-label={t('restaurants.filters.clearMinimumRating')}
                         >
                             ✕
                         </button>
@@ -76,14 +78,14 @@ const RatingFilter = memo(function RatingFilter({
                 </div>
                 {minRating !== null && (
                     <p className="text-xs text-gray-600">
-                        {minRating} star{minRating > 1 ? 's' : ''} & up
+                        {minRating} {minRating > 1 ? t('restaurants.filters.stars') : t('restaurants.filters.star')} {t('restaurants.filters.andUp')}
                     </p>
                 )}
             </div>
 
             {/* Max Rating */}
             <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Maximum Rating</label>
+                <label className="text-sm font-medium text-gray-700">{t('restaurants.filters.maximumRating')}</label>
                 <div className="flex items-center gap-1">
                     {[1, 2, 3, 4, 5].map((rating) => (
                         <button
@@ -93,8 +95,8 @@ const RatingFilter = memo(function RatingFilter({
                                     ? 'opacity-100'
                                     : 'opacity-40 hover:opacity-70'
                                 }`}
-                            aria-label={`Set maximum rating to ${rating} stars`}
-                            title={`Maximum: ${rating} star${rating > 1 ? 's' : ''}`}
+                            aria-label={t('restaurants.filters.setMaximumRating', { rating })}
+                            title={`${t('restaurants.filters.maximum')}: ${rating} ${rating > 1 ? t('restaurants.filters.stars') : t('restaurants.filters.star')}`}
                         >
                             <div className="w-5 h-5">
                                 <Star filled={maxRating !== null && rating <= maxRating} />
@@ -105,7 +107,7 @@ const RatingFilter = memo(function RatingFilter({
                         <button
                             onClick={() => onChange(minRating, null)}
                             className="ml-2 text-xs text-gray-500 hover:text-[#44BACA] transition"
-                            aria-label="Clear maximum rating"
+                            aria-label={t('restaurants.filters.clearMaximumRating')}
                         >
                             ✕
                         </button>
@@ -113,7 +115,7 @@ const RatingFilter = memo(function RatingFilter({
                 </div>
                 {maxRating !== null && (
                     <p className="text-xs text-gray-600">
-                        {maxRating} star{maxRating > 1 ? 's' : ''} & down
+                        {maxRating} {maxRating > 1 ? t('restaurants.filters.stars') : t('restaurants.filters.star')} {t('restaurants.filters.andDown')}
                     </p>
                 )}
             </div>

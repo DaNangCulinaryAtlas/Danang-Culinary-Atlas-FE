@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { FilterState } from "@/types/filter";
 import { CUISINE_TAGS } from "@/constants/cuisineTags";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface ActiveFiltersProps {
     filters: FilterState;
@@ -42,6 +43,7 @@ const ActiveFilters = memo(function ActiveFilters({
     onRemoveMaxRating,
     onClearAll,
 }: ActiveFiltersProps) {
+    const { t } = useTranslation();
     const hasActiveFilters =
         filters.cuisineIds.length > 0 ||
         filters.minRating !== null ||
@@ -55,13 +57,13 @@ const ActiveFilters = memo(function ActiveFilters({
         <div className="space-y-3">
             <div className="flex items-center justify-between">
                 <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                    Active Filters
+                    {t('restaurants.filters.activeFilters')}
                 </h4>
                 <button
                     onClick={onClearAll}
                     className="text-xs text-[#44BACA] hover:text-[#3aa3b3] font-medium transition"
                 >
-                    Clear All
+                    {t('restaurants.filters.clearAll')}
                 </button>
             </div>
 
@@ -81,7 +83,7 @@ const ActiveFilters = memo(function ActiveFilters({
                 {/* Min Rating Tag */}
                 {filters.minRating !== null && (
                     <FilterTag
-                        label={`Min: ${filters.minRating}★`}
+                        label={`${t('restaurants.filters.min')}: ${filters.minRating}★`}
                         onRemove={onRemoveMinRating}
                     />
                 )}
@@ -89,7 +91,7 @@ const ActiveFilters = memo(function ActiveFilters({
                 {/* Max Rating Tag */}
                 {filters.maxRating !== null && (
                     <FilterTag
-                        label={`Max: ${filters.maxRating}★`}
+                        label={`${t('restaurants.filters.max')}: ${filters.maxRating}★`}
                         onRemove={onRemoveMaxRating}
                     />
                 )}

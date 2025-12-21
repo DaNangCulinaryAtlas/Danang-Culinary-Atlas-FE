@@ -10,6 +10,7 @@ import { useDeleteReview } from '@/hooks/mutations/useDeleteReview';
 import { ReportReviewModal } from '@/components/restaurants/ReportReviewModal';
 import { useReportReview } from '@/hooks/mutations/useReportReview';
 import { uploadImageToCloudinary } from '@/services/upload-image';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ReviewCardProps {
     review: Review;
@@ -26,6 +27,7 @@ interface ImagePreview {
 }
 
 export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
+    const { t } = useTranslation();
     const [imageErrors, setImageErrors] = useState<{ [key: string]: boolean }>({});
     const [showMenu, setShowMenu] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
@@ -115,15 +117,15 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                             ? { ...img, isUploading: false, uploadError: result.message || 'Upload failed' }
                             : img
                     ));
-                    toast.error(`Failed to upload image: ${result.message}`);
+                    toast.error(`${t('reviews.uploadFailed')}: ${result.message}`);
                 }
             } catch (error) {
                 setEditImages(prev => prev.map((img, idx) =>
                     idx === imageIndex
-                        ? { ...img, isUploading: false, uploadError: 'Upload failed' }
+                        ? { ...img, isUploading: false, uploadError: t('reviews.uploadFailed') }
                         : img
                 ));
-                toast.error('Failed to upload image');
+                toast.error(t('reviews.uploadFailed'));
             }
         }
 
@@ -146,7 +148,7 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
 
     const handleUpdate = () => {
         if (editComment.trim().length < 2) {
-            toast.error('Review must be at least 2 characters', {
+            toast.error(t('reviews.reviewMinLength'), {
                 position: 'top-right',
                 autoClose: 2500,
             });
@@ -156,14 +158,14 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
         // Check if any images are still uploading
         const isAnyImageUploading = editImages.some(img => img.isUploading);
         if (isAnyImageUploading) {
-            toast.warning('Please wait for all images to finish uploading');
+            toast.warning(t('reviews.waitForUpload'));
             return;
         }
 
         // Check if any images failed to upload
         const failedImages = editImages.filter(img => img.uploadError);
         if (failedImages.length > 0) {
-            toast.error('Some images failed to upload. Please remove them or try again.');
+            toast.error(t('reviews.someImagesFailed'));
             return;
         }
 
@@ -190,7 +192,7 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                         }
                     });
 
-                    toast.success('Review updated successfully! ✨', {
+                    toast.success(t('reviews.editSuccess'), {
                         position: 'top-right',
                         autoClose: 2500,
                     });
@@ -199,23 +201,23 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                 onError: (error: any) => {
                     if (axios.isAxiosError(error)) {
                         if (error.response?.status === 403) {
-                            toast.error('You can only edit your own reviews.', {
+                            toast.error(t('reviews.editError'), {
                                 position: 'top-right',
                                 autoClose: 2500,
                             });
                         } else if (error.response?.status === 401) {
-                            toast.error('Your session has expired. Please log in again.', {
+                            toast.error(t('reviews.sessionExpired'), {
                                 position: 'top-right',
                                 autoClose: 2500,
                             });
                         } else {
-                            toast.error('Failed to update review.', {
+                            toast.error(t('reviews.deleteFailed'), {
                                 position: 'top-right',
                                 autoClose: 2500,
                             });
                         }
                     } else {
-                        toast.error('An error occurred.', {
+                        toast.error(t('reviews.unexpectedError'), {
                             position: 'top-right',
                             autoClose: 2500,
                         });
@@ -228,29 +230,32 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
     const handleDelete = () => {
         deleteReview(review.reviewId, {
             onSuccess: () => {
-                toast.success('Review deleted successfully!');
+                toast.success(t('reviews.deleteSuccess'),{
+                    position: 'top-right',
+                    autoClose: 2500,
+                });
                 setShowDeleteModal(false);
             },
             onError: (error: any) => {
                 if (axios.isAxiosError(error)) {
                     if (error.response?.status === 403) {
-                        toast.error('You can only delete your own reviews.', {
+                        toast.error(t('reviews.deleteError'), {
                             position: 'top-right',
                             autoClose: 2500,
                         });
                     } else if (error.response?.status === 401) {
-                        toast.error('Your session has expired. Please log in again.', {
+                        toast.error(t('reviews.sessionExpired'), {
                             position: 'top-right',
                             autoClose: 2500,
                         });
                     } else {
-                        toast.error('Failed to delete review.', {
+                        toast.error(t('reviews.deleteFailed'), {
                             position: 'top-right',
                             autoClose: 2500,
                         });
                     }
                 } else {
-                    toast.error('An error occurred.', {
+                    toast.error(t('reviews.unexpectedError'), {
                         position: 'top-right',
                         autoClose: 2500,
                     });
@@ -291,7 +296,7 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                                 <button
                                     onClick={() => setShowMenu(!showMenu)}
                                     className="text-gray-400 hover:text-gray-600 p-1"
-                                    title="Menu"
+                                    title={t('reviews.edit')}
                                 >
                                     <MoreVertical size={18} />
                                 </button>
@@ -321,7 +326,7 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                                                     className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 border-b border-gray-200"
                                                 >
                                                     <Edit2 size={14} />
-                                                    Edit
+                                                    {t('reviews.edit')}
                                                 </button>
                                                 <button
                                                     onClick={() => {
@@ -331,7 +336,7 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                                                     className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                                                 >
                                                     <Trash2 size={14} />
-                                                    Delete
+                                                    {t('reviews.delete')}
                                                 </button>
                                             </>
                                         ) : (
@@ -343,7 +348,7 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                                                 className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                                             >
                                                 <Flag size={14} />
-                                                Report
+                                                {t('reviews.report')}
                                             </button>
                                         )}
                                     </div>
@@ -381,7 +386,7 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center bg-gray-300 text-xs text-gray-600">
-                                            Error
+                                            {t('reviews.unexpectedError')}
                                         </div>
                                     )}
                                 </div>
@@ -403,7 +408,7 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <p className="font-semibold text-[#44BACA] text-sm">Phản hồi của nhà hàng</p>
+                                        <p className="font-semibold text-[#44BACA] text-sm">{t('reviews.restaurantResponse')}</p>
                                         {review.repliedAt && (
                                             <span className="text-xs text-gray-400">
                                                 • {formatDate(review.repliedAt)}
@@ -423,7 +428,7 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-bold text-gray-900">Edit Review</h3>
+                            <h3 className="text-lg font-bold text-gray-900">{t('reviews.editReview')}</h3>
                             <button
                                 onClick={() => {
                                     // Clean up object URLs for new uploads
@@ -442,7 +447,7 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
 
                         {/* Rating Editor */}
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">{t('restaurants.filters.ratings')}</label>
                             <div className="flex gap-1">
                                 {[1, 2, 3, 4, 5].map((value) => (
                                     <button
@@ -465,18 +470,18 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
 
                         {/* Comment Editor */}
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Comment</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">{t('reviews.comment')}</label>
                             <textarea
                                 value={editComment}
                                 onChange={(e) => setEditComment(e.target.value)}
                                 className="w-full h-24 p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#44BACA] focus:border-transparent resize-none text-sm"
                             />
-                            <p className="text-xs text-gray-500 mt-1">{editComment.length} characters</p>
+                            <p className="text-xs text-gray-500 mt-1">{editComment.length} {t('reviews.characters')}</p>
                         </div>
 
                         {/* Image Editor */}
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Images</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">{t('reviews.uploadImages')}</label>
 
                             {/* Image Preview Grid */}
                             {editImages.length > 0 && (
@@ -524,7 +529,7 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                                 className="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#44BACA] hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 text-sm text-gray-600 hover:text-[#44BACA]"
                             >
                                 <ImagePlus size={18} />
-                                Add Images
+                                {t('reviews.addImages')}
                             </button>
 
                             {/* Hidden File Input */}
@@ -552,14 +557,14 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
                                 }}
                                 className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                             >
-                                Cancel
+                                {t('reviews.cancel')}
                             </button>
                             <button
                                 onClick={handleUpdate}
                                 disabled={isUpdating}
                                 className="flex-1 px-4 py-2 text-sm font-medium text-white bg-[#44BACA] hover:bg-[#2B7A8E] disabled:bg-gray-300 rounded-lg transition-colors"
                             >
-                                {isUpdating ? 'Saving...' : 'Save'}
+                                {isUpdating ? t('reviews.saving') : t('reviews.save')}
                             </button>
                         </div>
                     </div>
@@ -570,23 +575,23 @@ export default function ReviewCard({ review, restaurantId }: ReviewCardProps) {
             {showDeleteModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl max-w-sm w-full p-6">
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">Delete Review?</h3>
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">{t('reviews.deleteReview')}</h3>
                         <p className="text-sm text-gray-600 mb-6">
-                            Are you sure you want to delete this review? This action cannot be undone.
+                            {t('reviews.deleteConfirm')}
                         </p>
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setShowDeleteModal(false)}
                                 className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                             >
-                                Cancel
+                                {t('reviews.cancel')}
                             </button>
                             <button
                                 onClick={handleDelete}
                                 disabled={isDeleting}
                                 className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:bg-gray-300 rounded-lg transition-colors"
                             >
-                                {isDeleting ? 'Deleting...' : 'Delete'}
+                                {isDeleting ? t('reviews.deleting') : t('reviews.delete')}
                             </button>
                         </div>
                     </div>

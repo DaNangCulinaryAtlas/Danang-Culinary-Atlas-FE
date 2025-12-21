@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function CuisineFeatures() {
   const { t } = useTranslation();

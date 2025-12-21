@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { uploadImageToCloudinary } from '@/services/upload-image';
 import axios from 'axios';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ReviewFormProps {
   restaurantId: string;
@@ -21,6 +22,7 @@ interface ImagePreview {
 }
 
 export default function ReviewForm({ restaurantId }: ReviewFormProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -73,15 +75,15 @@ export default function ReviewForm({ restaurantId }: ReviewFormProps) {
               ? { ...img, isUploading: false, uploadError: result.message || 'Upload failed' }
               : img
           ));
-          toast.error(`Failed to upload image: ${result.message}`);
+          toast.error(`${t('reviews.uploadFailed')}: ${result.message}`);
         }
       } catch (error) {
         setImages(prev => prev.map((img, idx) =>
           idx === imageIndex
-            ? { ...img, isUploading: false, uploadError: 'Upload failed' }
+            ? { ...img, isUploading: false, uploadError: t('reviews.uploadFailed') }
             : img
         ));
-        toast.error('Failed to upload image');
+        toast.error(t('reviews.uploadFailed'));
       }
     }
 
@@ -102,15 +104,15 @@ export default function ReviewForm({ restaurantId }: ReviewFormProps) {
 
   const validateForm = (): boolean => {
     if (rating === 0) {
-      toast.error('Please select a rating');
+      toast.error(t('reviews.selectRating'));
       return false;
     }
 
     if (comment.trim().length === 0) {
-      toast.error('Please write a review');
+      toast.error(t('reviews.writeReviewError'));
       return false;
     } else if (comment.trim().length < 2) {
-      toast.error('Review must be at least 2 characters');
+      toast.error(t('reviews.reviewMinLength'));
       return false;
     }
 
@@ -121,7 +123,7 @@ export default function ReviewForm({ restaurantId }: ReviewFormProps) {
     e.preventDefault();
 
     if (!isAuthenticated) {
-      toast.info('Please log in to post a review');
+      toast.info(t('reviews.loginToReview'));
       router.push('/login');
       return;
     }
@@ -131,14 +133,14 @@ export default function ReviewForm({ restaurantId }: ReviewFormProps) {
     // Check if any images are still uploading
     const isAnyImageUploading = images.some(img => img.isUploading);
     if (isAnyImageUploading) {
-      toast.warning('Please wait for all images to finish uploading');
+      toast.warning(t('reviews.waitForUpload'));
       return;
     }
 
     // Check if any images failed to upload
     const failedImages = images.filter(img => img.uploadError);
     if (failedImages.length > 0) {
-      toast.error('Some images failed to upload. Please remove them or try again.');
+      toast.error(t('reviews.someImagesFailed'));
       return;
     }
 
@@ -165,28 +167,31 @@ export default function ReviewForm({ restaurantId }: ReviewFormProps) {
           setImages([]);
 
           // Show success toast
-          toast.success('Review posted successfully! ✨');
+          toast.success(t('reviews.postSuccess'), {
+            position: 'top-right',
+            autoClose: 2500,
+          });
         },
         onError: (error: any) => {
-          toast.error('Lỗi khi tạo đánh giá', {
+          toast.error(t('reviews.postError'), {
             position: 'top-right',
             autoClose: 2500,
           });
 
           if (axios.isAxiosError(error)) {
             if (error.response?.status === 403) {
-              toast.error('You do not have permission to post reviews.');
+              toast.error(t('reviews.noPermission'));
             } else if (error.response?.status === 401) {
-              toast.error('Your session has expired. Please log in again.');
+              toast.error(t('reviews.sessionExpired'));
               setIsAuthenticated(false);
               router.push('/login');
             } else if (error.response?.status === 400) {
-              toast.error('Invalid review data.');
+              toast.error(t('reviews.invalidData'));
             } else {
-              toast.error('Failed to post review. Please try again.');
+              toast.error(t('reviews.postFailed'));
             }
           } else {
-            toast.error('An unexpected error occurred.');
+            toast.error(t('reviews.unexpectedError'));
           }
         },
       }
@@ -207,14 +212,14 @@ export default function ReviewForm({ restaurantId }: ReviewFormProps) {
       <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center gap-3">
         <AlertCircle className="w-5 h-5 text-blue-600 shrink-0" />
         <div className="flex-1">
-          <p className="text-blue-900 font-medium">Log in to post a review</p>
-          <p className="text-blue-700 text-sm">You must be logged in to share your experience.</p>
+          <p className="text-blue-900 font-medium">{t('reviews.loginToReview')}</p>
+          <p className="text-blue-700 text-sm">{t('reviews.mustLogin')}</p>
         </div>
         <button
           onClick={() => router.push('/login')}
           className="text-blue-600 hover:text-blue-700 font-semibold text-sm whitespace-nowrap ml-4"
         >
-          Go to Login
+          {t('reviews.goToLogin')}
         </button>
       </div>
     );
@@ -256,7 +261,7 @@ export default function ReviewForm({ restaurantId }: ReviewFormProps) {
           type="text"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          placeholder="Write a review..."
+          placeholder={t('reviews.writeReview')}
           className="flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400 text-sm md:text-base min-w-0"
         />
 
@@ -264,7 +269,7 @@ export default function ReviewForm({ restaurantId }: ReviewFormProps) {
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          title="Upload images"
+          title={t('reviews.uploadImages')}
           className="p-2 shrink-0 rounded-full hover:bg-white/50 transition-colors"
         >
           <ImagePlus size={18} className="text-gray-600 hover:text-[#44BACA]" />
@@ -286,7 +291,7 @@ export default function ReviewForm({ restaurantId }: ReviewFormProps) {
           onClick={handleSubmit}
           disabled={isPending || !rating || !comment.trim() || images.some(img => img.isUploading)}
           className="p-2 shrink-0 rounded-full bg-[#44BACA] text-white hover:bg-[#2B7A8E] disabled:bg-gray-300 disabled:cursor-not-allowed transition-all hover:scale-110 active:scale-95"
-          title="Send review"
+          title={t('reviews.sendReview')}
         >
           {isPending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
         </button>

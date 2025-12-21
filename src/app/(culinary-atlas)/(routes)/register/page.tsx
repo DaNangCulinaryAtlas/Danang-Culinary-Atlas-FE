@@ -12,8 +12,10 @@ import { useRegisterMutation } from '@/hooks/mutations/useAuthMutations';
 import { registerSchema, RegisterFormData } from '@/lib/validations/auth';
 import { toast } from 'react-toastify';
 import { useState } from 'react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function Register() {
+    const { t } = useTranslation();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const router = useRouter();
@@ -46,7 +48,7 @@ export default function Register() {
             },
             {
                 onSuccess: () => {
-                    toast.success('Đăng ký tài khoản thành công! Đang chuyển hướng...', {
+                    toast.success(t('auth.register.success'), {
                         position: 'top-right',
                         autoClose: 2500,
                     });
@@ -54,7 +56,7 @@ export default function Register() {
                     setTimeout(() => router.push('/login'), 2500);
                 },
                 onError: (error) => {
-                    toast.error(error.message || 'Đăng ký thất bại. Vui lòng thử lại.', {
+                    toast.error(error.message || t('auth.register.error'), {
                         position: 'top-right',
                     });
                 },
@@ -88,7 +90,7 @@ export default function Register() {
                             Danang Culinary Atlas
                         </h1>
                         <p className="text-sm md:text-base font-mulish leading-relaxed max-w-xs text-center">
-                            Join us and discover the most amazing culinary experiences in Da Nang.
+                            {t('auth.register.description')}
                         </p>
                     </div>
                 </div>
@@ -100,10 +102,10 @@ export default function Register() {
                         {/* Header */}
                         <div className="text-center mb-4">
                             <h2 className="font-mulish font-extrabold text-[#69C3CF] text-4xl sm:text-5xl">
-                                Register
+                                {t('auth.register.title')}
                             </h2>
                             <p className="font-mulish text-sm text-[#000000] mt-1">
-                                Create your account
+                                {t('auth.register.subtitle')}
                             </p>
                         </div>
 
@@ -125,14 +127,14 @@ export default function Register() {
                             {/* Email */}
                             <div>
                                 <label className="block text-sm font-bold text-[#69C3CF] mb-1 font-poppins">
-                                    Email
+                                    {t('auth.register.email')}
                                 </label>
                                 <div className="relative">
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                     <Input
                                         type="email"
                                         {...register('email')}
-                                        placeholder="Enter your email"
+                                        placeholder={t('auth.register.emailPlaceholder')}
                                         className="pl-10 h-12 border-[#69C3CF] font-poppins text-sm"
                                         disabled={registerMutation.isPending}
                                     />
@@ -145,14 +147,14 @@ export default function Register() {
                             {/* Password */}
                             <div>
                                 <label className="block text-sm font-bold text-[#69C3CF] mb-1 font-poppins">
-                                    Password
+                                    {t('auth.register.password')}
                                 </label>
                                 <div className="relative">
                                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                     <Input
                                         type={showPassword ? 'text' : 'password'}
                                         {...register('password')}
-                                        placeholder="******"
+                                        placeholder={t('auth.register.passwordPlaceholder')}
                                         className="pl-10 pr-10 h-12 border-[#69C3CF] font-poppins text-sm"
                                         disabled={registerMutation.isPending}
                                     />
@@ -172,14 +174,14 @@ export default function Register() {
                             {/* Confirm Password */}
                             <div>
                                 <label className="block text-sm font-bold text-[#69C3CF] mb-1 font-poppins">
-                                    Confirm Password
+                                    {t('auth.register.confirmPassword')}
                                 </label>
                                 <div className="relative">
                                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                     <Input
                                         type={showConfirmPassword ? 'text' : 'password'}
                                         {...register('confirmPassword')}
-                                        placeholder="******"
+                                        placeholder={t('auth.register.passwordPlaceholder')}
                                         className="pl-10 pr-10 h-12 border-[#69C3CF] font-poppins text-sm"
                                         disabled={registerMutation.isPending}
                                     />
@@ -199,7 +201,7 @@ export default function Register() {
                             {/* Role Selection */}
                             <div>
                                 <label className="block text-sm font-bold text-[#69C3CF] mb-2 font-poppins">
-                                    Register as
+                                    {t('auth.register.registerAs')}
                                 </label>
                                 <div className="flex gap-4">
                                     <label className="flex items-center space-x-2 cursor-pointer flex-1">
@@ -210,7 +212,7 @@ export default function Register() {
                                             className="w-4 h-4 text-[#69C3CF] focus:ring-[#69C3CF]"
                                             disabled={registerMutation.isPending}
                                         />
-                                        <span className="text-sm text-gray-700 font-poppins">Người dùng</span>
+                                        <span className="text-sm text-gray-700 font-poppins">{t('auth.register.user')}</span>
                                     </label>
                                     <label className="flex items-center space-x-2 cursor-pointer flex-1">
                                         <input
@@ -220,13 +222,13 @@ export default function Register() {
                                             className="w-4 h-4 text-[#69C3CF] focus:ring-[#69C3CF]"
                                             disabled={registerMutation.isPending}
                                         />
-                                        <span className="text-sm text-gray-700 font-poppins">Chủ nhà hàng</span>
+                                        <span className="text-sm text-gray-700 font-poppins">{t('auth.register.vendor')}</span>
                                     </label>
                                 </div>
                                 <p className="text-xs text-gray-500 mt-1 font-poppins">
                                     {selectedRole === 'USER'
-                                        ? 'Đăng ký tài khoản người dùng để khám phá ẩm thực Đà Nẵng.'
-                                        : 'Đăng ký tài khoản chủ nhà hàng để quản lý nhà hàng của bạn.'}
+                                        ? t('auth.register.userDescription')
+                                        : t('auth.register.vendorDescription')}
                                 </p>
                                 {errors.role && (
                                     <p className="text-red-500 text-xs mt-1 font-poppins">{errors.role.message}</p>
@@ -242,9 +244,9 @@ export default function Register() {
                                         className="w-4 h-4 mt-0.5 text-[#69C3CF] rounded focus:ring-[#69C3CF]"
                                     />
                                     <span className="text-gray-600 font-poppins">
-                                        Tôi đồng ý với{' '}
+                                        {t('auth.register.agreeTerms')}{' '}
                                         <Link href="/terms" className="text-[#69C3CF] hover:underline">
-                                            Điều khoản và Điều kiện
+                                            {t('auth.register.termsAndConditions')}
                                         </Link>
                                     </span>
                                 </label>
@@ -259,16 +261,16 @@ export default function Register() {
                                 disabled={registerMutation.isPending}
                                 className="w-full h-11 bg-[#69C3CF] hover:bg-[#5AB3BF] text-white font-poppins text-sm font-medium rounded-md disabled:opacity-50"
                             >
-                                {registerMutation.isPending ? 'ĐANG ĐĂNG KÝ...' : 'ĐĂNG KÝ'}
+                                {registerMutation.isPending ? t('auth.register.registering') : t('auth.register.registerButton')}
                             </Button>
                         </form>
 
 
                         {/* Login Link */}
                         <p className="text-center text-xs font-mulish text-gray-600">
-                            Bạn đã có tài khoản?{' '}
+                            {t('auth.register.hasAccount')}{' '}
                             <Link href="/login" className="text-[#69C3CF] hover:text-[#5AB3BF] font-semibold">
-                                Đăng nhập
+                                {t('auth.register.loginNow')}
                             </Link>
                         </p>
                     </div>

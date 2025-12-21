@@ -8,9 +8,10 @@ import MobileMenu from './components/Menu';
 import ProfileModal from './components/ProfileModal';
 import NotificationPanel from '@/components/notification/NotificationPanel';
 import { useAppSelector } from '@/hooks/useRedux';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '@/hooks/useTranslation';
 import { CircleUser, Bell } from 'lucide-react';
 import { useNotifications } from '@/hooks/queries/useNotifications';
+import LanguageSwitcher from './components/LanguageSwitcher';
 
 export default function Header() {
   const { t } = useTranslation();
@@ -93,6 +94,10 @@ export default function Header() {
               <span className="hidden lg:inline">{t('navbar.popularRestaurants')}</span>
               <span className="lg:hidden">{t('navbar.restaurants')}</span>
             </Link>
+            
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+            
             {user ? (
               <>
                 {/* Notification Bell */}
@@ -130,7 +135,7 @@ export default function Header() {
             ) : (
               <Button asChild className="ml-2 bg-[#FFDA32] w-20 lg:w-[90px] h-9 lg:h-[40px] text-black font-mulish font-extrabold hover:bg-[#e6c229] transition-colors rounded-none whitespace-nowrap">
                 <Link href="/login">
-                  Login
+                  {t('navbar.login')}
                 </Link>
               </Button>
             )}

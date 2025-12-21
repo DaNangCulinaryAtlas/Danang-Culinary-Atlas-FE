@@ -3,13 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { X, User, Lock, Settings, LogOut } from 'lucide-react';
+import { X, User, Lock, LogOut } from 'lucide-react';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { logout } from '@/stores/auth';
 import ProfileTab from './ProfileTab';
 import ChangePasswordTab from './ChangePasswordTab';
-import SettingsTab from './SettingsTab';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ProfileModalProps {
     isOpen: boolean;
@@ -40,7 +39,7 @@ export default function ProfileModal({
     const router = useRouter();
     const { user } = useAppSelector((state) => state.auth);
     const { t } = useTranslation();
-    const [activeTab, setActiveTab] = useState<'profile' | 'password' | 'settings'>('profile');
+    const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile');
 
     if (!isOpen) return null;
 
@@ -109,28 +108,12 @@ export default function ProfileModal({
                         <Lock className="inline-block mr-2" size={18} />
                         {t('profile.changePassword')}
                     </button>
-                    <button
-                        onClick={() => setActiveTab('settings')}
-                        className={`flex-1 py-3 px-4 text-sm font-semibold transition-colors ${activeTab === 'settings'
-                            ? 'border-b-2'
-                            : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                        style={
-                            activeTab === 'settings'
-                                ? { color: colorScheme.primary, borderColor: colorScheme.primaryBorder }
-                                : {}
-                        }
-                    >
-                        <Settings className="inline-block mr-2" size={18} />
-                        {t('profile.settings')}
-                    </button>
                 </div>
 
                 {/* Content - Fixed height to prevent layout shift */}
                 <div className="p-6 overflow-y-auto h-[400px]">
                     {activeTab === 'profile' && <ProfileTab user={user} />}
                     {activeTab === 'password' && <ChangePasswordTab />}
-                    {activeTab === 'settings' && <SettingsTab />}
                 </div>
 
                 {/* Footer */}

@@ -6,8 +6,10 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import SearchBox from './SearchBox';
 import { useRestaurants } from '@/hooks/queries/useRestaurants';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function RestaurantList() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [restaurantsData, setRestaurantsData] = useState<any>(null);
 
@@ -33,7 +35,7 @@ export default function RestaurantList() {
         <SearchBox onSearchChange={handleSearchChange} />
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-800">
-            {restaurants.length} restaurants found
+            {restaurants.length} {t('atlas.restaurantsFoundCount')}
           </h2>
         </div>
       </div>
@@ -42,11 +44,11 @@ export default function RestaurantList() {
       <div className="flex-1 overflow-y-auto p-4 sm:p-6">
         {isLoading && !restaurants.length ? (
           <div className="flex items-center justify-center h-full">
-            <p className="text-gray-500">Loading restaurants...</p>
+            <p className="text-gray-500">{t('atlas.loadingRestaurantsList')}</p>
           </div>
         ) : error ? (
           <div className="flex items-center justify-center h-full">
-            <p className="text-red-500">Failed to load restaurants</p>
+            <p className="text-red-500">{t('atlas.failedToLoad')}</p>
           </div>
         ) : restaurants.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -60,7 +62,7 @@ export default function RestaurantList() {
           </div>
         ) : (
           <div className="flex items-center justify-center h-full">
-            <p className="text-gray-500">No restaurants found</p>
+            <p className="text-gray-500">{t('atlas.noRestaurantsFound')}</p>
           </div>
         )}
       </div>
