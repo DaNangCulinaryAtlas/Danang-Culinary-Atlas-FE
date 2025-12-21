@@ -37,7 +37,22 @@ export function usePermissions() {
         id: action.actionId,
         name: action.actionName,
         code: action.actionCode,
+        requiresLicense: action.requiresLicense,
       }))
+
+      // Merge requiresLicense info from permissionRoles if not available in actionsData
+      permissionRoles.forEach((rolePermission) => {
+        if (Array.isArray(rolePermission.actions)) {
+          rolePermission.actions.forEach((action) => {
+            const foundAction = loadedActions.find(a => a.id === action.actionId)
+            if (foundAction && action.requiresLicense !== undefined) {
+              foundAction.requiresLicense = action.requiresLicense
+            }
+          })
+        }
+      })
+
+      console.log('Loaded actions with requiresLicense:', loadedActions)
 
       setRoles(loadedRoles)
       setActions(loadedActions)

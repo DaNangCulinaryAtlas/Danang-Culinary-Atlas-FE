@@ -26,6 +26,8 @@ export default function PermissionMatrix({
   onPermissionChange,
   disabled = false,
 }: PermissionMatrixProps) {
+  console.log('PermissionMatrix actions:', actions)
+
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -43,7 +45,7 @@ export default function PermissionMatrix({
           {actions.map((action, actionIndex) => (
             <TableRow key={action.id ?? action.code ?? `action-${actionIndex}`}>
               <TableCell className="sticky left-0 z-10 bg-background font-medium">
-                {action.name}
+                {action.name}{action.requiresLicense && <span className="text-red-500 ml-1">*</span>}
               </TableCell>
               {roles.map((role, roleIndex) => {
                 const roleKey = role.id ?? role.name ?? `role-${roleIndex}`

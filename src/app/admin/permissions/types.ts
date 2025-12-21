@@ -9,6 +9,7 @@ export interface ActionResponse {
   actionId: number
   actionName: string
   actionCode: string
+  requiresLicense?: boolean
 }
 
 export interface PermissionRoleResponse {
@@ -29,5 +30,6 @@ export interface Action {
   id: number
   name: string
   code: string
+  requiresLicense?: boolean
 }
 

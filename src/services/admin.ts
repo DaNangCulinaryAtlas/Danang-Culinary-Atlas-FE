@@ -57,6 +57,7 @@ export interface ActionData {
     actionId: number;
     actionName: string;
     actionCode: string;
+    requiresLicense?: boolean;
 }
 
 export interface RoleWithPermissions {
@@ -150,6 +151,37 @@ export const updateRolePermissions = async (
         const axiosError = error as AxiosError<ApiResponse>;
         throw new Error(
             axiosError.response?.data?.message || 'Failed to update role permissions'
+        );
+    }
+};
+
+export interface PermissionConfigurationResponse {
+    status: string;
+    message: string;
+}
+
+export const updatePermissionConfiguration = async (
+    roleId: number,
+    actionId: number,
+    requiresLicense: boolean
+): Promise<PermissionConfigurationResponse> => {
+    try {
+        const response: AxiosResponse = await instanceAxios.patch(
+            API_ENDPOINTS.ADMIN.PERMISSION_CONFIGURATION(roleId.toString(), actionId.toString()),
+            null,
+            {
+                params: { requiresLicense }
+            }
+        );
+
+        return {
+            status: response.data.status || 'success',
+            message: response.data.message || 'Cập nhật cấu hình permission thành công'
+        };
+    } catch (error) {
+        const axiosError = error as AxiosError<ApiResponse>;
+        throw new Error(
+            axiosError.response?.data?.message || 'Failed to update permission configuration'
         );
     }
 };

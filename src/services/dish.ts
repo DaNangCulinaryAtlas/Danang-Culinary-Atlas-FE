@@ -79,7 +79,7 @@ export const createDish = async (data: CreateDishRequest): Promise<ApiResponse<D
 // Update an existing dish
 export const updateDish = async (dishId: string, data: UpdateDishRequest): Promise<ApiResponse<DishApiResponse>> => {
     try {
-        const response = await instanceAxios.put(API_ENDPOINTS.DISH.UPDATE(dishId), data);
+        const response = await instanceAxios.patch(API_ENDPOINTS.DISH.UPDATE(dishId), data);
         return {
             success: true,
             data: response.data,

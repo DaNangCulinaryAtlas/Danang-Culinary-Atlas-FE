@@ -34,7 +34,7 @@ export default function ProfileModal({
         footerBg: '#f9fafb'
     },
     title,
-    redirectAfterLogout = '/login'
+    redirectAfterLogout = '/'
 }: ProfileModalProps) {
     const dispatch = useAppDispatch();
     const router = useRouter();
@@ -58,7 +58,7 @@ export default function ProfileModal({
             onClick={onClose}
         >
             <div
-                className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+                className="bg-white shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
@@ -82,8 +82,8 @@ export default function ProfileModal({
                     <button
                         onClick={() => setActiveTab('profile')}
                         className={`flex-1 py-3 px-4 text-sm font-semibold transition-colors ${activeTab === 'profile'
-                                ? 'border-b-2'
-                                : 'text-gray-500 hover:text-gray-700'
+                            ? 'border-b-2'
+                            : 'text-gray-500 hover:text-gray-700'
                             }`}
                         style={
                             activeTab === 'profile'
@@ -97,8 +97,8 @@ export default function ProfileModal({
                     <button
                         onClick={() => setActiveTab('password')}
                         className={`flex-1 py-3 px-4 text-sm font-semibold transition-colors ${activeTab === 'password'
-                                ? 'border-b-2'
-                                : 'text-gray-500 hover:text-gray-700'
+                            ? 'border-b-2'
+                            : 'text-gray-500 hover:text-gray-700'
                             }`}
                         style={
                             activeTab === 'password'
@@ -112,8 +112,8 @@ export default function ProfileModal({
                     <button
                         onClick={() => setActiveTab('settings')}
                         className={`flex-1 py-3 px-4 text-sm font-semibold transition-colors ${activeTab === 'settings'
-                                ? 'border-b-2'
-                                : 'text-gray-500 hover:text-gray-700'
+                            ? 'border-b-2'
+                            : 'text-gray-500 hover:text-gray-700'
                             }`}
                         style={
                             activeTab === 'settings'

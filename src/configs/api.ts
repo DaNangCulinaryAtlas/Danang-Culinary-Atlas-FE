@@ -100,6 +100,7 @@ export const API_ENDPOINTS = {
     PERMISSIONS_LIST: '/admin/permissions/roles', // Get all roles (basic info)
     ROLES_WITH_PERMISSIONS: '/admin/permissions/roles-with-permissions', // Get all roles with their permissions (detailed)
     PERMISSIONS_UPDATE: '/admin/permissions/roles/permissions', // Update roles permissions
+    PERMISSION_CONFIGURATION: (roleId: string, actionId: string) => `/admin/permissions/roles/${roleId}/actions/${actionId}/configuration`, // Configure permission requiresLicense
     ROLES_LIST: '/admin/permissions/roles', // Get all roles
     PERMISSIONS_FOR_ROLE: (roleId: string) => `/admin/permissions/roles/${roleId}/permissions`, // Get permissions for a specific role
     ACTIONS_LIST: '/admin/permissions/actions', // Get all available actions
