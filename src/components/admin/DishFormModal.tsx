@@ -23,6 +23,7 @@ import { DishApiResponse } from '@/types/dish';
 import { Loader2, X, Upload, Search } from 'lucide-react';
 import { uploadImageToCloudinary } from '@/services/upload-image';
 import { searchRestaurantsByName } from '@/services/restaurant';
+import { toast } from 'react-toastify';
 import { Badge } from '@/components/ui/badge';
 
 interface DishFormModalProps {
@@ -116,7 +117,10 @@ export default function DishFormModal({
                     setShowSearchResults(restaurants.length > 0);
                 }
             } catch (error) {
-                console.error('Failed to search restaurants:', error);
+                toast.error('Lỗi khi tìm kiếm nhà hàng', {
+                    position: 'top-right',
+                    autoClose: 2500,
+                });
                 setRestaurantSearchResults([]);
             } finally {
                 setIsSearching(false);
@@ -162,8 +166,10 @@ export default function DishFormModal({
                 .map((result) => result.data as string);
             setImages((prev) => [...prev, ...successfulUrls]);
         } catch (error) {
-            console.error('Failed to upload images:', error);
-            alert('Không thể tải lên hình ảnh. Vui lòng thử lại.');
+            toast.error('Không thể tải lên hình ảnh', {
+                position: 'top-right',
+                autoClose: 2500,
+            });
         } finally {
             setUploading(false);
         }
@@ -217,8 +223,10 @@ export default function DishFormModal({
             handleClose();
             onSuccess?.();
         } catch (error: any) {
-            console.error('Failed to save dish:', error);
-            alert(error.message || 'Không thể lưu món ăn. Vui lòng thử lại.');
+            toast.error(error.message || 'Không thể lưu món ăn', {
+                position: 'top-right',
+                autoClose: 2500,
+            });
         }
     };
 

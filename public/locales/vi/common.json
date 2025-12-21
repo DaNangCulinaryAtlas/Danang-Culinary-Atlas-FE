@@ -43,6 +43,13 @@
         "in": "trong",
         "seconds": "giây"
     },
+    "notFound": {
+        "title": "Trang Không Tồn Tại!",
+        "description": "Trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển. Hãy quay lại trang chủ để khám phá bản đồ ẩm thực Đà Nẵng!",
+        "returnHome": "Về Trang Chủ",
+        "goBack": "Quay Lại",
+        "footer": "Hãy cùng khám phá những hương vị tuyệt vời của Đà Nẵng! 🌴"
+    },
     "home": {
         "heroTitle": "Khám phá ẩm thực tinh túy Đà Nẵng",
         "heroDescription": "Ẩm thực Đà Nẵng - sự hòa quyện tinh tế của hương vị miền Trung. Từ tô mì Quảng đậm đà, bánh xèo giòn tan đến những món hải sản tươi ngon bậc nhất. Một hành trình vị giác đầy phóng khoáng và đáng nhớ.",

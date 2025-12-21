@@ -13,6 +13,7 @@ import { AlertTriangle, Loader2, Shield, Plus, Minus, Info } from "lucide-react"
 import { adminColors } from "@/configs/colors"
 import { useEffect, useState } from "react"
 import { getRolesWithPermissions } from "@/services/admin"
+import { toast } from "react-toastify"
 
 interface ConfirmUpdateModalProps {
     isOpen: boolean
@@ -61,7 +62,10 @@ export default function ConfirmUpdateModal({
             })
             setOriginalPermissions(permsMap)
         } catch (error) {
-            console.error("Error loading original permissions:", error)
+            toast.error('Lỗi khi tải quyền ban đầu', {
+                position: 'top-right',
+                autoClose: 2500,
+            });
         } finally {
             setLoadingOriginal(false)
         }

@@ -6,7 +6,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { MAP_STYLES } from '@/styles/map-styles';
 import { MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
+import { toast } from 'react-toastify';
 interface LocationMapPickerProps {
     latitude: number;
     longitude: number;
@@ -69,8 +69,10 @@ export function LocationMapPicker({ latitude, longitude, onLocationChange }: Loc
                     onLocationChange(lat, lng);
                 },
                 (error) => {
-                    console.error('Error getting location:', error);
-                    alert('Không thể lấy vị trí hiện tại. Vui lòng cho phép truy cập vị trí.');
+                    toast.error('Không thể lấy vị trí hiện tại', {
+                        position: 'top-right',
+                        autoClose: 2500,
+                    });
                 }
             );
         } else {

@@ -168,7 +168,10 @@ export default function ReviewForm({ restaurantId }: ReviewFormProps) {
           toast.success('Review posted successfully! ✨');
         },
         onError: (error: any) => {
-          console.error('Error creating review:', error);
+          toast.error('Lỗi khi tạo đánh giá', {
+            position: 'top-right',
+            autoClose: 2500,
+          });
 
           if (axios.isAxiosError(error)) {
             if (error.response?.status === 403) {
@@ -234,8 +237,8 @@ export default function ReviewForm({ restaurantId }: ReviewFormProps) {
               <Star
                 size={18}
                 className={`transition-colors ${value <= rating
-                    ? 'fill-[#44BACA] text-[#44BACA]'
-                    : 'text-gray-300 hover:text-gray-400'
+                  ? 'fill-[#44BACA] text-[#44BACA]'
+                  : 'text-gray-300 hover:text-gray-400'
                   }`}
               />
             </button>

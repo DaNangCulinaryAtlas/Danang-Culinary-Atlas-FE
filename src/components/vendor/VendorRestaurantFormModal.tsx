@@ -18,7 +18,7 @@ import { getWardById, getDistrictById } from '@/services/location';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { vendorColors } from '@/configs/colors';
-import toast from 'react-hot-toast';
+import { toast } from 'react-toastify';
 import { LocationMapPicker } from './LocationMapPicker';
 import type { Restaurant } from '@/app/vendor/restaurants/types';
 
@@ -86,7 +86,10 @@ export function VendorRestaurantFormModal({ open, onOpenChange, restaurant, mode
             // Step 1: Get ward details to get districtId
             const wardResponse = await getWardById(wardId);
             if (!wardResponse.success || !wardResponse.data) {
-                console.error('Failed to fetch ward details');
+                toast.error('Lỗi khi tải thông tin phường/xã', {
+                    position: 'top-right',
+                    autoClose: 2500,
+                });
                 setIsLoadingLocation(false);
                 return;
             }
@@ -96,7 +99,10 @@ export function VendorRestaurantFormModal({ open, onOpenChange, restaurant, mode
             // Step 2: Get district details to get provinceId
             const districtResponse = await getDistrictById(wardData.districtId);
             if (!districtResponse.success || !districtResponse.data) {
-                console.error('Failed to fetch district details');
+                toast.error('Lỗi khi tải thông tin quận/huyện', {
+                    position: 'top-right',
+                    autoClose: 2500,
+                });
                 setIsLoadingLocation(false);
                 return;
             }
@@ -125,7 +131,10 @@ export function VendorRestaurantFormModal({ open, onOpenChange, restaurant, mode
             setProvinceId(foundProvinceId);
 
         } catch (error) {
-            console.error('Error finding location hierarchy:', error);
+            toast.error('Lỗi khi tìm kiếm thông tin vị trí', {
+                position: 'top-right',
+                autoClose: 2500,
+            });
             setIsLoadingLocation(false);
         }
     };
@@ -177,7 +186,10 @@ export function VendorRestaurantFormModal({ open, onOpenChange, restaurant, mode
                     setPendingLocationData(null); // Clear pending data
                 }, 100);
             } else if (!targetWard) {
-                console.error('Ward not found in list!');
+                toast.error('Không tìm thấy phường/xã trong danh sách', {
+                    position: 'top-right',
+                    autoClose: 2500,
+                });
                 setIsLoadingLocation(false);
             }
         }
@@ -375,8 +387,10 @@ export function VendorRestaurantFormModal({ open, onOpenChange, restaurant, mode
             resetForm();
             onOpenChange(false);
         } catch (error: any) {
-            console.error(`Error ${mode === 'edit' ? 'updating' : 'creating'} restaurant:`, error);
-            toast.error(error.message || `Không thể ${mode === 'edit' ? 'cập nhật' : 'tạo'} quán ăn`);
+            toast.error(error.message || `Không thể ${mode === 'edit' ? 'cập nhật' : 'tạo'} quán ăn`, {
+                position: 'top-right',
+                autoClose: 2500,
+            });
         } finally {
             setIsUploading(false);
         }

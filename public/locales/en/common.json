@@ -43,11 +43,18 @@
         "in": "in",
         "seconds": "seconds"
     },
+    "notFound": {
+        "title": "Page Not Found!",
+        "description": "The page you're looking for doesn't exist or has been moved. Let's get you back to exploring Da Nang's culinary treasures!",
+        "returnHome": "Return to Home",
+        "goBack": "Go Back",
+        "footer": "Let's get you back to discovering the amazing flavors of Da Nang! 🌴"
+    },
     "home": {
         "heroTitle": "Discover the Essence of Da Nang Culinary",
         "heroDescription": "Da Nang cuisine - a sophisticated blend of Central Vietnam's flavors. From hearty Mi Quang noodles and crispy Banh Xeo to the freshest seafood. A vibrant and unforgettable culinary journey.",
         "watchVideo": "Watch Video",
-        "search": "Search",
+        "search": "Tìm kiếm",
         "searchPlaceholder": "Search for dishes, restaurants...",
         "cuisineTitle": "Da Nang Cuisine",
         "cuisineDescription": "Explore Da Nang's cuisine with distinctive Central Vietnamese flavors, where delicious dishes from mountains to sea converge, offering a unique and diverse culinary experience.",

@@ -12,7 +12,7 @@ interface AdminProtectedLayoutProps {
 
 export default function AdminProtectedLayout({ children }: AdminProtectedLayoutProps) {
     const router = useRouter()
-    const { user, isAuthenticated } = useAppSelector((state) => state.auth)
+    const { user, isAuthenticated, isHydrated } = useAppSelector((state) => state.auth)
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
@@ -20,17 +20,17 @@ export default function AdminProtectedLayout({ children }: AdminProtectedLayoutP
     }, [])
 
     useEffect(() => {
-        if (!mounted) return
+        if (!mounted || !isHydrated) return
 
         // Only redirect to login if user is not authenticated at all
         if (!isAuthenticated || !user) {
             router.replace("/login")
             return
         }
-    }, [isAuthenticated, user, router, mounted])
+    }, [isAuthenticated, user, router, mounted, isHydrated])
 
-    // Show loading state while mounting
-    if (!mounted) {
+    // Show loading state while mounting or hydrating
+    if (!mounted || !isHydrated) {
         return (
             <div className="flex items-center justify-center h-screen">
                 <Loader2 className="w-8 h-8 animate-spin text-[#44BACA]" />
