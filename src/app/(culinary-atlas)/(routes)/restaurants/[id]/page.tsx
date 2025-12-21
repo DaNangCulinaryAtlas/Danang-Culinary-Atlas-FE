@@ -17,8 +17,10 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { Notification } from '@/services/notification';
 import { useReportRestaurant } from '@/hooks/mutations/useReportRestaurant';
 import { MenuSection } from './components/MenuSection';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function RestaurantDetail() {
+  const { t } = useTranslation();
   const router = useRouter();
   const params = useParams();
   const restaurantId = params.id as string;
@@ -77,7 +79,7 @@ export default function RestaurantDetail() {
           // Only show notification if review is for current restaurant
           if (String(review.restaurantId) === String(restaurantId)) {
             toast.success(
-              notification.message || 'Có đánh giá mới',
+              notification.message || t('restaurantDetail.newReview'),
               {
                 position: 'top-right',
                 autoClose: 3000,
@@ -152,9 +154,9 @@ export default function RestaurantDetail() {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600 mb-4">Failed to load restaurant details</p>
+          <p className="text-gray-600 mb-4">{t('restaurantDetail.errorLoading')}</p>
           <Button onClick={() => router.back()} className="bg-[#44BACA] text-white">
-            Go Back
+            {t('restaurantDetail.goBack')}
           </Button>
         </div>
       </div>
@@ -173,7 +175,7 @@ export default function RestaurantDetail() {
               <button
                 onClick={() => setIsReportModalOpen(true)}
                 className="bg-red-100 hover:bg-red-200 rounded-full p-2 transition-all duration-300"
-                title="Báo cáo nhà hàng"
+                title={t('restaurantDetail.reportRestaurant')}
               >
                 <Flag className="w-5 h-5 text-red-600" />
               </button>
@@ -196,7 +198,7 @@ export default function RestaurantDetail() {
             <div className="flex items-center gap-1.5">
               <StarRating rating={restaurant.averageRating} />
               <span className="text-sm font-semibold text-gray-900">{restaurant.averageRating}</span>
-              <span className="text-sm text-gray-600">({restaurant.totalReviews} reviews)</span>
+              <span className="text-sm text-gray-600">({restaurant.totalReviews} {t('restaurantDetail.reviews')})</span>
             </div>
           </div>
 
@@ -267,7 +269,7 @@ export default function RestaurantDetail() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gray-300">
-                      <span className="text-gray-600">No image available</span>
+                      <span className="text-gray-600">{t('restaurantDetail.noImageAvailable')}</span>
                     </div>
                   )}
                 </div>
@@ -295,7 +297,7 @@ export default function RestaurantDetail() {
               </>
             ) : (
               <div className="relative w-full h-72 md:h-96 rounded-2xl overflow-hidden mb-4 shadow-lg bg-gray-300 flex items-center justify-center">
-                <span className="text-gray-600">No images available</span>
+                <span className="text-gray-600">{t('restaurantDetail.noImageAvailable')}</span>
               </div>
             );
           })()}
@@ -304,7 +306,7 @@ export default function RestaurantDetail() {
         {/* Restaurant Location Map */}
         {restaurant.latitude && restaurant.longitude && (
           <section className="mb-8">
-            <h2 className="text-2xl font-bold text-[#44BACA] mb-4">Location</h2>
+            <h2 className="text-2xl font-bold text-[#44BACA] mb-4">{t('restaurantDetail.location')}</h2>
             <RestaurantMap
               latitude={restaurant.latitude}
               longitude={restaurant.longitude}
@@ -319,7 +321,7 @@ export default function RestaurantDetail() {
 
         {/* Customer Reviews */}
         <section className="mb-8">
-          <h2 className="text-2xl font-bold text-[#44BACA] mb-6">Customer Review</h2>
+          <h2 className="text-2xl font-bold text-[#44BACA] mb-6">{t('restaurantDetail.customerReview')}</h2>
 
           {/* Rating Summary */}
           <div className="mb-8 pb-8 border-b border-gray-200">
@@ -332,7 +334,7 @@ export default function RestaurantDetail() {
                 <div className="flex items-center gap-2 mb-3">
                   <StarRating rating={restaurant.averageRating} />
                 </div>
-                <p className="text-sm text-gray-600">{restaurant.totalReviews} Reviews</p>
+                <p className="text-sm text-gray-600">{restaurant.totalReviews} {t('restaurantDetail.reviewsCount')}</p>
               </div>
             </div>
           </div>

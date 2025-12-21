@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { AlertTriangle } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ReportReviewModalProps {
     isOpen: boolean;
@@ -27,16 +28,17 @@ export const ReportReviewModal: React.FC<ReportReviewModalProps> = ({
     isLoading = false,
     reviewerName,
 }) => {
+    const { t } = useTranslation();
     const [reason, setReason] = useState('');
     const [error, setError] = useState('');
 
     const handleSubmit = () => {
         if (!reason.trim()) {
-            setError('Vui lòng nhập lý do báo cáo');
+            setError(t('reviews.reportReasonRequired'));
             return;
         }
         if (reason.trim().length < 10) {
-            setError('Lý do báo cáo phải có ít nhất 10 ký tự');
+            setError(t('reviews.reportReasonMinLength'));
             return;
         }
         onConfirm(reason.trim());
@@ -54,24 +56,24 @@ export const ReportReviewModal: React.FC<ReportReviewModalProps> = ({
                 <DialogHeader>
                     <div className="flex items-center gap-2">
                         <AlertTriangle className="w-6 h-6 text-red-500" />
-                        <DialogTitle>Báo cáo đánh giá</DialogTitle>
+                        <DialogTitle>{t('reviews.reportReview')}</DialogTitle>
                     </div>
                     {reviewerName && (
                         <DialogDescription className="text-sm">
-                            Bạn đang báo cáo đánh giá của: <span className="font-semibold">{reviewerName}</span>
+                            {t('reviews.reportingReview')}: <span className="font-semibold">{reviewerName}</span>
                         </DialogDescription>
                     )}
                     <DialogDescription className="text-sm text-gray-600">
-                        Vui lòng cung cấp lý do chi tiết để chúng tôi có thể xem xét báo cáo của bạn.
+                        {t('reviews.reportDescription')}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                        <Label htmlFor="reason">Lý do báo cáo <span className="text-red-500">*</span></Label>
+                        <Label htmlFor="reason">{t('reviews.reportReason')} <span className="text-red-500">*</span></Label>
                         <Textarea
                             id="reason"
-                            placeholder="Ví dụ: Nội dung không phù hợp, ngôn từ xúc phạm, thông tin sai lệch..."
+                            placeholder={t('reviews.reportReasonPlaceholder')}
                             value={reason}
                             onChange={(e) => {
                                 setReason(e.target.value);
@@ -84,14 +86,13 @@ export const ReportReviewModal: React.FC<ReportReviewModalProps> = ({
                             <p className="text-sm text-red-500">{error}</p>
                         )}
                         <p className="text-xs text-gray-500">
-                            {reason.length}/500 ký tự
+                            {reason.length}/500 {t('reviews.characters')}
                         </p>
                     </div>
 
                     <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
                         <p className="text-xs text-yellow-800">
-                            <strong>Lưu ý:</strong> Báo cáo của bạn sẽ được xem xét bởi đội ngũ quản trị.
-                            Vui lòng cung cấp thông tin chính xác và trung thực.
+                            {t('reviews.reportNote')}
                         </p>
                     </div>
                 </div>
@@ -102,14 +103,14 @@ export const ReportReviewModal: React.FC<ReportReviewModalProps> = ({
                         onClick={handleClose}
                         disabled={isLoading}
                     >
-                        Hủy
+                        {t('reviews.cancel')}
                     </Button>
                     <Button
                         variant="destructive"
                         onClick={handleSubmit}
                         disabled={isLoading || !reason.trim()}
                     >
-                        {isLoading ? 'Đang gửi...' : 'Gửi báo cáo'}
+                        {isLoading ? t('reviews.sending') : t('reviews.sendReport')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

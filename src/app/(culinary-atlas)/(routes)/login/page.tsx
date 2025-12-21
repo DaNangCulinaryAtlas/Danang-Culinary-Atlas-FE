@@ -15,8 +15,10 @@ import { useLoginMutation } from '@/hooks/mutations/useAuthMutations';
 import { loginSchema, LoginFormData } from '@/lib/validations/auth';
 import { useState } from 'react';
 import ForgotPasswordModal from '@/components/auth/ForgotPasswordModal';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function Login() {
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const router = useRouter();
@@ -75,7 +77,7 @@ export default function Login() {
               Danang Culinary Atlas
             </h1>
             <p className="text-sm md:text-base font-mulish leading-relaxed max-w-xs text-center">
-              Hãy để hành trình của bạn không chỉ là ngắm cảnh — mà còn là một chuyến phiêu lưu ẩm thực rực rỡ và đậm đà hương vị.
+              {t('auth.login.description')}
             </p>
           </div>
         </div>
@@ -87,10 +89,10 @@ export default function Login() {
             {/* Header */}
             <div className="text-center mb-4">
               <h2 className="font-mulish font-extrabold text-[#69C3CF] text-4xl sm:text-5xl">
-                Welcome
+                {t('auth.login.title')}
               </h2>
               <p className="font-mulish text-sm text-[#000000] mt-1">
-                Login with Email
+                {t('auth.login.subtitle')}
               </p>
             </div>
 
@@ -112,14 +114,14 @@ export default function Login() {
               {/* Email */}
               <div>
                 <label className="block text-sm font-bold text-[#69C3CF] mb-1 font-poppins">
-                  Email
+                  {t('auth.login.email')}
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <Input
                     type="email"
                     {...register('email')}
-                    placeholder="Enter your email"
+                    placeholder={t('auth.login.emailPlaceholder')}
                     className="pl-10 h-12 border-[#69C3CF] font-poppins text-sm"
                     disabled={loginMutation.isPending}
                   />
@@ -132,14 +134,14 @@ export default function Login() {
               {/* Password */}
               <div>
                 <label className="block text-sm font-bold text-[#69C3CF] mb-1 font-poppins">
-                  Password
+                  {t('auth.login.password')}
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <Input
                     type={showPassword ? 'text' : 'password'}
                     {...register('password')}
-                    placeholder="******"
+                    placeholder={t('auth.login.passwordPlaceholder')}
                     className="pl-10 pr-10 h-12 border-[#69C3CF] font-poppins text-sm"
                     disabled={loginMutation.isPending}
                   />
@@ -164,7 +166,7 @@ export default function Login() {
                   onClick={() => setShowForgotPassword(true)}
                   className="text-[#69C3CF] hover:underline font-poppins"
                 >
-                  Quên mật khẩu?
+                  {t('auth.login.forgotPassword')}
                 </button>
               </div>
 
@@ -174,15 +176,15 @@ export default function Login() {
                 disabled={loginMutation.isPending}
                 className="w-full h-11 bg-[#69C3CF] hover:bg-[#5AB3BF] text-white font-poppins text-sm font-medium rounded-md disabled:opacity-50"
               >
-                {loginMutation.isPending ? 'ĐANG ĐĂNG NHẬP' : 'ĐĂNG NHẬP'}
+                {loginMutation.isPending ? t('auth.login.loggingIn') : t('auth.login.loginButton')}
               </Button>
             </form>
 
             {/* Register Link */}
             <p className="text-center text-xs font-mulish text-gray-600">
-              Bạn chưa có tài khoản?{' '}
+              {t('auth.login.noAccount')}{' '}
               <Link href="/register" className="text-[#69C3CF] hover:text-[#5AB3BF] font-semibold">
-                Đăng ký ngay
+                {t('auth.login.registerNow')}
               </Link>
             </p>
           </div>

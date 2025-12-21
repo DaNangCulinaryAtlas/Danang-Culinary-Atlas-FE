@@ -11,7 +11,7 @@ import { Lock, Eye, EyeOff } from 'lucide-react';
 import { useResetPasswordMutation } from '@/hooks/mutations/useAuthMutations';
 import { resetPasswordSchema, ResetPasswordFormData } from '@/lib/validations/auth';
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function ResetPassword() {
     const { t } = useTranslation();

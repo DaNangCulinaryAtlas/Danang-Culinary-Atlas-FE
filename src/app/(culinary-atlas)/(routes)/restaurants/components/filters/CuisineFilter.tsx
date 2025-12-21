@@ -1,5 +1,6 @@
 import { memo, useCallback } from "react";
 import { CUISINE_TAGS } from "@/constants/cuisineTags";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CuisineFilterProps {
     selectedCuisineIds: number[];
@@ -38,6 +39,7 @@ const CuisineFilter = memo(function CuisineFilter({
     selectedCuisineIds,
     onChange,
 }: CuisineFilterProps) {
+    const { t } = useTranslation();
     const handleToggle = useCallback((tagId: number) => {
         if (selectedCuisineIds.includes(tagId)) {
             // Remove tagId from array
@@ -51,13 +53,13 @@ const CuisineFilter = memo(function CuisineFilter({
     return (
         <div className="space-y-3">
             <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-gray-800 text-base">Loại Ẩm Thực</h3>
+                <h3 className="font-semibold text-gray-800 text-base">{t('restaurants.filters.cuisineType')}</h3>
                 {selectedCuisineIds.length > 0 && (
                     <button
                         onClick={() => onChange([])}
                         className="text-xs text-[#44BACA] hover:text-[#3aa3b3] font-medium"
                     >
-                        Xóa bộ lọc
+                        {t('restaurants.filters.clearCuisineFilter')}
                     </button>
                 )}
             </div>

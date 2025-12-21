@@ -10,7 +10,7 @@ import { Mail, ArrowLeft } from 'lucide-react';
 import { useForgotPasswordMutation } from '@/hooks/mutations/useAuthMutations';
 import { forgotPasswordSchema, ForgotPasswordFormData } from '@/lib/validations/auth';
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function ForgotPassword() {
     const { t } = useTranslation();

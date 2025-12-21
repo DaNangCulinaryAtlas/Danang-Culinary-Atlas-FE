@@ -6,8 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Lock } from 'lucide-react';
 import { changePasswordAuth } from '@/services/auth';
 import { toast } from 'react-toastify';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function ChangePasswordTab() {
+    const { t } = useTranslation();
     const [isChangingPassword, setIsChangingPassword] = useState(false);
     const [passwordData, setPasswordData] = useState({
         currentPassword: '',
@@ -21,12 +23,12 @@ export default function ChangePasswordTab() {
         setPasswordError('');
 
         if (passwordData.newPassword !== passwordData.confirmPassword) {
-            setPasswordError('Mật khẩu mới và xác nhận mật khẩu không khớp');
+            setPasswordError(t('auth.changePassword.passwordMismatch'));
             return;
         }
 
         if (passwordData.newPassword.length < 6) {
-            setPasswordError('Mật khẩu phải có ít nhất 6 ký tự');
+            setPasswordError(t('auth.changePassword.passwordMinLength'));
             return;
         }
 
@@ -39,16 +41,16 @@ export default function ChangePasswordTab() {
             });
 
             if (response.success) {
-                toast.success('Thay đổi mật khẩu thành công', {
+                toast.success(t('auth.changePassword.success'), {
                     position: 'top-right',
                     autoClose: 2500,
                 });
                 setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
             } else {
-                setPasswordError(response.message || 'Thay đổi mật khẩu thất bại');
+                setPasswordError(response.message || t('auth.changePassword.error'));
             }
         } catch (error) {
-            setPasswordError('Có lỗi xảy ra. Vui lòng thử lại.');
+            setPasswordError(t('auth.changePassword.errorOccurred'));
         } finally {
             setIsChangingPassword(false);
         }
@@ -60,7 +62,7 @@ export default function ChangePasswordTab() {
                 <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
                     <p className="text-sm text-blue-700">
                         <Lock className="inline-block mr-2" size={16} />
-                        Nhập mật khẩu hiện tại và mật khẩu mới để thay đổi mật khẩu của bạn.
+                        {t('auth.changePassword.description')}
                     </p>
                 </div>
             ): (
@@ -71,7 +73,7 @@ export default function ChangePasswordTab() {
             <form onSubmit={handlePasswordChange} className="space-y-4">
                 <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Mật khẩu hiện tại
+                        {t('auth.changePassword.currentPassword')}
                     </label>
                     <Input
                         type="password"
@@ -79,14 +81,14 @@ export default function ChangePasswordTab() {
                         onChange={(e) =>
                             setPasswordData({ ...passwordData, currentPassword: e.target.value })
                         }
-                        placeholder="Enter current password"
+                        placeholder={t('auth.changePassword.currentPasswordPlaceholder')}
                         required
                     />
                 </div>
 
                 <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Mật khẩu mới
+                        {t('auth.changePassword.newPassword')}
                     </label>
                     <Input
                         type="password"
@@ -94,14 +96,14 @@ export default function ChangePasswordTab() {
                         onChange={(e) =>
                             setPasswordData({ ...passwordData, newPassword: e.target.value })
                         }
-                        placeholder="Enter new password"
+                        placeholder={t('auth.changePassword.newPasswordPlaceholder')}
                         required
                     />
                 </div>
 
                 <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Xác nhận lại mật khẩu
+                        {t('auth.changePassword.confirmPassword')}
                     </label>
                     <Input
                         type="password"
@@ -109,7 +111,7 @@ export default function ChangePasswordTab() {
                         onChange={(e) =>
                             setPasswordData({ ...passwordData, confirmPassword: e.target.value })
                         }
-                        placeholder="Confirm new password"
+                        placeholder={t('auth.changePassword.confirmPasswordPlaceholder')}
                         required
                     />
                 </div>
@@ -119,7 +121,7 @@ export default function ChangePasswordTab() {
                     className="w-full mt-2 py-5 bg-[#69C3CF] hover:bg-[#57a8ae] text-white"
                     disabled={isChangingPassword}
                 >
-                    {isChangingPassword ? 'Đang đổi mật khẩu...' : 'Đổi mật khẩu'}
+                    {isChangingPassword ? t('auth.changePassword.changing') : t('auth.changePassword.changeButton')}
                 </Button>
             </form>
         </div>

@@ -11,11 +11,20 @@ import {
   } from '@/components/ui/sheet';
   import { ScrollArea } from '@/components/ui/scroll-area';
   import { Menu } from 'lucide-react';
- import menuItems from "@/types/navbar.items";
+import { useTranslation } from '@/hooks/useTranslation';
+import LanguageSwitcher from './LanguageSwitcher';
+
+const menuItems = [
+    { href: '/atlas', translationKey: 'navbar.atlas' },
+    { href: '/our-story', translationKey: 'navbar.aboutUs' },
+    { href: '/dishes', translationKey: 'navbar.dishes' },
+    { href: '/restaurants', translationKey: 'navbar.restaurants' },
+];
 
 export default function  MobileMenu(){
     const [open, setOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const { t } = useTranslation();
 
     useEffect(() => {
         setMounted(true);
@@ -39,10 +48,13 @@ export default function  MobileMenu(){
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                 <SheetHeader className="flex justify-between items-center">
-                    <SheetTitle className="font-mulish font-bold text-lg">Menu</SheetTitle>
+                    <SheetTitle className="font-mulish font-bold text-lg">{t('navbar.atlas')}</SheetTitle>
                     <p className="sr-only">Navigation menu</p>
                 </SheetHeader>
                 <ScrollArea className="h-[calc(100vh-8rem)] mt-6">
+                    <div className="mb-4 pb-4 border-b">
+                        <LanguageSwitcher variant="inline" />
+                    </div>
                     {menuItems.map((item) => (
                         <Link
                             key={item.href}
@@ -50,7 +62,7 @@ export default function  MobileMenu(){
                             onClick={() => setOpen(false)}
                             className="text-lg font-mulish text-[#495560] hover:opacity-90 transition-opacity block mb-4"
                         >
-                            {item.label}
+                            {t(item.translationKey)}
                         </Link>
                     ))}
                 </ScrollArea>

@@ -5,12 +5,14 @@ import { useSearchRestaurantsByName, useRestaurants } from '@/hooks/queries/useR
 import { useQueryClient } from '@tanstack/react-query';
 import { useAppDispatch } from '@/hooks/useRedux';
 import { setSearchQuery, setSearchResults, clearSearch } from '@/stores/atlas';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface SearchBoxProps {
   onSearchChange?: (data: any) => void;
 }
 
 export default function SearchBox({ onSearchChange }: SearchBoxProps) {
+  const { t } = useTranslation();
   const [searchInput, setSearchInput] = useState('');
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
@@ -55,7 +57,7 @@ export default function SearchBox({ onSearchChange }: SearchBoxProps) {
         type="text"
         value={searchInput}
         onChange={(e) => setSearchInput(e.target.value)}
-        placeholder="Search restaurants..."
+        placeholder={t('atlas.searchPlaceholder')}
         className="w-full px-4 py-6 pr-12 border border-gray-200 rounded-xl"
       />
       <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />

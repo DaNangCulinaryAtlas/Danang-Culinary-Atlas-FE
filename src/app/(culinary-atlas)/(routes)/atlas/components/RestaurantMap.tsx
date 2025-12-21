@@ -13,6 +13,7 @@ import type { ViewStateChangeEvent } from 'react-map-gl/maplibre';
 import { getDirectionsOSRM, type RouteResponse } from '@/services/directions';
 import { MapPin } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useTranslation } from '@/hooks/useTranslation';
 // Validation helpers
 const isValidLatitude = (lat: any): boolean => {
   const num = parseFloat(lat);
@@ -49,6 +50,7 @@ const restaurantToMapRestaurant = (restaurant: Restaurant): MapRestaurant => {
 };
 
 const RestaurantMap: React.FC = () => {
+  const { t } = useTranslation();
   const mapRef = useRef<MapRef>(null);
   const dispatch = useAppDispatch();
   const { viewState, searchQuery, searchResults } = useAppSelector((state) => state.atlas);
@@ -215,14 +217,14 @@ const RestaurantMap: React.FC = () => {
         },
         (error) => {
           console.log('Error getting user location:', error);
-          toast.error('Không thể lấy vị trí của bạn. Vui lòng cho phép truy cập vị trí.', {
+          toast.error(String(t('atlas.locationError')), {
             position: 'top-right',
             duration: 2500,
           });
         }
       );
     } else {
-      toast.error('Trình duyệt của bạn không hỗ trợ định vị.', {
+      toast.error(String(t('atlas.locationNotSupported')), {
         position: 'top-right',
         duration: 2500,
       });
@@ -274,11 +276,14 @@ const RestaurantMap: React.FC = () => {
         );
       }
     } catch (error) {
-      alert('Không thể tìm đường đi. Vui lòng thử lại.');
+      toast.error(String(t('atlas.routeError')), {
+        position: 'top-right',
+        duration: 2500,
+      });
     } finally {
       setIsLoadingRoute(false);
     }
-  }, [userLocation, getUserLocation]);
+  }, [userLocation, getUserLocation, t]);
 
   // Clear directions
   const clearDirections = useCallback(() => {
@@ -318,7 +323,7 @@ const RestaurantMap: React.FC = () => {
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 bg-white px-4 py-2 rounded-lg shadow-lg">
           <div className="flex items-center gap-2">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-            <span className="text-sm text-gray-700">Loading restaurants...</span>
+            <span className="text-sm text-gray-700">{String(t('atlas.loadingRestaurants'))}</span>
           </div>
         </div>
       )}
@@ -363,7 +368,7 @@ const RestaurantMap: React.FC = () => {
                 <MapPin className="w-6 h-6" fill="white" />
               </div>
               <div className="mt-1 bg-blue-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-md">
-                Vị trí của bạn
+                {String(t('atlas.yourLocation'))}
               </div>
             </div>
           </Marker>
@@ -400,7 +405,7 @@ const RestaurantMap: React.FC = () => {
       {!loading && restaurants.length > 0 && (
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded-lg shadow-lg">
           <span className="text-sm text-gray-700">
-            {restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''} {searchQuery ? 'found' : 'in view'}
+            {restaurants.length} {restaurants.length === 1 ? String(t('atlas.restaurant')) : String(t('atlas.restaurants'))} {searchQuery ? String(t('atlas.restaurantsFound')) : String(t('atlas.restaurantsInView'))}
           </span>
         </div>
       )}
@@ -409,7 +414,7 @@ const RestaurantMap: React.FC = () => {
       {!loading && restaurants.length === 0 && (
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded-lg shadow-lg">
           <span className="text-sm text-gray-500">
-            {searchQuery ? 'No restaurants match your search' : 'No restaurants found in this area'}
+            {searchQuery ? String(t('atlas.noRestaurantsMatch')) : String(t('atlas.noRestaurantsInArea'))}
           </span>
         </div>
       )}
@@ -428,7 +433,7 @@ const RestaurantMap: React.FC = () => {
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 bg-white px-4 py-2 rounded-lg shadow-lg">
           <div className="flex items-center gap-2">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-            <span className="text-sm text-gray-700">Đang tìm đường...</span>
+            <span className="text-sm text-gray-700">{String(t('atlas.findingRoute'))}</span>
           </div>
         </div>
       )}

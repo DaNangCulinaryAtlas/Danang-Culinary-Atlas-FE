@@ -6,8 +6,10 @@ import { ChevronLeft, MapPin, Store, Loader2, CheckCircle, XCircle, Clock } from
 import { Button } from '@/components/ui/button';
 import { useDishDetail } from '@/hooks/queries/useDishDetail';
 import { useRestaurantDetail } from '@/hooks/queries/useRestaurantDetail';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function DishDetail() {
+  const { t } = useTranslation();
   const router = useRouter();
   const params = useParams();
   const dishId = params.id as string;
@@ -50,9 +52,9 @@ export default function DishDetail() {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600 mb-4">Không thể tải thông tin món ăn</p>
+          <p className="text-gray-600 mb-4">{t('dishDetail.errorLoading')}</p>
           <Button onClick={() => router.back()} className="bg-[#44BACA] text-white">
-            Quay lại
+            {t('dishDetail.goBack')}
           </Button>
         </div>
       </div>
@@ -87,12 +89,12 @@ export default function DishDetail() {
               {dish.status === 'AVAILABLE' ? (
                 <>
                   <CheckCircle className="w-5 h-5 text-green-500" />
-                  <span className="text-green-600 font-semibold">Còn món</span>
+                  <span className="text-green-600 font-semibold">{t('dishDetail.available')}</span>
                 </>
               ) : (
                 <>
                   <XCircle className="w-5 h-5 text-red-500" />
-                  <span className="text-red-600 font-semibold">Hết món</span>
+                  <span className="text-red-600 font-semibold">{t('dishDetail.unavailable')}</span>
                 </>
               )}
             </div>
@@ -121,19 +123,19 @@ export default function DishDetail() {
             {dish.approvalStatus === 'APPROVED' && (
               <span className="px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium flex items-center gap-2">
                 <CheckCircle className="w-4 h-4" />
-                Đã được duyệt
+                {t('dishDetail.approved')}
               </span>
             )}
             {dish.approvalStatus === 'PENDING' && (
               <span className="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium flex items-center gap-2">
                 <Clock className="w-4 h-4" />
-                Đang chờ duyệt
+                {t('dishDetail.pending')}
               </span>
             )}
             {dish.approvalStatus === 'REJECTED' && (
               <span className="px-4 py-2 bg-red-100 text-red-700 rounded-full text-sm font-medium flex items-center gap-2">
                 <XCircle className="w-4 h-4" />
-                Đã bị từ chối
+                {t('dishDetail.rejected')}
               </span>
             )}
           </div>
@@ -141,7 +143,7 @@ export default function DishDetail() {
 
         {/* Photo Gallery */}
         <section className="mb-8">
-          <h2 className="text-2xl font-bold text-[#44BACA] mb-4">Hình ảnh món ăn</h2>
+          <h2 className="text-2xl font-bold text-[#44BACA] mb-4">{t('dishDetail.images')}</h2>
           {images.length > 0 ? (
             <>
               <div className="relative w-full h-[500px] rounded-2xl overflow-hidden mb-4 shadow-lg bg-gray-200">
@@ -157,7 +159,7 @@ export default function DishDetail() {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-300">
-                    <span className="text-gray-600">Không thể tải hình ảnh</span>
+                    <span className="text-gray-600">{t('dishDetail.imageError')}</span>
                   </div>
                 )}
               </div>
@@ -193,29 +195,29 @@ export default function DishDetail() {
             </>
           ) : (
             <div className="relative w-full h-[500px] rounded-2xl overflow-hidden mb-4 shadow-lg bg-gray-200 flex items-center justify-center">
-              <span className="text-gray-600 text-lg font-medium">No image</span>
+              <span className="text-gray-600 text-lg font-medium">{t('dishDetail.noImage')}</span>
             </div>
           )}
         </section>
 
         {/* Description */}
         <section className="mb-8">
-          <h2 className="text-2xl font-bold text-[#44BACA] mb-4">Mô tả món ăn</h2>
+          <h2 className="text-2xl font-bold text-[#44BACA] mb-4">{t('dishDetail.description')}</h2>
           <div className="bg-gray-50 rounded-xl p-6">
             <p className="text-gray-700 text-lg leading-relaxed">
-              {dish.description || 'Chưa có mô tả cho món ăn này.'}
+              {dish.description || t('dishDetail.noDescription')}
             </p>
           </div>
         </section>
 
         {/* Dish Information */}
         <section className="mb-8">
-          <h2 className="text-2xl font-bold text-[#44BACA] mb-4">Thông tin món ăn</h2>
+          <h2 className="text-2xl font-bold text-[#44BACA] mb-4">{t('dishDetail.information')}</h2>
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div className="grid grid-cols-1 md:grid-cols-2">
               {/* Price */}
               <div className="p-6 border-b md:border-r border-gray-200">
-                <div className="text-sm text-gray-600 mb-1">Giá</div>
+                <div className="text-sm text-gray-600 mb-1">{t('dishDetail.price')}</div>
                 <div className="text-2xl font-bold text-[#44BACA]">
                   {formatPrice(dish.price)}
                 </div>
@@ -223,17 +225,17 @@ export default function DishDetail() {
 
               {/* Status */}
               <div className="p-6 border-b border-gray-200">
-                <div className="text-sm text-gray-600 mb-1">Trạng thái</div>
+                <div className="text-sm text-gray-600 mb-1">{t('dishDetail.status')}</div>
                 <div className="flex items-center gap-2">
                   {dish.status === 'AVAILABLE' ? (
                     <>
                       <CheckCircle className="w-5 h-5 text-green-500" />
-                      <span className="text-lg font-semibold text-green-600">Còn món</span>
+                      <span className="text-lg font-semibold text-green-600">{t('dishDetail.available')}</span>
                     </>
                   ) : (
                     <>
                       <XCircle className="w-5 h-5 text-red-500" />
-                      <span className="text-lg font-semibold text-red-600">Hết món</span>
+                      <span className="text-lg font-semibold text-red-600">{t('dishDetail.unavailable')}</span>
                     </>
                   )}
                 </div>
@@ -242,7 +244,7 @@ export default function DishDetail() {
             {/* Rejection Reason */}
             {dish.rejectionReason && (
               <div className="p-6 border-t border-gray-200 bg-red-50">
-                <div className="text-sm text-red-600 font-semibold mb-2">Lý do từ chối</div>
+                <div className="text-sm text-red-600 font-semibold mb-2">{t('dishDetail.rejectionReason')}</div>
                 <p className="text-gray-700">{dish.rejectionReason}</p>
               </div>
             )}
@@ -255,14 +257,14 @@ export default function DishDetail() {
             onClick={() => router.back()}
             className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl py-6 text-lg font-semibold"
           >
-            Quay lại
+            {t('dishDetail.goBack')}
           </Button>
           {restaurant && (
             <Button
               onClick={() => router.push(`/restaurants/${dish.restaurantId}`)}
               className="flex-1 bg-[#44BACA] hover:bg-[#3aa3b3] text-white rounded-xl py-6 text-lg font-semibold"
             >
-              Xem nhà hàng
+              {t('dishDetail.viewRestaurant')}
             </Button>
           )}
         </section>

@@ -7,7 +7,7 @@ import RestaurantCard from "@/components/restaurants/RestaurantCard";
 import { Button } from "@/components/ui/button";
 import { Heart, Share2, MapPin, Star } from 'lucide-react';
 import { useRouter } from "next/navigation";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '@/hooks/useTranslation';
 import { useAppSelector } from "@/hooks/useRedux";
 import { useRecommendedDishesWithDetails, useRecommendedRestaurantsWithDetails } from "@/hooks/queries/useRecommendationsWithDetails";
 
@@ -110,7 +110,7 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="text-center py-20">
-            <p className="text-gray-500 text-lg">Không có món ăn nào</p>
+            <p className="text-gray-500 text-lg">{t('home.noDishes')}</p>
           </div>
         )}
       </div>

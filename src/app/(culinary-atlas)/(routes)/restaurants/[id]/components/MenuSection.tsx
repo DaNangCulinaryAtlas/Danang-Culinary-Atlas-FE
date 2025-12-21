@@ -5,12 +5,14 @@ import { useRestaurantDishes } from '@/hooks/queries/useRestaurantDishes';
 import { DishCard } from './DishCard';
 import { Loader2, ChevronLeft, ChevronRight, UtensilsCrossed } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface MenuSectionProps {
     restaurantId: string;
 }
 
 export const MenuSection: React.FC<MenuSectionProps> = ({ restaurantId }) => {
+    const { t } = useTranslation();
     const [currentPage, setCurrentPage] = useState(0);
     const pageSize = 6; // Show 6 dishes per page
 
@@ -43,7 +45,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ restaurantId }) => {
             <section id="menu-section" className="mb-8">
                 <h2 className="text-2xl font-bold text-[#44BACA] mb-6 flex items-center gap-2">
                     <UtensilsCrossed className="w-6 h-6" />
-                    Menu
+                    {t('restaurantDetail.menu')}
                 </h2>
                 <div className="flex items-center justify-center py-20">
                     <Loader2 className="w-8 h-8 text-[#44BACA] animate-spin" />
@@ -57,10 +59,10 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ restaurantId }) => {
             <section id="menu-section" className="mb-8">
                 <h2 className="text-2xl font-bold text-[#44BACA] mb-6 flex items-center gap-2">
                     <UtensilsCrossed className="w-6 h-6" />
-                    Menu
+                    {t('restaurantDetail.menu')}
                 </h2>
                 <div className="text-center py-10 bg-red-50 rounded-xl border border-red-200">
-                    <p className="text-red-600 font-medium">Không thể tải menu. Vui lòng thử lại sau.</p>
+                    <p className="text-red-600 font-medium">{t('restaurantDetail.menuError')}</p>
                 </div>
             </section>
         );
@@ -71,12 +73,12 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ restaurantId }) => {
             <section id="menu-section" className="mb-8">
                 <h2 className="text-2xl font-bold text-[#44BACA] mb-6 flex items-center gap-2">
                     <UtensilsCrossed className="w-6 h-6" />
-                    Menu
+                    {t('restaurantDetail.menu')}
                 </h2>
                 <div className="text-center py-16 bg-gray-50 rounded-xl border border-gray-200">
                     <UtensilsCrossed className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                    <p className="text-gray-600 font-medium text-lg">Chưa có món ăn nào</p>
-                    <p className="text-gray-500 text-sm mt-2">Menu sẽ được cập nhật sớm</p>
+                    <p className="text-gray-600 font-medium text-lg">{t('restaurantDetail.noDishes')}</p>
+                    <p className="text-gray-500 text-sm mt-2">{t('restaurantDetail.menuWillUpdate')}</p>
                 </div>
             </section>
         );
@@ -88,9 +90,9 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ restaurantId }) => {
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                     <UtensilsCrossed className="w-6 h-6 text-[#44BACA]" />
-                    <h2 className="text-2xl font-bold text-[#44BACA]">Menu</h2>
+                    <h2 className="text-2xl font-bold text-[#44BACA]">{t('restaurantDetail.menu')}</h2>
                     <span className="text-sm text-gray-500 ml-2">
-                        ({data.totalElements} món)
+                        ({data.totalElements} {t('restaurantDetail.dishesCount')})
                     </span>
                 </div>
             </div>
@@ -107,7 +109,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ restaurantId }) => {
                 <div className="flex items-center justify-between pt-6 border-t border-gray-200">
                     {/* Page Info */}
                     <div className="text-sm text-gray-600">
-                        Trang <span className="font-semibold text-gray-900">{currentPage + 1}</span> trên{' '}
+                        {t('restaurantDetail.page')} <span className="font-semibold text-gray-900">{currentPage + 1}</span> {t('restaurantDetail.of')}{' '}
                         <span className="font-semibold text-gray-900">{data.totalPages}</span>
                     </div>
 
@@ -121,7 +123,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ restaurantId }) => {
                             className="flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#44BACA] hover:text-white hover:border-[#44BACA] transition-colors"
                         >
                             <ChevronLeft className="w-4 h-4" />
-                            <span className="hidden sm:inline">Trước</span>
+                            <span className="hidden sm:inline">{t('restaurantDetail.previous')}</span>
                         </Button>
 
                         {/* Page Numbers */}
@@ -163,7 +165,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ restaurantId }) => {
                             size="sm"
                             className="flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#44BACA] hover:text-white hover:border-[#44BACA] transition-colors"
                         >
-                            <span className="hidden sm:inline">Tiếp</span>
+                            <span className="hidden sm:inline">{t('restaurantDetail.next')}</span>
                             <ChevronRight className="w-4 h-4" />
                         </Button>
                     </div>

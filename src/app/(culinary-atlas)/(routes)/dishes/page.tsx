@@ -5,16 +5,18 @@ import { Button } from "@/components/ui/button";
 import { useDishes } from "@/hooks/queries/useDishes";
 import { CUISINE_TAGS } from "@/constants/cuisineTags";
 import Link from "next/link";
-
-const PRICE_RANGES = [
-  { label: "Dưới 30k", min: 0, max: 30000 },
-  { label: "30k - 50k", min: 30000, max: 50000 },
-  { label: "50k - 100k", min: 50000, max: 100000 },
-  { label: "100k - 200k", min: 100000, max: 200000 },
-  { label: "Trên 200k", min: 200000, max: 10000000 }
-];
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function DishPage() {
+  const { t } = useTranslation();
+  
+  const PRICE_RANGES = [
+    { label: t('dishes.priceRanges.under30k'), min: 0, max: 30000, key: 'under30k' },
+    { label: t('dishes.priceRanges.30k50k'), min: 30000, max: 50000, key: '30k50k' },
+    { label: t('dishes.priceRanges.50k100k'), min: 50000, max: 100000, key: '50k100k' },
+    { label: t('dishes.priceRanges.100k200k'), min: 100000, max: 200000, key: '100k200k' },
+    { label: t('dishes.priceRanges.over200k'), min: 200000, max: 10000000, key: 'over200k' }
+  ];
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTagId, setSelectedTagId] = useState<number | undefined>(undefined);
   const [selectedPriceRange, setSelectedPriceRange] = useState<string>("");
@@ -35,7 +37,7 @@ export default function DishPage() {
   // Get price range values
   const priceRange = useMemo(() => {
     if (!selectedPriceRange) return undefined;
-    const range = PRICE_RANGES.find(r => r.label === selectedPriceRange);
+    const range = PRICE_RANGES.find(r => r.key === selectedPriceRange);
     return range ? { min: range.min, max: range.max } : undefined;
   }, [selectedPriceRange]);
 
@@ -127,10 +129,10 @@ export default function DishPage() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-4">
           <h1 className="font-volkhov font-bold text-4xl md:text-5xl text-center mb-6 drop-shadow-lg">
-            Khám Phá Ẩm Thực Đà Nẵng
+            {t('dishes.title')}
           </h1>
           <p className="text-center text-lg mb-8 opacity-95 drop-shadow">
-            {totalElements > 0 ? `Hơn ${totalElements} món ăn đặc sắc từ các nhà hàng uy tín` : 'Khám phá ẩm thực phong phú'}
+            {totalElements > 0 ? t('dishes.subtitle', { count: totalElements }) : t('dishes.subtitleEmpty')}
           </p>
 
           {/* Search Bar */}
@@ -141,7 +143,7 @@ export default function DishPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Tìm kiếm món ăn, nhà hàng..."
+                placeholder={t('dishes.searchPlaceholder')}
                 className="w-full pl-12 pr-4 py-4 rounded-full text-gray-900 font-mulish text-base focus:outline-none focus:ring-2 focus:ring-white/50 shadow-xl"
               />
             </div>
@@ -175,7 +177,7 @@ export default function DishPage() {
           <aside className="hidden lg:block">
             <div className="bg-white rounded-xl shadow-sm p-6 sticky top-4">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="font-bold text-lg text-[#44BACA]">Bộ lọc</h3>
+                <h3 className="font-bold text-lg text-[#44BACA]">{t('dishes.filters')}</h3>
                 {hasActiveFilters && (
                   <Button
                     onClick={clearFilters}
@@ -183,7 +185,7 @@ export default function DishPage() {
                     size="sm"
                     className="text-red-600 hover:text-red-700"
                   >
-                    Xóa
+                    {t('dishes.clearFilters')}
                   </Button>
                 )}
               </div>
@@ -192,7 +194,7 @@ export default function DishPage() {
               <div className="mb-6">
                 <div className="flex items-center gap-2 text-[#44BACA] mb-3">
                   <Layers2 className="w-5 h-5" />
-                  <h4 className="font-semibold">Loại ẩm thực</h4>
+                  <h4 className="font-semibold">{t('dishes.cuisineType')}</h4>
                 </div>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {CUISINE_TAGS.map(tag => (
@@ -214,16 +216,16 @@ export default function DishPage() {
               <div className="mb-6">
                 <div className="flex items-center gap-2 text-[#44BACA] mb-3">
                   <CircleDollarSign className="w-5 h-5" />
-                  <h4 className="font-semibold">Khoảng giá</h4>
+                  <h4 className="font-semibold">{t('dishes.priceRange')}</h4>
                 </div>
                 <div className="space-y-2">
                   {PRICE_RANGES.map(range => (
-                    <label key={range.label} className="flex items-center gap-2 cursor-pointer">
+                    <label key={range.key} className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="radio"
                         name="priceRange"
-                        checked={selectedPriceRange === range.label}
-                        onChange={() => setSelectedPriceRange(range.label)}
+                        checked={selectedPriceRange === range.key}
+                        onChange={() => setSelectedPriceRange(range.key)}
                         className="border-gray-300 text-[#44BACA] focus:ring-[#44BACA]"
                       />
                       <span className="text-sm">{range.label}</span>
@@ -236,14 +238,14 @@ export default function DishPage() {
               <div>
                 <div className="flex items-center gap-2 text-[#44BACA] mb-3">
                   <TrendingUp className="w-5 h-5" />
-                  <h4 className="font-semibold">Sắp xếp</h4>
+                  <h4 className="font-semibold">{t('dishes.sort')}</h4>
                 </div>
                 <div className="space-y-2">
                   {[
-                    { value: "name-asc", label: "Tên A → Z" },
-                    { value: "name-desc", label: "Tên Z → A" },
-                    { value: "price-asc", label: "Giá thấp → cao" },
-                    { value: "price-desc", label: "Giá cao → thấp" }
+                    { value: "name-asc", label: t('dishes.sortNameAsc') },
+                    { value: "name-desc", label: t('dishes.sortNameDesc') },
+                    { value: "price-asc", label: t('dishes.sortPriceAsc') },
+                    { value: "price-desc", label: t('dishes.sortPriceDesc') }
                   ].map(option => (
                     <label key={option.value} className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -267,7 +269,7 @@ export default function DishPage() {
             <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="font-semibold text-gray-700">
-                  Tìm thấy <span className="text-[#44BACA]">{filteredDishes.length}</span> món ăn
+                  {t('dishes.found')} <span className="text-[#44BACA]">{filteredDishes.length}</span> {t('dishes.dishes')}
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -277,7 +279,7 @@ export default function DishPage() {
                     className="lg:hidden bg-[#44BACA] hover:bg-[#3aa3b3] text-white rounded-lg px-4 py-2"
                   >
                     <SlidersHorizontal className="w-4 h-4 mr-2" />
-                    Lọc
+                    {t('dishes.filter')}
                   </Button>
 
                   {/* View Toggle */}
@@ -302,10 +304,10 @@ export default function DishPage() {
                     onChange={(e) => handleSortChange(e.target.value)}
                     className="lg:hidden border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="name-asc">Tên A → Z</option>
-                    <option value="name-desc">Tên Z → A</option>
-                    <option value="price-asc">Giá thấp → cao</option>
-                    <option value="price-desc">Giá cao → thấp</option>
+                    <option value="name-asc">{t('dishes.sortNameAsc')}</option>
+                    <option value="name-desc">{t('dishes.sortNameDesc')}</option>
+                    <option value="price-asc">{t('dishes.sortPriceAsc')}</option>
+                    <option value="price-desc">{t('dishes.sortPriceDesc')}</option>
                   </select>
                 </div>
               </div>
@@ -323,7 +325,7 @@ export default function DishPage() {
                   )}
                   {selectedPriceRange && (
                     <span className="inline-flex items-center gap-1 bg-[#44BACA]/10 text-[#44BACA] px-3 py-1 rounded-full text-sm">
-                      {selectedPriceRange}
+                      {PRICE_RANGES.find(r => r.key === selectedPriceRange)?.label || selectedPriceRange}
                       <button onClick={() => setSelectedPriceRange("")}>
                         <X className="w-3 h-3" />
                       </button>
@@ -337,15 +339,15 @@ export default function DishPage() {
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-20">
                 <Loader2 className="w-12 h-12 text-[#44BACA] animate-spin mb-4" />
-                <p className="text-gray-600">Đang tải món ăn...</p>
+                <p className="text-gray-600">{t('dishes.loading')}</p>
               </div>
             ) : error ? (
               <div className="text-center py-16 bg-white rounded-xl">
                 <div className="w-16 h-16 mx-auto mb-4 text-red-400">
                   <X className="w-full h-full" />
                 </div>
-                <h3 className="font-bold text-xl mb-2">Có lỗi xảy ra</h3>
-                <p className="text-gray-600 mb-6">Không thể tải danh sách món ăn. Vui lòng thử lại sau.</p>
+                <h3 className="font-bold text-xl mb-2">{t('dishes.error')}</h3>
+                <p className="text-gray-600 mb-6">{t('dishes.errorMessage')}</p>
               </div>
             ) : filteredDishes.length > 0 ? (
               <>
@@ -375,7 +377,7 @@ export default function DishPage() {
                               ? 'bg-green-100 text-green-700'
                               : 'bg-gray-100 text-gray-700'
                               }`}>
-                              {dish.status === 'AVAILABLE' ? 'Còn hàng' : 'Hết hàng'}
+                              {dish.status === 'AVAILABLE' ? t('dishes.available') : t('dishes.unavailable')}
                             </span>
                           </div>
                         </div>
@@ -392,7 +394,7 @@ export default function DishPage() {
                       disabled={currentPage === 0}
                       className="px-4 py-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Trước
+                      {t('dishes.previous')}
                     </Button>
                     <div className="flex gap-2">
                       {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -425,7 +427,7 @@ export default function DishPage() {
                       disabled={currentPage === totalPages - 1}
                       className="px-4 py-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Sau
+                      {t('dishes.next')}
                     </Button>
                   </div>
                 )}
@@ -436,14 +438,14 @@ export default function DishPage() {
                 <div className="w-16 h-16 mx-auto mb-4 text-gray-400">
                   <Search className="w-full h-full" />
                 </div>
-                <h3 className="font-bold text-xl mb-2">Không tìm thấy món ăn phù hợp</h3>
-                <p className="text-gray-600 mb-6">Thử xóa bộ lọc hoặc tìm kiếm từ khóa khác</p>
+                <h3 className="font-bold text-xl mb-2">{t('dishes.noResults')}</h3>
+                <p className="text-gray-600 mb-6">{t('dishes.noResultsMessage')}</p>
                 <div className="flex gap-3 justify-center">
                   <Button
                     onClick={clearFilters}
                     className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg px-6 py-2"
                   >
-                    Xóa bộ lọc
+                    {t('dishes.clearAllFilters')}
                   </Button>
                   <Button
                     onClick={() => {
@@ -452,7 +454,7 @@ export default function DishPage() {
                     }}
                     className="bg-[#44BACA] hover:bg-[#3aa3b3] text-white rounded-lg px-6 py-2"
                   >
-                    Xem tất cả món
+                    {t('dishes.viewAll')}
                   </Button>
                 </div>
               </div>
@@ -470,7 +472,7 @@ export default function DishPage() {
           />
           <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="font-bold text-lg">Bộ lọc</h3>
+              <h3 className="font-bold text-lg">{t('dishes.filters')}</h3>
               <button onClick={() => setShowMobileFilters(false)}>
                 <X className="w-6 h-6" />
               </button>
@@ -480,7 +482,7 @@ export default function DishPage() {
             <div className="space-y-6">
               {/* Tags */}
               <div>
-                <h4 className="font-semibold mb-3">🍽️ Loại ẩm thực</h4>
+                <h4 className="font-semibold mb-3">🍽️ {t('dishes.cuisineType')}</h4>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                   {CUISINE_TAGS.map(tag => (
                     <label key={tag.tagId} className="flex items-center gap-2 cursor-pointer">
@@ -499,15 +501,15 @@ export default function DishPage() {
 
               {/* Price */}
               <div>
-                <h4 className="font-semibold mb-3">💰 Khoảng giá</h4>
+                <h4 className="font-semibold mb-3">💰 {t('dishes.priceRange')}</h4>
                 <div className="space-y-2">
                   {PRICE_RANGES.map(range => (
-                    <label key={range.label} className="flex items-center gap-2 cursor-pointer">
+                    <label key={range.key} className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="radio"
                         name="mobilePriceRange"
-                        checked={selectedPriceRange === range.label}
-                        onChange={() => setSelectedPriceRange(range.label)}
+                        checked={selectedPriceRange === range.key}
+                        onChange={() => setSelectedPriceRange(range.key)}
                         className="border-gray-300 text-[#44BACA] focus:ring-[#44BACA]"
                       />
                       <span className="text-sm">{range.label}</span>
@@ -522,13 +524,13 @@ export default function DishPage() {
                 onClick={clearFilters}
                 className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg py-3"
               >
-                Xóa bộ lọc
+                {t('dishes.clearAllFilters')}
               </Button>
               <Button
                 onClick={() => setShowMobileFilters(false)}
                 className="flex-1 bg-[#44BACA] hover:bg-[#3aa3b3] text-white rounded-lg py-3"
               >
-                Áp dụng
+                {t('dishes.apply')}
               </Button>
             </div>
           </div>

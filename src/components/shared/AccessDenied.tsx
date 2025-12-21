@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import { ShieldAlert, ArrowLeft, Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useTranslation } from "react-i18next"
+import { useTranslation } from "@/hooks/useTranslation"
 import { useAppSelector } from "@/hooks/useRedux"
 
 interface AccessDeniedProps {

@@ -4,6 +4,7 @@ import RestaurantCard from "@/components/restaurants/RestaurantCard";
 import { Restaurant } from "@/types/restaurant/index";
 import ViewMode from "@/types/view-mode";
 import RestaurantGridSkeleton from "./RestaurantGridSkeleton";
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface RestaurantGridProps {
     restaurants: Restaurant[];
@@ -18,6 +19,7 @@ const RestaurantGrid = memo(function RestaurantGrid({
     loading,
     resultsPerPage,
 }: RestaurantGridProps) {
+    const { t } = useTranslation();
     const router = useRouter();
 
     const handleRestaurantClick = useCallback((restaurantId: string) => {
@@ -57,10 +59,10 @@ const RestaurantGrid = memo(function RestaurantGrid({
                         />
                     </svg>
                     <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                        Không tìm thấy nhà hàng nào
+                        {t('restaurants.noResults')}
                     </h3>
                     <p className="text-gray-600">
-                        Chúng tôi không tìm thấy nhà hàng nào phù hợp với bộ lọc hiện tại của bạn.
+                        {t('restaurants.noResultsDescription')}
                     </p>
                 </div>
             </div>
@@ -75,7 +77,7 @@ const RestaurantGrid = memo(function RestaurantGrid({
                 <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
                     <div className="bg-white p-4 rounded-lg shadow-lg">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#44BACA] mx-auto"></div>
-                        <p className="mt-2 text-sm text-gray-600">Đang tải...</p>
+                        <p className="mt-2 text-sm text-gray-600">{t('restaurants.loading')}</p>
                     </div>
                 </div>
             )}
